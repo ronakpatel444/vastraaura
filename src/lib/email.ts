@@ -22,9 +22,14 @@ export const sendCustomerOrderEmail = async (order: any) => {
     subject: `Order Confirmation - VASTRA AURA #${order._id.toString().substring(0, 8)}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <h2 style="text-align: center;">Thank You for Your Order!</h2>
+        <h2 style="text-align: center; margin-bottom: 5px;">TAX INVOICE</h2>
+        <p style="text-align: center; color: #666; margin-top: 0;">Order #${order._id.toString().substring(0, 8).toUpperCase()}</p>
         <p>Hi ${order.shippingAddress.firstName},</p>
         <p>We've received your order and are getting it ready to be shipped. We will notify you when it has been sent.</p>
+        
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com'}/invoice/${order._id}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Download Official Invoice</a>
+        </div>
         
         <h3>Order Summary</h3>
         <table style="width: 100%; border-collapse: collapse;">

@@ -4,13 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [orderNumber, setOrderNumber] = useState('');
+  const searchParams = useSearchParams();
+  const orderId = searchParams?.get('id');
 
   useEffect(() => {
-    setOrderNumber(Math.floor(Math.random() * 90000) + 10000 + '');
+    if (orderId) {
+      setOrderNumber(orderId.substring(0, 8).toUpperCase());
+    } else {
+      setOrderNumber(Math.floor(Math.random() * 90000) + 10000 + '');
+    }
 
     // Trigger confetti
     const duration = 3 * 1000;
@@ -56,14 +64,32 @@ export default function OrderSuccessPage() {
             We've sent an order confirmation to your email. You will receive another notification once your royal attire has been dispatched.
           </p>
         </div>
-
-        <Link 
-          href="/shop"
-          className="w-full bg-black text-white py-4 rounded font-medium tracking-wide hover:bg-gray-800 transition-colors block text-center"
-        >
-          Continue Shopping
-        </Link>
+        <div className="flex flex-col w-full gap-3 mt-6">
+          {orderId && (
+            <Link 
+              href={`/invoice/${orderId}`}
+              className="w-full bg-white text-black border border-black py-4 rounded font-medium tracking-wide hover:bg-gray-50 transition-colors block text-center"
+            >
+              Download Bill / Invoice
+            </Link>
+          )}
+          
+          <Link 
+            href="/shop"
+            className="w-full bg-black text-white py-4 rounded font-medium tracking-wide hover:bg-gray-800 transition-colors block text-center"
+          >
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

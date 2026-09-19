@@ -199,7 +199,7 @@ export default function CheckoutPage() {
               if (!verifyRes.ok) throw new Error('Payment verification failed');
               
               useStore.setState({ cartItems: [] });
-              router.push('/order-success');
+              router.push('/order-success?id=' + dbOrderId);
             } catch (error) {
               console.error(error);
               alert('Payment verification failed. If money was deducted, please contact support.');
@@ -230,9 +230,10 @@ export default function CheckoutPage() {
         });
 
         if (!res.ok) throw new Error('Failed to create order');
+        const createdOrder = await res.json();
 
         useStore.setState({ cartItems: [] });
-        router.push('/order-success');
+        router.push('/order-success?id=' + createdOrder._id);
       }
     } catch (err) {
       console.error(err);

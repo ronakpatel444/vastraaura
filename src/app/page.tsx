@@ -1,4 +1,5 @@
 import Hero from '@/components/sections/Hero';
+import PromoBanner from '@/components/sections/PromoBanner';
 import Collections from '@/components/sections/Collections';
 import HorizontalScroll from '@/components/sections/HorizontalScroll';
 import BestSellers from '@/components/sections/BestSellers';
@@ -13,6 +14,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <PromoBanner />
       <Collections />
       <HorizontalScroll />
       <MegaDiscount />

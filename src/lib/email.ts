@@ -18,13 +18,13 @@ export const sendCustomerOrderEmail = async (order: any) => {
 
   const mailOptions = {
     from: `"VASTRA AURA" <${process.env.EMAIL_USER}>`,
-    to: order.shippingAddress.email,
+    to: order.customer.email,
     subject: `Order Confirmation - VASTRA AURA #${order._id.toString().substring(0, 8)}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <h2 style="text-align: center; margin-bottom: 5px;">TAX INVOICE</h2>
         <p style="text-align: center; color: #666; margin-top: 0;">Order #${order._id.toString().substring(0, 8).toUpperCase()}</p>
-        <p>Hi ${order.shippingAddress.firstName},</p>
+        <p>Hi ${order.customer.firstName},</p>
         <p>We've received your order and are getting it ready to be shipped. We will notify you when it has been sent.</p>
         
         <div style="text-align: center; margin: 20px 0;">
@@ -41,13 +41,15 @@ export const sendCustomerOrderEmail = async (order: any) => {
             </tr>
           </thead>
           <tbody>
-            ${order.items.map((item: any) => `
+            ${order.items.map((item: any) => {
+              const itemPrice = parseInt(String(item.price).replace(/[^\d]/g, ''), 10) || 0;
+              return `
               <tr>
                 <td style="padding: 8px;">${item.name} ${item.size ? `(Size: ${item.size})` : ''}</td>
                 <td style="text-align: right; padding: 8px;">${item.quantity}</td>
-                <td style="text-align: right; padding: 8px;">₹${(item.price * item.quantity).toLocaleString('en-IN')}</td>
+                <td style="text-align: right; padding: 8px;">₹${(itemPrice * item.quantity).toLocaleString('en-IN')}</td>
               </tr>
-            `).join('')}
+            `}).join('')}
           </tbody>
         </table>
         
@@ -59,7 +61,7 @@ export const sendCustomerOrderEmail = async (order: any) => {
 
         <div style="margin-top: 30px;">
           <h4>Shipping Address</h4>
-          <p style="margin: 0;">${order.shippingAddress.firstName} ${order.shippingAddress.lastName}</p>
+          <p style="margin: 0;">${order.customer.firstName} ${order.customer.lastName}</p>
           <p style="margin: 0;">${order.shippingAddress.address}</p>
           <p style="margin: 0;">${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.pincode}</p>
         </div>
@@ -95,9 +97,9 @@ export const sendAdminOrderEmail = async (order: any, adminEmail: string) => {
         <p>A new order has been placed on VASTRA AURA.</p>
         
         <h3>Customer Details</h3>
-        <p><strong>Name:</strong> ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}</p>
-        <p><strong>Email:</strong> ${order.shippingAddress.email}</p>
-        <p><strong>Phone:</strong> ${order.shippingAddress.phone}</p>
+        <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
+        <p><strong>Email:</strong> ${order.customer.email}</p>
+        <p><strong>Phone:</strong> ${order.customer.phone}</p>
         
         <h3>Order Value: ₹${(order.totalAmount + (order.shippingFee || 0)).toLocaleString('en-IN')}</h3>
         <p><a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/admin/orders" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px;">View Order in Admin Panel</a></p>

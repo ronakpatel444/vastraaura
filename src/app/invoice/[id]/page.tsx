@@ -75,17 +75,20 @@ export default async function InvoicePage({
             </tr>
           </thead>
           <tbody>
-            {order.items.map((item: any, index: number) => (
-              <tr key={index} className="border-b border-gray-100">
-                <td className="py-4">
-                  <p className="font-medium text-gray-900">{item.name}</p>
-                </td>
-                <td className="py-4 text-center text-gray-600">{item.size}</td>
-                <td className="py-4 text-center text-gray-600">{item.quantity}</td>
-                <td className="py-4 text-right text-gray-600">₹{parseInt(item.price).toLocaleString('en-IN')}</td>
-                <td className="py-4 text-right font-medium text-gray-900">₹{(parseInt(item.price) * item.quantity).toLocaleString('en-IN')}</td>
-              </tr>
-            ))}
+            {order.items.map((item: any, index: number) => {
+              const itemPrice = parseInt(String(item.price).replace(/[^\d]/g, ''), 10) || 0;
+              return (
+                <tr key={index} className="border-b border-gray-100">
+                  <td className="py-4">
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                  </td>
+                  <td className="py-4 text-center text-gray-600">{item.size}</td>
+                  <td className="py-4 text-center text-gray-600">{item.quantity}</td>
+                  <td className="py-4 text-right text-gray-600">₹{itemPrice.toLocaleString('en-IN')}</td>
+                  <td className="py-4 text-right font-medium text-gray-900">₹{(itemPrice * item.quantity).toLocaleString('en-IN')}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 

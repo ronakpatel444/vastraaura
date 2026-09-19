@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import mongoose from 'mongoose';
 import Image from 'next/image';
+import PrintButton from '@/components/PrintButton';
 
 export default async function InvoicePage({
   params,
@@ -26,13 +27,7 @@ export default async function InvoicePage({
     <div className="min-h-screen bg-gray-100 flex justify-center py-10 font-sans print:py-0 print:bg-white">
       {/* Action Buttons for Screen (Hidden in Print) */}
       <div className="fixed top-5 right-5 flex gap-4 print:hidden">
-        <button
-          className="bg-accent text-white px-6 py-2 rounded-sm text-sm tracking-widest font-medium hover:bg-black transition-colors shadow-lg"
-        >
-          <a href="#" onClick={(e) => { e.preventDefault(); window.print(); }}>
-            PRINT / DOWNLOAD PDF
-          </a>
-        </button>
+        <PrintButton />
       </div>
 
       {/* A4 Paper Container */}

@@ -48,7 +48,7 @@ export default async function InvoicePage({
           <div className="text-right">
             <h2 className="text-4xl font-light text-gray-300 mb-2">INVOICE</h2>
             <p className="text-gray-900 font-medium">Invoice No: #{order._id.toString().substring(0, 8).toUpperCase()}</p>
-            <p className="text-gray-500 text-sm">Date: {new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p className="text-gray-500 text-sm">Date: {new Date((order as any).createdAt || Date.now()).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             <p className="text-gray-500 text-sm">Status: <span className="uppercase font-semibold text-gray-700">{order.status}</span></p>
           </div>
         </div>
@@ -102,10 +102,10 @@ export default async function InvoicePage({
               <span>₹{order.subtotal?.toLocaleString('en-IN')}</span>
             </div>
             
-            {order.discount > 0 && (
+            {(order.discount || 0) > 0 && (
               <div className="flex justify-between py-2 text-sm text-green-600">
                 <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
-                <span>-₹{order.discount?.toLocaleString('en-IN')}</span>
+                <span>-₹{(order.discount || 0).toLocaleString('en-IN')}</span>
               </div>
             )}
             

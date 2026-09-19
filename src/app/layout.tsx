@@ -14,15 +14,15 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "VASTRA AURA | Timeless Elegance",
+    default: "VASTRA AURA | Designer Chaniya Choli & Lehengas in Surat",
     template: "%s | VASTRA AURA",
   },
-  description: "Ultra-luxury traditional Indian fashion. Rooted in tradition, crafted for today.",
-  keywords: ["Indian fashion", "luxury clothing", "traditional wear", "ethnic wear", "Vastra Aura"],
+  description: "Shop premium designer Chaniya Choli, Lehengas, and ethnic wear for women and kids at Vastra Aura, Surat. Perfect for Navratri, weddings, and festivals.",
+  keywords: ["Chaniya Choli", "Navratri Collection", "Designer Lehenga", "Ethnic Wear Surat", "Kids Ethnic Wear", "Vastra Aura", "Premium Chaniya Choli"],
   authors: [{ name: "Vastra Aura" }],
   openGraph: {
-    title: "VASTRA AURA | Timeless Elegance",
-    description: "Ultra-luxury traditional Indian fashion.",
+    title: "VASTRA AURA | Designer Chaniya Choli & Lehengas",
+    description: "Shop premium designer Chaniya Choli, Lehengas, and ethnic wear in Surat.",
     url: "https://vastraaura.com",
     siteName: "VASTRA AURA",
     images: [

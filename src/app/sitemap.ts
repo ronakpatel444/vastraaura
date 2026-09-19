@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Product from '@/models/Product';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://rangrez.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com';
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [

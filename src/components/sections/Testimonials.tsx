@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const testimonials = [
   {
-    quote: "The craftsmanship is unparalleled. I felt like royalty wearing my RANGREZ Chaniya Choli for Navratri.",
+    quote: "The craftsmanship is unparalleled. I felt like royalty wearing my VASTRA AURA Chaniya Choli for Navratri.",
     name: "Aanya Patel",
     location: "Mumbai",
   },
@@ -19,7 +19,7 @@ const testimonials = [
     location: "Ahmedabad",
   },
   {
-    quote: "A perfect blend of traditional roots and modern elegance. RANGREZ is my go-to for all festive wear.",
+    quote: "A perfect blend of traditional roots and modern elegance. VASTRA AURA is my go-to for all festive wear.",
     name: "Riya Desai",
     location: "London",
   }

@@ -107,7 +107,7 @@ export default function HeritageStory() {
           </p>
           
           <p className="text-sm opacity-60 max-w-md leading-loose">
-            At RANGREZ, we preserve the intricate craftsmanship of India. From the vibrant Bandhani of Gujarat to the exquisite mirror work of Rajasthan, our collections are a homage to our roots.
+            At VASTRA AURA, we preserve the intricate craftsmanship of India. From the vibrant Bandhani of Gujarat to the exquisite mirror work of Rajasthan, our collections are a homage to our roots.
           </p>
         </div>
 

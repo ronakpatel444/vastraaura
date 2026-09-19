@@ -14,23 +14,23 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "RANGREZ | Timeless Elegance",
-    template: "%s | RANGREZ",
+    default: "VASTRA AURA | Timeless Elegance",
+    template: "%s | VASTRA AURA",
   },
   description: "Ultra-luxury traditional Indian fashion. Rooted in tradition, crafted for today.",
-  keywords: ["Indian fashion", "luxury clothing", "traditional wear", "ethnic wear", "Rangrez"],
-  authors: [{ name: "Rangrez" }],
+  keywords: ["Indian fashion", "luxury clothing", "traditional wear", "ethnic wear", "Vastra Aura"],
+  authors: [{ name: "Vastra Aura" }],
   openGraph: {
-    title: "RANGREZ | Timeless Elegance",
+    title: "VASTRA AURA | Timeless Elegance",
     description: "Ultra-luxury traditional Indian fashion.",
-    url: "https://rangrez.com",
-    siteName: "RANGREZ",
+    url: "https://vastraaura.com",
+    siteName: "VASTRA AURA",
     images: [
       {
-        url: "https://rangrez.com/og-image.jpg", // Replace with your actual OG image
+        url: "https://vastraaura.com/og-image.jpg", // Replace with your actual OG image
         width: 1200,
         height: 630,
-        alt: "RANGREZ Luxury Fashion",
+        alt: "VASTRA AURA Luxury Fashion",
       }
     ],
     locale: "en_IN",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "RANGREZ | Timeless Elegance",
+    title: "VASTRA AURA | Timeless Elegance",
     description: "Ultra-luxury traditional Indian fashion.",
-    images: ["https://rangrez.com/og-image.jpg"],
+    images: ["https://vastraaura.com/og-image.jpg"],
   }
 };
 

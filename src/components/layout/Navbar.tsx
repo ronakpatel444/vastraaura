@@ -69,7 +69,7 @@ export default function Navbar() {
               onMouseEnter={() => setCursorType('MAGNETIC')}
               onMouseLeave={() => setCursorType('DEFAULT')}
             >
-              RANGREZ
+              VASTRA AURA
             </Link>
           </div>
 

@@ -179,7 +179,7 @@ export default function CheckoutPage() {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: amount.toString(),
           currency: currency,
-          name: 'RANGREZ',
+          name: 'VASTRA AURA',
           description: 'Payment for your order',
           order_id: razorpayOrderId,
           handler: async function (response: any) {
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
       {/* Left Column: Form */}
       <div className="w-full lg:w-3/5 p-4 md:p-8 lg:p-16 lg:pr-24 flex justify-end bg-white">
         <div className="w-full max-w-xl mt-12 lg:mt-0">
-          <Link href="/" className="text-3xl font-serif tracking-widest mb-12 block">RANGREZ</Link>
+          <Link href="/" className="text-3xl font-serif tracking-widest mb-12 block">VASTRA AURA</Link>
           
           <form onSubmit={handleCheckout} className="space-y-8">
             <section>

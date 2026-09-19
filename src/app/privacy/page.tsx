@@ -10,7 +10,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-serif text-foreground mb-4">Information We Collect</h2>
             <p className="text-sm leading-relaxed">
-              When you visit Rangrez, we collect certain information about your device, your interaction with the Site, and information necessary to process your purchases. We may also collect additional information if you contact us for customer support.
+              When you visit Vastra Aura, we collect certain information about your device, your interaction with the Site, and information necessary to process your purchases. We may also collect additional information if you contact us for customer support.
             </p>
             <ul className="text-sm leading-relaxed list-disc pl-5 mt-4 space-y-2">
               <li><strong>Order Information:</strong> Name, billing address, shipping address, payment information (including credit card numbers), email address, and phone number.</li>

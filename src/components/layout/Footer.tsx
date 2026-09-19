@@ -21,7 +21,7 @@ export default function Footer() {
           
           {/* Brand Info */}
           <div className="lg:pr-8">
-            <h2 className="text-3xl font-serif mb-6 tracking-wider">RANGREZ</h2>
+            <h2 className="text-3xl font-serif mb-6 tracking-wider">VASTRA AURA</h2>
             <p className="text-sm text-gray-400 leading-relaxed mb-8">
               Reviving India's royal heritage through handcrafted luxury fashion. Every piece is a testament to centuries of artisanal craftsmanship.
             </p>

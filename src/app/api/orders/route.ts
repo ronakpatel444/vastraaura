@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     // Trigger emails asynchronously for COD orders (Razorpay triggers in verify route)
     if (newOrder.paymentMethod === 'COD') {
       sendCustomerOrderEmail(newOrder).catch(console.error);
-      const adminEmail = process.env.ADMIN_EMAIL || 'hello@rangrez.com';
+      const adminEmail = process.env.ADMIN_EMAIL || 'hello@vastraaura.com';
       sendAdminOrderEmail(newOrder, adminEmail).catch(console.error);
     }
     

@@ -8,7 +8,7 @@ export default function ReturnsPage() {
           <section>
             <h2 className="text-xl font-serif text-foreground mb-4">Our Commitment</h2>
             <p className="text-sm leading-relaxed">
-              At Rangrez, every piece is handcrafted with immense love and care. We want you to be completely satisfied with your purchase. If for any reason you are not, we gladly accept returns and exchanges under the following conditions.
+              At Vastra Aura, every piece is handcrafted with immense love and care. We want you to be completely satisfied with your purchase. If for any reason you are not, we gladly accept returns and exchanges under the following conditions.
             </p>
           </section>
 
@@ -25,7 +25,7 @@ export default function ReturnsPage() {
           <section>
             <h2 className="text-xl font-serif text-foreground mb-4">How to Initiate a Return</h2>
             <ol className="text-sm leading-relaxed list-decimal pl-5 space-y-2">
-              <li>Contact our support team at <a href="mailto:hello@rangrez.com" className="underline">hello@rangrez.com</a> with your order number.</li>
+              <li>Contact our support team at <a href="mailto:hello@vastraaura.com" className="underline">hello@vastraaura.com</a> with your order number.</li>
               <li>Our team will arrange a reverse pickup from your address within 2-3 business days.</li>
               <li>Once we receive the item at our studio, it will undergo a quality check.</li>
               <li>Upon approval, your refund will be processed to the original payment method within 5-7 business days.</li>

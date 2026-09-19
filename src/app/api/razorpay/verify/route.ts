@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
       // Trigger emails asynchronously
       sendCustomerOrderEmail(order).catch(console.error);
-      const adminEmail = process.env.ADMIN_EMAIL || 'hello@rangrez.com';
+      const adminEmail = process.env.ADMIN_EMAIL || 'hello@vastraaura.com';
       sendAdminOrderEmail(order, adminEmail).catch(console.error);
 
       return NextResponse.json({ success: true, message: 'Payment verified successfully' }, { status: 200 });

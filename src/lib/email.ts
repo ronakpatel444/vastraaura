@@ -15,9 +15,9 @@ export const sendCustomerOrderEmail = async (order: any) => {
   }
 
   const mailOptions = {
-    from: `"RANGREZ" <${process.env.EMAIL_USER}>`,
+    from: `"VASTRA AURA" <${process.env.EMAIL_USER}>`,
     to: order.shippingAddress.email,
-    subject: `Order Confirmation - RANGREZ #${order._id.toString().substring(0, 8)}`,
+    subject: `Order Confirmation - VASTRA AURA #${order._id.toString().substring(0, 8)}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <h2 style="text-align: center;">Thank You for Your Order!</h2>
@@ -58,7 +58,7 @@ export const sendCustomerOrderEmail = async (order: any) => {
         </div>
 
         <p style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
-          If you have any questions, reply to this email or contact us at hello@rangrez.com.
+          If you have any questions, reply to this email or contact us at hello@vastraaura.com.
         </p>
       </div>
     `,
@@ -79,13 +79,13 @@ export const sendAdminOrderEmail = async (order: any, adminEmail: string) => {
   }
 
   const mailOptions = {
-    from: `"RANGREZ System" <${process.env.EMAIL_USER}>`,
+    from: `"VASTRA AURA System" <${process.env.EMAIL_USER}>`,
     to: adminEmail,
     subject: `New Order Received - #${order._id.toString().substring(0, 8)}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <h2>New Order Alert 🚨</h2>
-        <p>A new order has been placed on RANGREZ.</p>
+        <p>A new order has been placed on VASTRA AURA.</p>
         
         <h3>Customer Details</h3>
         <p><strong>Name:</strong> ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}</p>

@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const title = `${product.name} | RANGREZ`;
-    const description = product.description || `Buy ${product.name} at RANGREZ`;
+    const title = `${product.name} | VASTRA AURA`;
+    const description = product.description || `Buy ${product.name} at VASTRA AURA`;
 
     return {
       title,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: 'Product | RANGREZ',
+      title: 'Product | VASTRA AURA',
     };
   }
 }

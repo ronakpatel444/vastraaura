@@ -11,8 +11,8 @@ export interface ISettings extends Document {
 
 const SettingsSchema = new Schema(
   {
-    storeName: { type: String, default: 'RANGREZ' },
-    contactEmail: { type: String, default: 'hello@rangrez.com' },
+    storeName: { type: String, default: 'VASTRA AURA' },
+    contactEmail: { type: String, default: 'hello@vastraaura.com' },
     storeDescription: { type: String, default: 'Luxury Indian fashion and heritage craftsmanship.' },
     currency: { type: String, default: 'INR' },
     flatShippingRate: { type: Number, default: 250 },

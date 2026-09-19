@@ -11,7 +11,7 @@ export default function Newsletter() {
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="text-3xl md:text-6xl font-serif mb-4 md:mb-6">STAY CONNECTED</h2>
         <p className="text-base md:text-xl font-serif italic opacity-80 mb-8 md:mb-12 max-w-2xl mx-auto">
-          “Join the RANGREZ family. Get updates on new arrivals, exclusive offers, and special events.”
+          “Join the VASTRA AURA family. Get updates on new arrivals, exclusive offers, and special events.”
         </p>
 
         <form className="flex flex-col md:flex-row gap-0 max-w-2xl mx-auto border-b border-background/30 focus-within:border-accent transition-colors pb-4">

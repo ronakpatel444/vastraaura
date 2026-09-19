@@ -32,7 +32,7 @@ const articles = [
     category: 'SUSTAINABILITY',
     date: 'Jul 04, 2026',
     image: '/images/collection-new.jpg',
-    excerpt: 'Why sustainable practices are at the core of everything we do at Rangrez.',
+    excerpt: 'Why sustainable practices are at the core of everything we do at Vastra Aura.',
   }
 ];
 

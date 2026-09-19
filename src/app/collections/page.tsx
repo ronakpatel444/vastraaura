@@ -90,7 +90,7 @@ export default function CollectionsPage() {
       {/* Header */}
       <div className="container mx-auto px-6 mb-16 md:mb-24 text-center overflow-hidden flex flex-col items-center">
         <h1 className="header-text text-4xl sm:text-5xl md:text-8xl font-serif tracking-widest mb-6 pl-[0.1em]">COLLECTIONS</h1>
-        <p className="header-text text-xs sm:text-sm uppercase tracking-widest opacity-60 pl-[0.1em]">Discover the heritage of Rangrez</p>
+        <p className="header-text text-xs sm:text-sm uppercase tracking-widest opacity-60 pl-[0.1em]">Discover the heritage of Vastra Aura</p>
       </div>
 
       {/* Directory */}

@@ -55,7 +55,7 @@ export default function AboutPage() {
       <div className="container mx-auto px-6 text-center mb-32 overflow-hidden">
         <h1 className="header-text text-5xl md:text-8xl font-serif tracking-widest mb-6">OUR STORY</h1>
         <p className="header-text text-sm uppercase tracking-widest opacity-60 max-w-2xl mx-auto leading-relaxed">
-          Rooted in tradition, crafted for the modern era. Rangrez is a celebration of India's rich textile heritage.
+          Rooted in tradition, crafted for the modern era. Vastra Aura is a celebration of India's rich textile heritage.
         </p>
       </div>
 
@@ -75,7 +75,7 @@ export default function AboutPage() {
             "We believe that every thread tells a story. Our mission is to preserve the ancient art of Indian craftsmanship while redefining it for the contemporary wardrobe."
           </h2>
           <p className="text-sm opacity-70 leading-relaxed">
-            Founded with a passion for authenticity, Rangrez works directly with master artisans across Gujarat and Rajasthan. 
+            Founded with a passion for authenticity, Vastra Aura works directly with master artisans across Gujarat and Rajasthan. 
             Each piece in our collection is a labor of love, taking weeks—sometimes months—to perfect.
           </p>
         </div>

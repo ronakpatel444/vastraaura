@@ -34,7 +34,7 @@ export default function AdminLayout({
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-gray-50 z-30">
         <div className="flex items-center">
-          <span className="font-serif text-xl tracking-widest">RANGREZ</span>
+          <span className="font-serif text-xl tracking-widest">VASTRA AURA</span>
           <span className="ml-2 text-[10px] font-sans font-bold text-accent">ADMIN</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 -mr-2">
@@ -45,7 +45,7 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-gray-50 border-r border-gray-200 hidden md:flex flex-col flex-shrink-0">
         <div className="h-20 flex items-center px-8 border-b border-gray-200">
-          <span className="font-serif text-2xl tracking-widest">RANGREZ</span>
+          <span className="font-serif text-2xl tracking-widest">VASTRA AURA</span>
           <span className="ml-2 text-xs font-sans font-bold text-accent">ADMIN</span>
         </div>
         
@@ -96,7 +96,7 @@ export default function AdminLayout({
           >
               <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
                 <div className="flex items-center">
-                  <span className="font-serif text-xl tracking-widest">RANGREZ</span>
+                  <span className="font-serif text-xl tracking-widest">VASTRA AURA</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(false)}>
                   <X className="w-5 h-5" />

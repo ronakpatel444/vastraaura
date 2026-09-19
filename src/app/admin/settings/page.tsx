@@ -26,8 +26,8 @@ export default function AdminSettingsPage() {
         if (res.ok) {
           const data = await res.json();
           setFormData({
-            storeName: data.storeName || 'RANGREZ',
-            contactEmail: data.contactEmail || 'hello@rangrez.com',
+            storeName: data.storeName || 'VASTRA AURA',
+            contactEmail: data.contactEmail || 'hello@vastraaura.com',
             storeDescription: data.storeDescription || '',
             currency: data.currency || 'INR',
             flatShippingRate: data.flatShippingRate ?? 250,

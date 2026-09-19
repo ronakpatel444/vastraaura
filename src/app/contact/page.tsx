@@ -14,7 +14,7 @@ export default function ContactPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest mb-2">Email</h3>
-                <a href="mailto:hello@rangrez.com" className="opacity-70 hover:opacity-100 transition-opacity">hello@rangrez.com</a>
+                <a href="mailto:hello@vastraaura.com" className="opacity-70 hover:opacity-100 transition-opacity">hello@vastraaura.com</a>
               </div>
               
               <div>
@@ -25,9 +25,8 @@ export default function ContactPage() {
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest mb-2">Flagship Studio</h3>
                 <p className="opacity-70 leading-relaxed">
-                  123 Heritage Row, <br/>
-                  Navrangpura, Ahmedabad,<br/>
-                  Gujarat, India 380009
+                  183 - Vijay Nagar, Yogi Chowk, <br/>
+                  Surat, Gujarat, India
                 </p>
               </div>
             </div>

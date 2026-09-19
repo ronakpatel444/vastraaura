@@ -101,7 +101,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Rangrez Luxury Fashion. All rights reserved.
+            © {new Date().getFullYear()} Vastra Aura. All rights reserved.
           </p>
           <div className="flex gap-4">
             <span className="text-xs text-gray-500">INR (₹)</span>

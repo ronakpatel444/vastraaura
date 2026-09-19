@@ -55,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     await dbConnect();
     const products = await Product.find({ status: 'Active' }, { _id: 1, updatedAt: 1 });
 
-    const dynamicRoutes: MetadataRoute.Sitemap = products.map((product) => ({
+    const dynamicRoutes: MetadataRoute.Sitemap = products.map((product: any) => ({
       url: `${baseUrl}/product/${product._id}`,
       lastModified: product.updatedAt || new Date(),
       changeFrequency: 'daily',

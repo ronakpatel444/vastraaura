@@ -108,7 +108,7 @@ export default function MegaDiscount() {
             const discount = getDiscountPercentage(product.price, product.originalPrice);
             return (
               <motion.div 
-                variants={itemVariants}
+                variants={itemVariants as any}
                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
                 key={product.id} 
                 className="group relative bg-white/5 border border-white/10 p-4 rounded-xl transition-colors duration-500 hover:bg-white/10 hover:shadow-[0_20px_40px_-15px_rgba(220,38,38,0.3)]"

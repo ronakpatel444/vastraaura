@@ -25,6 +25,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     description: '',
     originalSellerLink: '',
     colors: '',
+    fabric: '',
     stockBySize: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 } as StockBySize
   });
 

@@ -4,11 +4,11 @@ import Order from '@/models/Order';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await context.params;
     const body = await request.json();
     
     if (!body.status) {

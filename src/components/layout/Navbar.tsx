@@ -65,7 +65,7 @@ export default function Navbar() {
           <div className="flex-1 flex justify-center">
             <Link 
               href="/" 
-              className="text-3xl font-serif tracking-widest"
+              className="text-xl md:text-3xl font-serif tracking-widest whitespace-nowrap"
               onMouseEnter={() => setCursorType('MAGNETIC')}
               onMouseLeave={() => setCursorType('DEFAULT')}
             >

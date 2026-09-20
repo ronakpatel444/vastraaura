@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { useStore, AdminProduct, StockBySize } from '@/store/useStore';
+import { useStore, AdminProduct, ProductSize } from '@/store/useStore';
 
 interface ProductFormDrawerProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     colors: '',
     colorDetails: [] as { name: string; image: string }[],
     fabric: '',
-    stockBySize: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 } as StockBySize
+    sizes: [] as ProductSize[]
   });
 
   const [isUploading, setIsUploading] = useState(false);
@@ -48,7 +48,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
         originalSellerLink: productToEdit.originalSellerLink || '',
         colors: productToEdit.colors ? productToEdit.colors.join(', ') : '',
         colorDetails: productToEdit.colorDetails ? [...productToEdit.colorDetails] : [],
-        stockBySize: { ...productToEdit.stockBySize }
+        sizes: productToEdit.sizes ? [...productToEdit.sizes] : []
       });
     } else {
       setFormData({
@@ -64,7 +64,10 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
         originalSellerLink: '',
         colors: '',
         colorDetails: [],
-        stockBySize: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
+        sizes: [
+          { name: 'XS', stock: 0 }, { name: 'S', stock: 0 }, { name: 'M', stock: 0 },
+          { name: 'L', stock: 0 }, { name: 'XL', stock: 0 }, { name: 'XXL', stock: 0 }
+        ]
       });
     }
   }, [productToEdit, isOpen]);
@@ -97,15 +100,18 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     }
   };
 
-  const handleSizeChange = (size: keyof StockBySize, value: string) => {
+  const handleSizeChange = (sizeName: string, value: string) => {
     const num = parseInt(value) || 0;
-    setFormData(prev => ({
-      ...prev,
-      stockBySize: {
-        ...prev.stockBySize,
-        [size]: num
+    setFormData(prev => {
+      const newSizes = [...prev.sizes];
+      const existing = newSizes.find(s => s.name === sizeName);
+      if (existing) {
+        existing.stock = num;
+      } else {
+        newSizes.push({ name: sizeName, stock: num });
       }
-    }));
+      return { ...prev, sizes: newSizes };
+    });
   };
 
   // Helper to resolve an index (like "2") to a URL from the image gallery
@@ -130,7 +136,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     e.preventDefault();
     
     // Calculate total stock to determine status
-    const totalStock = Object.values(formData.stockBySize).reduce((a, b) => a + b, 0);
+    const totalStock = (formData.sizes || []).reduce((a, b) => a + (b.stock || 0), 0);
     
     let status = 'Active';
     if (totalStock === 0) status = 'Out of Stock';
@@ -153,7 +159,6 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
       price: `₹${parseInt(formData.price || '0').toLocaleString('en-IN')}`,
       originalPrice: formData.originalPrice ? `₹${parseInt(formData.originalPrice).toLocaleString('en-IN')}` : undefined,
       allowCOD: formData.allowCOD,
-      stockBySize: formData.stockBySize,
       status,
       image: formData.image,
       images: formData.images.split(',').map(img => img.trim()).filter(img => img !== ''),
@@ -161,7 +166,8 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
       description: formData.description,
       originalSellerLink: formData.originalSellerLink,
       colors: colorsArray,
-      colorDetails: updatedColorDetails
+      colorDetails: updatedColorDetails,
+      sizes: formData.sizes
     };
 
     if (productToEdit) {
@@ -404,14 +410,14 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                 <div className="space-y-3 pt-4 border-t border-gray-200">
                   <label className="text-sm font-medium text-gray-700 block">Inventory by Size</label>
                   <div className="grid grid-cols-3 gap-3">
-                    {Object.keys(formData.stockBySize).map((size) => (
-                      <div key={size} className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500 w-8 font-medium">{size}</span>
+                    {(formData.sizes || []).map((sizeObj) => (
+                      <div key={sizeObj.name} className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500 w-8 font-medium">{sizeObj.name}</span>
                         <input 
                           type="number" 
                           min="0"
-                          value={formData.stockBySize[size as keyof StockBySize]}
-                          onChange={(e) => handleSizeChange(size as keyof StockBySize, e.target.value)}
+                          value={sizeObj.stock || 0}
+                          onChange={(e) => handleSizeChange(sizeObj.name, e.target.value)}
                           className="w-full border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-black focus:border-black text-sm" 
                         />
                       </div>

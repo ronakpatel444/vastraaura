@@ -36,13 +36,13 @@ export default function ComboPage() {
   };
 
   const handleAddCombo = (product: any) => {
-    const qty = quantities[product._id] || 1;
+    const qty = quantities[product.id] || 1;
     // Auto-select first size and color if available
     const defaultSize = product.sizes?.[0]?.name || 'Free Size';
     const defaultColor = product.colors?.[0] || 'Default';
 
     addToCart({
-      id: product._id,
+      id: product.id,
       name: product.name,
       price: product.price, // Assuming ₹2999 is applied at checkout via useStore getCartTotal
       image: product.image,
@@ -54,7 +54,7 @@ export default function ComboPage() {
     });
     
     // Reset local quantity back to 1
-    setQuantities(prev => ({ ...prev, [product._id]: 1 }));
+    setQuantities(prev => ({ ...prev, [product.id]: 1 }));
   };
 
   return (
@@ -76,12 +76,12 @@ export default function ComboPage() {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
           {comboProducts.map((product) => {
-            const qty = quantities[product._id] || 1;
+            const qty = quantities[product.id] || 1;
             
             return (
-              <div key={product._id} className="product-card group flex flex-col h-full bg-white p-3 rounded-md shadow-sm hover:shadow-xl transition-shadow duration-300">
+              <div key={product.id} className="product-card group flex flex-col h-full bg-white p-3 rounded-md shadow-sm hover:shadow-xl transition-shadow duration-300">
                 <Link 
-                  href={`/product/${product._id}`}
+                  href={`/product/${product.id}`}
                   className="relative aspect-[3/4] overflow-hidden bg-foreground/5 mb-4 block group-hover:opacity-90 transition-opacity rounded-sm"
                   onMouseEnter={() => setCursorType('VIEW')}
                   onMouseLeave={() => setCursorType('DEFAULT')}
@@ -100,7 +100,7 @@ export default function ComboPage() {
                 
                 <div className="flex flex-col flex-grow">
                   <h3 className="text-sm font-medium mb-1 line-clamp-2 min-h-[40px] leading-tight text-gray-800">
-                    <Link href={`/product/${product._id}`} className="hover:text-accent transition-colors">
+                    <Link href={`/product/${product.id}`} className="hover:text-accent transition-colors">
                       {product.name}
                     </Link>
                   </h3>
@@ -123,14 +123,14 @@ export default function ComboPage() {
                       </button>
                       <div className="flex items-center bg-white">
                         <button 
-                          onClick={() => handleQuantityChange(product._id, -1)}
+                          onClick={() => handleQuantityChange(product.id, -1)}
                           className="px-3 py-3 text-gray-500 hover:text-black transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="w-6 text-center text-xs font-medium">{qty}</span>
                         <button 
-                          onClick={() => handleQuantityChange(product._id, 1)}
+                          onClick={() => handleQuantityChange(product.id, 1)}
                           className="px-3 py-3 text-gray-500 hover:text-black transition-colors"
                         >
                           <Plus className="w-3 h-3" />
@@ -139,7 +139,7 @@ export default function ComboPage() {
                     </div>
                     
                     <Link 
-                      href={`/product/${product._id}`}
+                      href={`/product/${product.id}`}
                       className="w-full border border-gray-200 text-gray-500 hover:text-black hover:border-gray-400 text-[10px] font-semibold uppercase tracking-widest py-2 text-center transition-colors rounded-sm"
                       onMouseEnter={() => setCursorType('MAGNETIC')}
                       onMouseLeave={() => setCursorType('DEFAULT')}

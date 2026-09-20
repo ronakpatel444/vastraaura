@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { useStore, StockBySize } from '@/store/useStore';
+import { useStore, ProductSize } from '@/store/useStore';
 import { Heart, ArrowRight, Star } from 'lucide-react';
 import gsap from 'gsap';
 import Link from 'next/link';
@@ -312,11 +312,11 @@ export default function ProductDetailPage() {
                 <span className="text-sm">{quantity}</span>
                 <button 
                   onClick={() => {
-                    if (selectedSize && quantity < product.stockBySize[selectedSize]) {
+                    if (selectedSize && quantity < (product.sizes.find(s => s.name === selectedSize)?.stock || 0)) {
                       setQuantity(quantity + 1);
                     }
                   }}
-                  className={`opacity-50 ${selectedSize && quantity < product.stockBySize[selectedSize] ? 'hover:opacity-100 cursor-pointer' : 'cursor-not-allowed'}`}
+                  className={`opacity-50 ${selectedSize && quantity < (product.sizes.find(s => s.name === selectedSize)?.stock || 0) ? 'hover:opacity-100 cursor-pointer' : 'cursor-not-allowed'}`}
                 >+</button>
               </div>
               

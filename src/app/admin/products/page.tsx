@@ -88,7 +88,7 @@ export default function AdminProductsPage() {
                   <td className="px-6 py-4 text-gray-500">{product.category}</td>
                   <td className="px-6 py-4 font-medium">{product.price}</td>
                   <td className="px-6 py-4 text-gray-500">
-                    {Object.values(product.stockBySize).reduce((a, b) => a + b, 0)}
+                    {product.sizes?.reduce((a, b) => a + (b.stock || 0), 0) || 0}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${

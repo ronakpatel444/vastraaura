@@ -25,6 +25,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     description: '',
     originalSellerLink: '',
     colors: '',
+    colorDetails: [] as { name: string; image: string }[],
     fabric: '',
     stockBySize: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 } as StockBySize
   });
@@ -46,6 +47,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
         description: productToEdit.description || '',
         originalSellerLink: productToEdit.originalSellerLink || '',
         colors: productToEdit.colors ? productToEdit.colors.join(', ') : '',
+        colorDetails: productToEdit.colorDetails ? [...productToEdit.colorDetails] : [],
         stockBySize: { ...productToEdit.stockBySize }
       });
     } else {
@@ -61,6 +63,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
         description: '',
         originalSellerLink: '',
         colors: '',
+        colorDetails: [],
         stockBySize: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
       });
     }
@@ -105,6 +108,24 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     }));
   };
 
+  // Helper to resolve an index (like "2") to a URL from the image gallery
+  const resolveColorImage = (val: string, mainImage: string, additionalImages: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return mainImage;
+    if (trimmed.startsWith('http') || trimmed.startsWith('/')) return trimmed;
+    
+    // Assume it's an index. 0 = main image, 1+ = additional images
+    const index = parseInt(trimmed);
+    if (!isNaN(index)) {
+      if (index === 0) return mainImage;
+      const imagesArray = additionalImages.split(',').map(s => s.trim()).filter(s => s !== '');
+      if (index > 0 && index <= imagesArray.length) {
+        return imagesArray[index - 1];
+      }
+    }
+    return mainImage;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -114,6 +135,17 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
     let status = 'Active';
     if (totalStock === 0) status = 'Out of Stock';
     else if (totalStock < 5) status = 'Low Stock';
+
+    const colorsArray = formData.colors.split(',').map(c => c.trim()).filter(c => c !== '');
+    
+    // Make sure colorDetails matches the current colors
+    const updatedColorDetails = colorsArray.map(colorName => {
+      const existing = formData.colorDetails.find(cd => cd.name === colorName);
+      return {
+        name: colorName,
+        image: existing ? existing.image : formData.image
+      };
+    });
 
     const productPayload: any = {
       name: formData.name,
@@ -128,7 +160,8 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
       fabric: formData.fabric,
       description: formData.description,
       originalSellerLink: formData.originalSellerLink,
-      colors: formData.colors.split(',').map(c => c.trim()).filter(c => c !== '')
+      colors: colorsArray,
+      colorDetails: updatedColorDetails
     };
 
     if (productToEdit) {
@@ -265,6 +298,57 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                       placeholder="e.g. 5000"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4 border border-gray-200 rounded-xl p-4 bg-gray-50">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 block">Colors</label>
+                    <input 
+                      type="text" 
+                      value={formData.colors}
+                      onChange={(e) => {
+                        const newColorsStr = e.target.value;
+                        setFormData(prev => {
+                          const newColors = newColorsStr.split(',').map(c => c.trim()).filter(c => c !== '');
+                          // keep existing details for colors that still exist
+                          const newDetails = newColors.map(cName => {
+                            const existing = prev.colorDetails.find(cd => cd.name === cName);
+                            return existing || { name: cName, image: prev.image };
+                          });
+                          return { ...prev, colors: newColorsStr, colorDetails: newDetails };
+                        });
+                      }}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" 
+                      placeholder="Red, Blue, Green"
+                    />
+                  </div>
+
+                  {formData.colorDetails.length > 0 && (
+                    <div className="space-y-3 pt-2 border-t border-gray-200">
+                      <label className="text-sm font-medium text-gray-700 block">Assign Image Index to Colors</label>
+                      <p className="text-xs text-gray-500 mb-2">Enter the image index (0 for main image, 1 for first extra image, etc.)</p>
+                      {formData.colorDetails.map((cd, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <span className="w-24 text-sm font-medium">{cd.name}</span>
+                          <input 
+                            type="text"
+                            placeholder="Index (e.g. 0)"
+                            className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-black"
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const imgUrl = resolveColorImage(val, formData.image, formData.images);
+                              const newDetails = [...formData.colorDetails];
+                              newDetails[i] = { ...newDetails[i], image: imgUrl };
+                              setFormData({ ...formData, colorDetails: newDetails });
+                            }}
+                          />
+                          <div className="w-8 h-8 rounded border border-gray-200 bg-cover bg-center" style={{ backgroundImage: `url(${cd.image})` }} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                   
                   <div className="space-y-2 flex flex-col justify-center pt-6">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -291,16 +375,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Colors (comma separated)</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Red, Blue, Green"
-                    value={formData.colors}
-                    onChange={(e) => setFormData({...formData, colors: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" 
-                  />
-                </div>
+
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Description</label>

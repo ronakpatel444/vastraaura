@@ -13,14 +13,14 @@ export interface IProduct extends Document {
   description: string;
   originalSellerLink?: string;
   colors: string[];
-  stockBySize: {
-    XS: number;
-    S: number;
-    M: number;
-    L: number;
-    XL: number;
-    XXL: number;
-  };
+  colorDetails?: {
+    name: string;
+    image: string;
+  }[];
+  sizes: {
+    name: string;
+    stock: number;
+  }[];
 }
 
 const ProductSchema = new Schema<IProduct>(
@@ -37,13 +37,23 @@ const ProductSchema = new Schema<IProduct>(
     description: { type: String },
     originalSellerLink: { type: String },
     colors: { type: [String], default: [] },
-    stockBySize: {
-      XS: { type: Number, default: 0 },
-      S: { type: Number, default: 0 },
-      M: { type: Number, default: 0 },
-      L: { type: Number, default: 0 },
-      XL: { type: Number, default: 0 },
-      XXL: { type: Number, default: 0 },
+    colorDetails: {
+      type: [
+        {
+          name: { type: String },
+          image: { type: String },
+        }
+      ],
+      default: []
+    },
+    sizes: {
+      type: [
+        {
+          name: { type: String },
+          stock: { type: Number, default: 0 },
+        }
+      ],
+      default: []
     },
   },
   {

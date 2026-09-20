@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function CheckoutPage() {
-  const { cartItems, setCartOpen, setCursorType, appliedCoupon, setAppliedCoupon, storeSettings, fetchSettings } = useStore();
+  const { cartItems, setCartOpen, setCursorType, appliedCoupon, setAppliedCoupon, storeSettings, fetchSettings, getCartTotal, getComboDiscount } = useStore();
   const router = useRouter();
   
   useEffect(() => {
@@ -41,10 +41,7 @@ export default function CheckoutPage() {
     phone: '',
   });
 
-  const subtotal = cartItems.reduce((acc, item) => {
-    const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
-    return acc + (priceVal * item.quantity);
-  }, 0);
+  const subtotal = getCartTotal();
   
   let discount = 0;
   if (appliedCoupon) {
@@ -432,6 +429,13 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
+
+          {getComboDiscount() > 0 && (
+            <div className="mb-6 bg-[#8A5A44]/10 border border-[#8A5A44]/20 p-4 rounded-sm flex justify-between items-center">
+              <span className="text-sm font-semibold text-[#8A5A44]">✨ Combo Offer Applied!</span>
+              <span className="text-sm font-bold text-accent">You saved ₹{getComboDiscount().toLocaleString('en-IN')}</span>
+            </div>
+          )}
 
           <div className="border-t border-gray-200 py-6 space-y-3">
             {/* Coupon Section */}

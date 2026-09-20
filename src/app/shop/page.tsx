@@ -23,7 +23,7 @@ function ShopContent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = activeCategory === 'All' 
-    ? adminProducts 
+    ? adminProducts.filter(p => p.category !== 'Combo')
     : adminProducts.filter(p => p.category === activeCategory);
 
   useEffect(() => {
@@ -151,17 +151,22 @@ function ShopContent() {
                   </div>
                   
                   {/* Colors display */}
-                  {product.colors && product.colors.length > 0 && (
+                  {product.colors && product.colors.length > 1 && (
                     <div className="flex items-center gap-3 pt-3 border-t border-gray-200/50 w-full justify-center">
                       <div className="flex gap-1">
-                        {product.colors.slice(0, 4).map((color, i) => (
-                          <div 
-                            key={i} 
-                            className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
-                            style={{ backgroundColor: color.trim().toLowerCase().replace(' ', '') }}
-                            title={color}
-                          />
-                        ))}
+                        {product.colors.slice(0, 4).map((color, i) => {
+                          const specificColorDetail = product.colorDetails?.find(c => c.name === color);
+                          const colorImage = specificColorDetail?.image;
+
+                          return (
+                            <div 
+                              key={i} 
+                              className="w-8 h-8 rounded-full border border-gray-300 shadow-sm bg-cover bg-center transition-transform hover:scale-110"
+                              style={colorImage ? { backgroundImage: `url(${colorImage})` } : { backgroundColor: color.trim().toLowerCase().replace(' ', '') }}
+                              title={color}
+                            />
+                          );
+                        })}
                         {product.colors.length > 4 && (
                           <div className="w-4 h-4 rounded-full bg-gray-200 text-[8px] flex items-center justify-center text-gray-600">
                             +{product.colors.length - 4}

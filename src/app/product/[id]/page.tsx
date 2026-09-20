@@ -6,8 +6,9 @@ import { useStore, StockBySize } from '@/store/useStore';
 import { Heart, ArrowRight, Star } from 'lucide-react';
 import gsap from 'gsap';
 import Link from 'next/link';
+import Image from 'next/image';
 
-const SIZES: (keyof StockBySize)[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+// Removed static SIZES array
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -18,7 +19,7 @@ export default function ProductDetailPage() {
   const product = adminProducts.find(p => p.id === params.id);
   
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<keyof StockBySize | ''>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -42,13 +43,16 @@ export default function ProductDetailPage() {
 
   // Set the first available size on mount
   useEffect(() => {
-    if (product) {
-      const firstAvailableSize = SIZES.find(size => product.stockBySize[size] > 0);
-      setSelectedSize(firstAvailableSize || '');
+    if (product && product.sizes && product.sizes.length > 0) {
+      const firstAvailableSize = product.sizes.find(size => size.stock > 0);
+      setSelectedSize(firstAvailableSize ? firstAvailableSize.name : '');
     }
   }, [product]);
 
   useEffect(() => {
+    // Force scroll to top on page load (Fixes Next.js + Lenis scroll retention issue)
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
     if (!product) return;
     const ctx = gsap.context(() => {
       gsap.from('.product-gallery > div', { x: -50, opacity: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out' });
@@ -72,7 +76,8 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!selectedSize) return alert('Please select a size');
     if (product.colors && product.colors.length > 0 && !selectedColor) return alert('Please select a color');
-    if (product.stockBySize[selectedSize as keyof StockBySize] < quantity) return alert('Not enough stock available for this size');
+    const sizeDetails = product.sizes?.find(s => s.name === selectedSize);
+    if (!sizeDetails || sizeDetails.stock < quantity) return alert('Not enough stock available for this size');
 
     setIsAdded(true);
     addToCart({
@@ -92,7 +97,7 @@ export default function ProductDetailPage() {
     }, 1500);
   };
 
-  const isOutOfStock = Object.values(product.stockBySize).reduce((a, b) => a + b, 0) === 0;
+  const isOutOfStock = !product.sizes || product.sizes.reduce((a, b) => a + b.stock, 0) === 0;
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,34 +129,66 @@ export default function ProductDetailPage() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
           
           {/* Left: Product Gallery */}
-          <div className="product-gallery w-full lg:w-1/2 flex flex-col md:flex-row gap-6 items-center justify-center md:items-start md:justify-start">
-            {/* Thumbnails */}
-            <div className="flex md:flex-col gap-3 md:gap-4 order-2 md:order-1 overflow-x-auto md:overflow-visible w-full md:w-auto hide-scrollbar justify-center items-center py-2">
-              {galleryImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImage(idx)}
-                  className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 bg-cover bg-center transition-all rounded-lg overflow-hidden ${
-                    activeImage === idx ? 'border-2 border-accent opacity-100 scale-105' : 'opacity-60 hover:opacity-100'
-                  }`}
-                  style={{ backgroundImage: `url(${img})` }}
-                  onMouseEnter={() => setCursorType('MAGNETIC')}
-                  onMouseLeave={() => setCursorType('DEFAULT')}
-                />
-              ))}
-            </div>
-            
+          <div className="product-gallery w-full lg:w-1/2 flex flex-col gap-4">
             {/* Main Image */}
-            <div className="w-full max-w-[90vw] md:max-w-lg aspect-[3/4] order-1 md:order-2 relative rounded-2xl overflow-hidden shadow-sm flex items-center justify-center bg-gray-50">
-              <div 
-                className="w-full h-full bg-cover bg-top cursor-zoom-in transition-transform duration-700 ease-out hover:scale-[1.02]"
-                style={{ backgroundImage: `url(${galleryImages[activeImage]})` }}
+            <div className="w-full aspect-[3/4] relative rounded-2xl overflow-hidden shadow-sm flex items-center justify-center bg-gray-50">
+              <Image 
+                src={galleryImages[activeImage]} 
+                alt={product.name}
+                fill
+                priority
+                className="object-cover object-top cursor-zoom-in transition-transform duration-700 ease-out hover:scale-[1.02]"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
               {product.originalPrice && (
                 <div className="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 uppercase tracking-widest rounded-md z-10">
                   {Math.round(((parseInt(product.originalPrice.replace(/[^\d]/g, ''), 10) - parseInt(product.price.replace(/[^\d]/g, ''), 10)) / parseInt(product.originalPrice.replace(/[^\d]/g, ''), 10)) * 100)}% OFF
                 </div>
               )}
+            </div>
+            
+            {/* Thumbnails Scroll View */}
+            <div className="relative group w-full flex items-center mt-2">
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('thumbnail-scroll');
+                  if (el) el.scrollBy({ left: -200, behavior: 'smooth' });
+                }}
+                className="absolute left-0 z-10 w-8 h-8 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center -translate-x-3 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50"
+              >
+                <span className="text-gray-600 text-lg font-medium">‹</span>
+              </button>
+              
+              <div id="thumbnail-scroll" className="flex gap-3 overflow-x-auto hide-scrollbar py-2 px-1 w-full snap-x snap-mandatory scroll-smooth">
+                {galleryImages.map((img, idx) => (
+                  <div 
+                    key={idx}
+                    onClick={() => setActiveImage(idx)}
+                    className={`flex-none snap-start relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300 w-24 aspect-[3/4] ${
+                      activeImage === idx ? 'ring-2 ring-black shadow-md scale-[1.02]' : 'ring-1 ring-gray-200 hover:ring-gray-300 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Image 
+                      src={img} 
+                      alt={`Thumbnail ${idx}`}
+                      fill
+                      loading="lazy"
+                      className="object-cover object-center"
+                      sizes="96px"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('thumbnail-scroll');
+                  if (el) el.scrollBy({ left: 200, behavior: 'smooth' });
+                }}
+                className="absolute right-0 z-10 w-8 h-8 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center translate-x-3 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50"
+              >
+                <span className="text-gray-600 text-lg font-medium">›</span>
+              </button>
             </div>
           </div>
 
@@ -174,37 +211,38 @@ export default function ProductDetailPage() {
               </div>
             </div>
             
-            <div className="mb-8">
-              <p className="text-sm opacity-80 leading-relaxed max-w-md mb-4 whitespace-pre-line">
-                {product.description || 'A masterpiece of traditional craftsmanship.'}
-              </p>
-              {product.fabric && (
-                <p className="text-sm font-medium tracking-wide">
-                  Fabric: <span className="opacity-70 font-normal">{product.fabric}</span>
-                </p>
-              )}
-            </div>
+
 
             {/* Color Selector */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-8">
-                <span className="text-sm uppercase tracking-widest font-medium block mb-4">Select Color</span>
+                <span className="text-sm uppercase tracking-widest font-medium block mb-4">Color: {selectedColor}</span>
                 <div className="flex flex-wrap gap-3">
-                  {product.colors.map((color) => {
+                  {product.colors.map((color, idx) => {
                     const isSelected = selectedColor === color;
+                    // Look for specific color image in colorDetails, fallback to main gallery
+                    const specificColorDetail = product.colorDetails?.find(c => c.name === color);
+                    const colorImage = specificColorDetail?.image || galleryImages[idx] || product.image;
+                    
                     return (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 text-sm font-medium rounded-full border transition-all ${
+                        className={`group flex flex-col items-center gap-2 p-1 rounded-lg border-2 transition-all ${
                           isSelected 
-                            ? 'bg-foreground text-white border-foreground' 
-                            : 'bg-transparent text-foreground border-foreground/20 hover:border-accent'
+                            ? 'border-[#8B5E34] bg-[#8B5E34]/5 scale-[1.02] shadow-sm' 
+                            : 'border-transparent hover:border-gray-200 hover:bg-gray-50'
                         }`}
                         onMouseEnter={() => setCursorType('MAGNETIC')}
                         onMouseLeave={() => setCursorType('DEFAULT')}
                       >
-                        {color}
+                        <div 
+                          className={`w-20 h-28 bg-cover bg-center rounded-md border ${isSelected ? 'border-[#8B5E34]/30' : 'border-gray-200'}`}
+                          style={{ backgroundImage: `url(${colorImage})` }}
+                        />
+                        <span className={`text-xs font-medium px-1 ${isSelected ? 'text-[#8B5E34]' : 'text-gray-600 group-hover:text-black'}`}>
+                          {color.length > 15 ? color.substring(0, 12) + '...' : color}
+                        </span>
                       </button>
                     );
                   })}
@@ -216,11 +254,11 @@ export default function ProductDetailPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm uppercase tracking-widest font-medium">Select Size</span>
-                <button className="text-xs uppercase tracking-widest opacity-60 hover:text-accent border-b border-foreground/20">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-4">
-                {SIZES.map((size) => {
-                  const stock = product.stockBySize[size];
+                {(product.sizes || []).map((sizeObj) => {
+                  const size = sizeObj.name;
+                  const stock = sizeObj.stock;
                   const isAvailable = stock > 0;
                   const isSelected = selectedSize === size;
 
@@ -229,7 +267,7 @@ export default function ProductDetailPage() {
                       key={size}
                       onClick={() => isAvailable && setSelectedSize(size)}
                       disabled={!isAvailable}
-                      className={`relative w-12 h-12 flex items-center justify-center text-sm font-medium group ${
+                      className={`relative min-w-[3rem] w-auto px-4 h-12 flex items-center justify-center text-sm font-medium group ${
                         !isAvailable ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
                       }`}
                       onMouseEnter={() => isAvailable && setCursorType('MAGNETIC')}
@@ -255,39 +293,14 @@ export default function ProductDetailPage() {
                 })}
               </div>
               
-              {selectedSize && product.stockBySize[selectedSize] > 0 && product.stockBySize[selectedSize] < 5 && (
+              {selectedSize && product.sizes?.find(s => s.name === selectedSize)?.stock! > 0 && product.sizes?.find(s => s.name === selectedSize)?.stock! < 5 && (
                 <p className="text-xs text-red-600 mt-3 font-medium uppercase tracking-wide">
-                  Only {product.stockBySize[selectedSize]} left in this size!
+                  Only {product.sizes?.find(s => s.name === selectedSize)?.stock} left in this size!
                 </p>
               )}
             </div>
 
-            {/* Color Selector */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm uppercase tracking-widest font-medium">Select Color</span>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                  {product.colors.map((color: string) => {
-                    const isSelected = selectedColor === color;
-                    return (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 text-sm font-medium border transition-colors ${
-                          isSelected ? 'bg-black text-white border-black' : 'bg-transparent text-black border-gray-300 hover:border-black'
-                        }`}
-                        onMouseEnter={() => setCursorType('MAGNETIC')}
-                        onMouseLeave={() => setCursorType('DEFAULT')}
-                      >
-                        {color}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
 
             {/* Quantity and Actions */}
             <div className="flex gap-4 mb-12">
@@ -336,8 +349,22 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
+            {/* Product Details (Description & Fabric) */}
+            <div className="mb-8 pt-8 border-t border-foreground/10">
+              <h3 className="text-sm uppercase tracking-widest font-medium mb-4">Product Details</h3>
+              <div 
+                className="text-sm opacity-80 leading-relaxed mb-4 prose prose-sm prose-p:mb-2 prose-a:text-accent prose-strong:font-bold max-w-none"
+                dangerouslySetInnerHTML={{ __html: product.description || 'A masterpiece of traditional craftsmanship.' }}
+              />
+              {product.fabric && (
+                <p className="text-sm font-medium tracking-wide mt-4">
+                  Fabric: <span className="opacity-70 font-normal">{product.fabric}</span>
+                </p>
+              )}
+            </div>
+
             {/* Accordion Details */}
-            <div className="border-t border-foreground/10 pt-8 mt-12">
+            <div className="border-t border-foreground/10 pt-4 mt-8">
               
               {/* Shipping Information */}
               <div className="mb-4 border-b border-foreground/10 pb-4">

@@ -28,7 +28,7 @@ export default function Navbar() {
     <>
       <motion.header
         className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
-          isScrolled || isMenuOpen ? 'bg-background/90 backdrop-blur-md text-foreground shadow-sm' : 'bg-transparent text-foreground'
+          isScrolled || isMenuOpen ? 'bg-background/95 text-foreground shadow-sm' : 'bg-transparent text-foreground'
         }`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -47,7 +47,7 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <nav className="hidden lg:flex flex-1 gap-8 text-sm tracking-widest uppercase">
-            {['Shop', 'Collections', 'About', 'Journal'].map((item) => (
+            {['Shop', 'Collections', 'Combo', 'About'].map((item) => (
               <Link 
                 key={item} 
                 href={`/${item.toLowerCase()}`}
@@ -105,7 +105,7 @@ export default function Navbar() {
             className="fixed inset-0 z-40 bg-background pt-24 px-6 flex flex-col"
           >
             <nav className="flex flex-col gap-6 text-3xl font-serif mt-10">
-              {['Home', 'Shop', 'Collections', 'About', 'Journal'].map((item, i) => (
+              {['Shop', 'Collections', 'Combo', 'About', 'Journal'].map((item, i) => (
                 <motion.div
                   key={item}
                   initial={{ opacity: 0, y: 20 }}

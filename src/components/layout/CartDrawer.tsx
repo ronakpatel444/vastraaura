@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function CartDrawer() {
   const pathname = usePathname();
-  const { isCartOpen, setCartOpen, setCursorType, cartItems, removeFromCart, updateQuantity } = useStore();
+  const { isCartOpen, setCartOpen, setCursorType, cartItems, removeFromCart, updateQuantity, getCartTotal, getComboDiscount } = useStore();
 
   if (pathname.startsWith('/admin')) {
     return null;
@@ -111,13 +111,17 @@ export default function CartDrawer() {
 
             {/* Footer */}
             <div className="p-6 border-t border-foreground/10 bg-background">
+              {getComboDiscount() > 0 && (
+                <div className="mb-4 bg-[#8A5A44]/10 border border-[#8A5A44]/20 p-3 flex justify-between items-center">
+                  <span className="text-sm font-semibold text-[#8A5A44]">✨ Combo Offer Applied!</span>
+                  <span className="text-sm font-bold text-accent">You saved ₹{getComboDiscount().toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between mb-4">
                 <span className="text-sm uppercase tracking-widest">Subtotal</span>
                 <span className="font-medium">
-                  ₹{cartItems.reduce((acc, item) => {
-                    const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
-                    return acc + (priceVal * item.quantity);
-                  }, 0).toLocaleString('en-IN')}
+                  ₹{getCartTotal().toLocaleString('en-IN')}
                 </span>
               </div>
               <p className="text-xs opacity-60 mb-6">Shipping & taxes calculated at checkout.</p>

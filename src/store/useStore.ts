@@ -13,15 +13,12 @@ export interface CartItem {
   size?: string;
   color?: string;
   originalSellerLink?: string;
+  category?: string;
 }
 
-export interface StockBySize {
-  XS: number;
-  S: number;
-  M: number;
-  L: number;
-  XL: number;
-  XXL: number;
+export interface ProductSize {
+  name: string;
+  stock: number;
 }
 
 export interface AdminProduct {
@@ -33,12 +30,13 @@ export interface AdminProduct {
   price: string;
   originalPrice?: string;
   allowCOD: boolean;
-  stockBySize: StockBySize;
+  sizes: ProductSize[];
   status: string;
   fabric: string;
   description: string;
   originalSellerLink?: string;
   colors: string[];
+  colorDetails?: { name: string; image: string }[];
 }
 
 export interface AdminCoupon {
@@ -78,6 +76,8 @@ interface StoreState {
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string | number, size?: string, color?: string) => void;
   updateQuantity: (id: string | number, size: string | undefined, color: string | undefined, quantity: number) => void;
+  getCartTotal: () => number;
+  getComboDiscount: () => number;
 
   // Admin State
   adminProducts: AdminProduct[];
@@ -126,7 +126,7 @@ export const useStore = create<StoreState>((set) => ({
       newItems[existingIndex].quantity += item.quantity;
       return { cartItems: newItems, isCartOpen: true };
     }
-    return { cartItems: [...state.cartItems, { ...item, originalSellerLink: item.originalSellerLink }], isCartOpen: true };
+    return { cartItems: [...state.cartItems, { ...item, originalSellerLink: item.originalSellerLink, category: item.category }], isCartOpen: true };
   }),
   removeFromCart: (id, size, color) => set((state) => ({
     cartItems: state.cartItems.filter(i => 
@@ -138,6 +138,72 @@ export const useStore = create<StoreState>((set) => ({
       (String(i.id) === String(id) && i.size === size && i.color === color) ? { ...i, quantity } : i
     )
   })),
+  getCartTotal: () => {
+    const state = useStore.getState();
+    let total = 0;
+    
+    // Combo Logic arrays
+    const comboItemPrices: number[] = [];
+    
+    state.cartItems.forEach(item => {
+        const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
+        // If it's a combo eligible item (from the Combo category)
+        if (item.category === 'Combo') {
+            for (let i = 0; i < item.quantity; i++) {
+                comboItemPrices.push(priceVal);
+            }
+        } else {
+            total += priceVal * item.quantity;
+        }
+    });
+
+    // Handle Combo pricing: 2 for 2999
+    // Sort descending so most expensive items get paired first to maximize discount
+    comboItemPrices.sort((a, b) => b - a);
+    
+    const comboPairs = Math.floor(comboItemPrices.length / 2);
+    const remainder = comboItemPrices.length % 2;
+    
+    total += comboPairs * 2999;
+    
+    if (remainder > 0) {
+        // Add the remaining unpaired item (the cheapest one) at its regular price
+        total += comboItemPrices[comboItemPrices.length - 1];
+    }
+    
+    return total;
+  },
+  getComboDiscount: () => {
+    const state = useStore.getState();
+    let discount = 0;
+    const comboItemPrices: number[] = [];
+    
+    state.cartItems.forEach(item => {
+        if (item.category === 'Combo') {
+            const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
+            for (let i = 0; i < item.quantity; i++) {
+                comboItemPrices.push(priceVal);
+            }
+        }
+    });
+
+    comboItemPrices.sort((a, b) => b - a);
+    const comboPairs = Math.floor(comboItemPrices.length / 2);
+    
+    // For every pair, the regular cost would be the sum of those two items.
+    // The combo cost is 2999.
+    // The discount is the difference.
+    for (let i = 0; i < comboPairs; i++) {
+        const item1Price = comboItemPrices[i * 2];
+        const item2Price = comboItemPrices[i * 2 + 1];
+        const regularPairPrice = item1Price + item2Price;
+        if (regularPairPrice > 2999) {
+            discount += (regularPairPrice - 2999);
+        }
+    }
+    
+    return discount;
+  },
 
   // Admin State Implementation
   adminProducts: [],

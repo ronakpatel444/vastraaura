@@ -51,6 +51,8 @@ import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/layout/CartDrawer";
 import SearchOverlay from "@/components/layout/SearchOverlay";
 import StoreInitializer from "@/components/providers/StoreInitializer";
+import FacebookPixel from "@/components/providers/FacebookPixel";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -60,6 +62,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="antialiased min-h-screen bg-background text-foreground selection:bg-accent/30 selection:text-foreground">
+        <Suspense fallback={null}>
+          <FacebookPixel />
+        </Suspense>
         <StoreInitializer />
         <SmoothScrollProvider>
           <CustomCursor />

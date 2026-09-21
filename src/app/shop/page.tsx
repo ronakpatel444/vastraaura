@@ -23,8 +23,8 @@ function ShopContent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = activeCategory === 'All' 
-    ? adminProducts.filter(p => p.category !== 'Combo')
-    : adminProducts.filter(p => p.category === activeCategory);
+    ? adminProducts.filter(p => p.category?.toLowerCase() !== 'combo')
+    : adminProducts.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
 
   useEffect(() => {
     setActiveCategory(getCategoryFromParam(categoryParam));

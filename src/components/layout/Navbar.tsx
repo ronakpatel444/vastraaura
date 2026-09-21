@@ -46,17 +46,40 @@ export default function Navbar() {
           </button>
 
           {/* Desktop Links */}
-          <nav className="hidden lg:flex flex-1 gap-8 text-sm tracking-widest uppercase">
-            {['Shop', 'Collections', 'Combo', 'About'].map((item) => (
+          <nav className="hidden lg:flex flex-1 gap-8 text-sm tracking-widest uppercase items-center">
+            {/* Shop Dropdown */}
+            <div className="relative group py-4">
+              <Link 
+                href="/shop"
+                className="hover:text-accent transition-colors relative inline-block"
+                onMouseEnter={() => setCursorType('MAGNETIC')}
+                onMouseLeave={() => setCursorType('DEFAULT')}
+              >
+                SHOP
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
+              </Link>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute top-[100%] left-0 w-48 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <Link href="/shop" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">All Products</Link>
+                <Link href="/shop?category=saree" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Saree</Link>
+                <Link href="/shop?category=chaniya-choli" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Chaniya Choli</Link>
+                <Link href="/shop?category=lehenga" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Lehenga</Link>
+                <Link href="/shop?category=kurta-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
+                <Link href="/shop?category=kids-wear" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
+              </div>
+            </div>
+
+            {['Collections', 'Combo', 'About'].map((item) => (
               <Link 
                 key={item} 
                 href={`/${item.toLowerCase()}`}
-                className="hover:text-accent transition-colors relative group"
+                className="hover:text-accent transition-colors relative group py-4"
                 onMouseEnter={() => setCursorType('MAGNETIC')}
                 onMouseLeave={() => setCursorType('DEFAULT')}
               >
                 {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
+                <span className="absolute bottom-3 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </nav>
@@ -105,15 +128,27 @@ export default function Navbar() {
             className="fixed inset-0 z-40 bg-background pt-24 px-6 flex flex-col"
           >
             <nav className="flex flex-col gap-6 text-3xl font-serif mt-10">
-              {['Shop', 'Collections', 'Combo', 'About', 'Journal'].map((item, i) => (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                <div className="flex flex-col gap-3">
+                  <Link href="/shop" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Shop</Link>
+                  <div className="flex flex-col gap-2 pl-4 border-l-2 border-foreground/10 text-xl text-gray-500 mt-2">
+                    <Link href="/shop?category=saree" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Saree</Link>
+                    <Link href="/shop?category=chaniya-choli" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Chaniya Choli</Link>
+                    <Link href="/shop?category=lehenga" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Lehenga</Link>
+                    <Link href="/shop?category=kurta-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kurta Sets</Link>
+                    <Link href="/shop?category=kids-wear" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kids Wear</Link>
+                  </div>
+                </div>
+              </motion.div>
+              {['Collections', 'Combo', 'About', 'Journal'].map((item, i) => (
                 <motion.div
                   key={item}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 + 0.2 }}
+                  transition={{ delay: (i + 1) * 0.1 + 0.2 }}
                 >
                   <Link 
-                    href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                    href={`/${item.toLowerCase()}`}
                     onClick={() => setMenuOpen(false)}
                     className="hover:text-accent transition-colors"
                   >

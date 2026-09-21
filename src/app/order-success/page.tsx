@@ -14,6 +14,11 @@ function OrderSuccessContent() {
   const orderId = searchParams?.get('id');
 
   useEffect(() => {
+    // Track Facebook Pixel Purchase Event
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Purchase', { currency: 'INR', value: 0 });
+    }
+
     if (orderId) {
       setOrderNumber(orderId.substring(0, 8).toUpperCase());
     } else {

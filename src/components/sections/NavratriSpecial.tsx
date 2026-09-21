@@ -35,22 +35,27 @@ export default function NavratriSpecial() {
 
         {/* Note: In a full build, this would be a Swiper carousel. Using grid for layout representation. */}
         <div className="flex overflow-x-auto no-scrollbar gap-8 snap-x snap-mandatory">
-          {[1, 2, 3, 4].map((item) => (
+          {[
+            { id: 1, title: 'Chaniya Choli', image: '/images/collection-chaniya-choli.jpeg', link: '/shop?category=chaniya-choli' },
+            { id: 2, title: 'Designer Lehenga', image: '/images/collection-lehenga.jpg', link: '/shop?category=lehenga' },
+            { id: 3, title: 'Festive Sarees', image: '/images/collection-saree.jpg', link: '/shop?category=saree' },
+            { id: 4, title: 'Kurta Sets', image: '/images/collection-kurta.jpeg', link: '/shop?category=kurta-sets' }
+          ].map((item) => (
             <Link 
-              key={item} 
-              href="/shop"
+              key={item.id} 
+              href={item.link}
               className="min-w-[85vw] md:min-w-[40vw] lg:min-w-[30vw] aspect-[4/5] relative group snap-center overflow-hidden"
               onMouseEnter={() => setCursorType('VIEW')}
               onMouseLeave={() => setCursorType('DEFAULT')}
             >
               <div 
                 className="w-full h-full bg-cover bg-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
-                style={{ backgroundImage: `url(/images/collection-chaniya-choli.jpeg)` }}
+                style={{ backgroundImage: `url(${item.image})` }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
               
               <div className="absolute bottom-0 left-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 text-white">
-                <h4 className="text-2xl font-serif mb-2">Navratri Collection</h4>
+                <h4 className="text-2xl font-serif mb-2">{item.title}</h4>
                 <p className="text-sm opacity-80 uppercase tracking-widest flex items-center gap-2">
                   Shop Now <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </p>

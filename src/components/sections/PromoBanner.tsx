@@ -58,9 +58,9 @@ export default function PromoBanner() {
               <Gift className="w-8 h-8 mb-3 text-black" />
               <div className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-1">Use Code</div>
               <div className="text-3xl font-black tracking-wider border-2 border-dashed border-black py-3 px-8 rounded-lg mb-3 bg-gray-50 w-full text-center">
-                WELCOME20
+                WELCOME15
               </div>
-              <div className="text-sm font-medium">Get 20% OFF on all orders</div>
+              <div className="text-sm font-medium">Get 15% OFF on all orders</div>
             </div>
           </motion.div>
         </motion.div>

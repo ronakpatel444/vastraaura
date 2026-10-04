@@ -7,9 +7,10 @@ import Payout from '@/models/Payout';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     await connectToDatabase();
 
     const seller = await User.findById(id).lean();

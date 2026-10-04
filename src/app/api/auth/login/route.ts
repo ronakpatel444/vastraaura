@@ -85,7 +85,6 @@ export async function POST(req: Request) {
 
       let redirectUrl = '/account';
       if (user.role === UserRole.ADMIN) redirectUrl = '/admin';
-      if (user.role === UserRole.SELLER) redirectUrl = '/seller';
       if (user.role === UserRole.INFLUENCER) redirectUrl = '/influencer';
 
       const response = NextResponse.json({ success: true, redirectUrl });

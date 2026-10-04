@@ -16,6 +16,7 @@ export default function AddProduct() {
     originalPrice: '',
     category: '',
     stock: '',
+    images: [] as string[]
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

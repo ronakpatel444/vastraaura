@@ -14,7 +14,7 @@ export async function GET() {
     const payouts = await Payout.find({ userType: 'seller' }).sort({ createdAt: -1 }).lean();
     
     // Group seller stats
-    const sellerIds = [...new Set(payouts.map(p => p.userId))];
+    const sellerIds = [...new Set(payouts.map(p => p.userId).filter(Boolean))];
     
     const sellerStats: Record<string, { online: number, cod: number, name: string, businessName: string }> = {};
     
@@ -44,7 +44,7 @@ export async function GET() {
     });
 
     const enrichedPayouts = payouts.map(p => {
-      const sid = p.userId?.toString();
+      const sid = p.userId?.toString() || '';
       return {
         ...p,
         sellerDetails: sellerStats[sid] || { online: 0, cod: 0, name: 'Unknown', businessName: 'Unknown' }

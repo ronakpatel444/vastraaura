@@ -12,10 +12,6 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { setCartOpen, setSearchOpen, isMenuOpen, setMenuOpen, setCursorType, cartItems } = useStore();
 
-  if (pathname.startsWith('/admin')) {
-    return null;
-  }
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -24,10 +20,37 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (pathname.startsWith('/admin') || pathname.startsWith('/seller') || pathname.startsWith('/influencer')) {
+    return null;
+  }
+
   return (
     <>
+      {/* Top Announcement Bar */}
+      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-2 px-4 border-b border-white/10 relative z-50">
+        <div className="container mx-auto flex justify-between items-center text-center">
+          <div className="hidden md:flex items-center gap-2 text-neutral-400 text-[11px]">
+            <span>✨ Authentic Handcrafted Luxury Fashion</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 mx-auto md:mx-0 flex-wrap">
+            <span className="text-amber-400 font-semibold tracking-wider">SELL WITH US:</span>
+            <span>Register as a Designer Seller (₹3,999 One-Time)</span>
+            <Link href="/seller/register" className="font-bold underline text-amber-300 hover:text-white transition-colors ml-1">
+              Apply & Launch →
+            </Link>
+          </div>
+          <div className="hidden md:flex items-center gap-3 text-[11px] text-neutral-400">
+            <Link href="/track-order" className="hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
+            <span>|</span>
+            <Link href="/seller" className="hover:text-white transition-colors">Seller Login</Link>
+            <span>|</span>
+            <Link href="/influencer" className="hover:text-white transition-colors">Influencer Portal</Link>
+          </div>
+        </div>
+      </div>
+
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
+        className={`fixed top-8 sm:top-8 left-0 right-0 z-50 transition-colors duration-500 ${
           isScrolled || isMenuOpen ? 'bg-background/95 text-foreground shadow-sm' : 'bg-transparent text-foreground'
         }`}
         initial={{ y: -100 }}

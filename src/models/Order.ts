@@ -2,6 +2,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IOrderItem {
   productId: string;
+  sellerId?: mongoose.Types.ObjectId | string;
   name: string;
   price: string;
   image: string;
@@ -12,6 +13,7 @@ export interface IOrderItem {
 }
 
 export interface IOrder extends Document {
+  userId?: mongoose.Types.ObjectId | string;
   customer: {
     email: string;
     firstName: string;
@@ -32,6 +34,9 @@ export interface IOrder extends Document {
   totalAmount: number;
   paymentMethod: string;
   status: string; // 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Paid'
+  courierPartner?: string;
+  trackingNumber?: string;
+  estimatedDelivery?: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   razorpaySignature?: string;
@@ -39,6 +44,7 @@ export interface IOrder extends Document {
 
 const OrderItemSchema = new Schema<IOrderItem>({
   productId: { type: String, required: true },
+  sellerId: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true },
   price: { type: String, required: true },
   image: { type: String, required: true },
@@ -50,6 +56,7 @@ const OrderItemSchema = new Schema<IOrderItem>({
 
 const OrderSchema = new Schema<IOrder>(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
     customer: {
       email: { type: String, required: true },
       firstName: { type: String, required: true },
@@ -70,6 +77,9 @@ const OrderSchema = new Schema<IOrder>(
     totalAmount: { type: Number, required: true },
     paymentMethod: { type: String, required: true, default: 'COD' },
     status: { type: String, required: true, default: 'Pending' },
+    courierPartner: { type: String },
+    trackingNumber: { type: String },
+    estimatedDelivery: { type: String },
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
     razorpaySignature: { type: String },

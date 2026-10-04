@@ -12,6 +12,7 @@ export interface IProduct extends Document {
   fabric: string;
   description: string;
   originalSellerLink?: string;
+  sellerId?: mongoose.Types.ObjectId | string; // Reference to the User (Seller)
   colors: string[];
   colorDetails?: {
     name: string;
@@ -36,6 +37,7 @@ const ProductSchema = new Schema<IProduct>(
     fabric: { type: String },
     description: { type: String },
     originalSellerLink: { type: String },
+    sellerId: { type: Schema.Types.ObjectId, ref: 'User' },
     colors: { type: [String], default: [] },
     colorDetails: {
       type: [
@@ -65,3 +67,4 @@ const ProductSchema = new Schema<IProduct>(
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;
+

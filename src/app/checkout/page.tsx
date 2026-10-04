@@ -55,11 +55,24 @@ export default function CheckoutPage() {
   }
 
   // Dynamic Shipping Logic
-  const freeThreshold = storeSettings?.freeShippingThreshold ?? 10000;
-  const flatRate = storeSettings?.flatShippingRate ?? 250;
+  const freeThreshold = storeSettings?.freeShippingThreshold ?? 999;
+  const flatRate = storeSettings?.flatShippingRate ?? 100;
   
   const shipping = (freeThreshold > 0 && subtotal > freeThreshold) ? 0 : flatRate;
-  const total = subtotal - discount + shipping;
+
+  // Dynamic Handling Charge (0 = hidden, % or ₹ applied if > 0)
+  const handlingType = storeSettings?.handlingChargeType || 'PERCENTAGE';
+  const handlingValue = storeSettings?.handlingChargeValue || 0;
+  let handlingFee = 0;
+  if (handlingValue > 0) {
+    if (handlingType === 'PERCENTAGE') {
+      handlingFee = Math.round((subtotal - discount) * (handlingValue / 100));
+    } else {
+      handlingFee = Number(handlingValue);
+    }
+  }
+
+  const total = subtotal - discount + shipping + handlingFee;
 
   const isCODRestrictedByProduct = cartItems.some(item => item.allowCOD === false);
   const isCODRestrictedByCoupon = appliedCoupon !== null;
@@ -488,6 +501,15 @@ export default function CheckoutPage() {
               <span className="text-gray-600">Shipping</span>
               <span className="font-medium">{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
             </div>
+
+            {handlingFee > 0 && (
+              <div className="flex justify-between text-sm text-neutral-800">
+                <span className="text-gray-600">
+                  Handling Fee {handlingType === 'PERCENTAGE' ? `(${handlingValue}%)` : ''}
+                </span>
+                <span className="font-medium">₹{handlingFee.toLocaleString('en-IN')}</span>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-gray-200 pt-6 flex justify-between items-end">

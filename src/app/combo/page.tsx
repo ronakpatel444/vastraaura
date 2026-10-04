@@ -74,7 +74,7 @@ export default function ComboPage() {
       </div>
 
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 sm:gap-x-6 gap-y-8 sm:gap-y-12">
           {comboProducts.map((product) => {
             const qty = quantities[product.id] || 1;
             
@@ -92,7 +92,7 @@ export default function ComboPage() {
                     className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                   />
                   {product.originalPrice && parseInt(product.originalPrice) > parseInt(product.price) && (
-                    <div className="absolute top-4 left-4 bg-background text-foreground text-xs px-3 py-1 uppercase tracking-widest shadow-sm">
+                    <div className="absolute top-3 left-3 bg-background text-foreground text-[10px] px-2 py-0.5 uppercase tracking-wider shadow-sm font-bold">
                       Sale
                     </div>
                   )}

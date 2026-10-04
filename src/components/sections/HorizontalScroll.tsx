@@ -13,8 +13,14 @@ gsap.registerPlugin(ScrollTrigger);
 export default function HorizontalScroll() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { setCursorType, adminProducts } = useStore();
+  const { setCursorType, adminProducts, fetchProducts } = useStore();
   
+  useEffect(() => {
+    if (adminProducts.length === 0) {
+      fetchProducts();
+    }
+  }, [adminProducts.length, fetchProducts]);
+
   const liveProducts = adminProducts.filter(p => p.status !== 'Out of Stock').slice(0, 5);
 
   useEffect(() => {

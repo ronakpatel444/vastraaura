@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { Heart, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -7,8 +8,14 @@ import Link from 'next/link';
 // Static array removed in favor of live data
 
 export default function BestSellers() {
-  const { setCursorType, setCartOpen, addToCart, adminProducts } = useStore();
+  const { setCursorType, setCartOpen, addToCart, adminProducts, fetchProducts } = useStore();
   
+  useEffect(() => {
+    if (adminProducts.length === 0) {
+      fetchProducts();
+    }
+  }, [adminProducts.length, fetchProducts]);
+
   // Use first 3 active products for best sellers
   const liveProducts = adminProducts.filter(p => p.status !== 'Out of Stock').slice(0, 3);
 

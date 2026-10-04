@@ -41,15 +41,30 @@ export default function Hero() {
       );
 
       // 2. Scroll Animations
+      // When scrolling down, the video will scale up and fade out slightly, while text moves up faster
       gsap.to(imageRef.current, {
-        yPercent: 30,
-        scale: 1.05,
+        yPercent: 40,
+        scale: 1.15,
+        opacity: 0.4,
         ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: true,
+          scrub: 1, // Smooth scrubbing
+        },
+      });
+
+      // Text parallax effect
+      gsap.to('.hero-text-container', {
+        yPercent: -50,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
         },
       });
 
@@ -60,25 +75,32 @@ export default function Hero() {
 
   return (
     <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-background">
-      {/* Background Image Container */}
+      {/* Background Video Container */}
       <div 
         ref={imageRef} 
-        className="absolute inset-0 w-full h-[120%] -top-[10%]"
+        className="absolute inset-0 w-full h-[120%] -top-[10%] bg-black"
       >
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url("/images/hero.jpg")' }}
-        />
-        <div className="absolute inset-0 bg-black/30" /> {/* Dark overlay for text readability */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          poster="/images/hero.jpg"
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+        >
+          {/* Local motion graphic video */}
+          <source src="/videos/hero-motion.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" /> {/* Dark gradient overlay for cinematic feel */}
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full container mx-auto px-6 flex flex-col justify-center items-center text-center text-white pt-24">
-        <p className="hero-sub text-sm tracking-[0.3em] uppercase mb-6 font-medium">Traditional Wear</p>
+      <div className="hero-text-container relative z-10 h-full container mx-auto px-6 flex flex-col justify-center items-center text-center text-white pt-24">
+        <p className="hero-sub text-sm tracking-[0.3em] uppercase mb-6 font-medium text-accent">Vastra Aura Exclusive</p>
         
-        <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif leading-none mb-8 overflow-hidden">
+        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-serif leading-none mb-8 overflow-hidden drop-shadow-2xl">
           <div ref={(el) => { if (el) textRefs.current[0] = el; }}>TIMELESS</div>
-          <div ref={(el) => { if (el) textRefs.current[1] = el; }} className="italic">ELEGANCE</div>
+          <div ref={(el) => { if (el) textRefs.current[1] = el; }} className="italic font-light">ELEGANCE</div>
         </h1>
 
         <p className="hero-sub text-lg md:text-xl font-serif italic mb-12 opacity-90 max-w-lg">

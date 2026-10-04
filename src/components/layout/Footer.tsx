@@ -9,8 +9,8 @@ export default function Footer() {
   const pathname = usePathname();
   const { setCursorType } = useStore();
 
-  // Hide footer on admin routes and checkout
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/checkout')) {
+  // Hide footer on admin, seller, influencer routes and checkout
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/seller') || pathname?.startsWith('/influencer') || pathname?.startsWith('/checkout')) {
     return null;
   }
 
@@ -59,16 +59,29 @@ export default function Footer() {
 
           {/* Help & Information */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-widest mb-6">Assistance</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest mb-6">Partners & Support</h3>
             <ul className="space-y-4">
+              <li>
+                <Link href="/seller/register" className="text-sm text-amber-300 hover:text-amber-200 transition-colors font-semibold flex items-center gap-1">
+                  ✨ Become a Seller (₹3,999)
+                </Link>
+              </li>
+              <li>
+                <Link href="/seller" className="text-sm text-gray-400 hover:text-white transition-colors">Seller Dashboard</Link>
+              </li>
+              <li>
+                <Link href="/influencer/register" className="text-sm text-gray-400 hover:text-white transition-colors">Join as Fashion Influencer</Link>
+              </li>
               <li>
                 <Link href="/contact" className="text-sm text-gray-400 hover:text-white transition-colors">Contact Us</Link>
               </li>
               <li>
-                <Link href="/shipping" className="text-sm text-gray-400 hover:text-white transition-colors">Shipping Information</Link>
+                <Link href="/track-order" className="text-sm text-gray-400 hover:text-white transition-colors">
+                  Track Your Order
+                </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/shipping" className="text-sm text-gray-400 hover:text-white transition-colors">Shipping & Doorstep Pickup</Link>
               </li>
             </ul>
           </div>

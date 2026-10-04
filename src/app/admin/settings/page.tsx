@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { Percent, IndianRupee, Truck, ShieldCheck, Info, CheckCircle2 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -13,8 +14,15 @@ export default function AdminSettingsPage() {
     contactEmail: '',
     storeDescription: '',
     currency: 'INR',
-    flatShippingRate: 250,
-    freeShippingThreshold: 10000,
+    flatShippingRate: 100,
+    freeShippingThreshold: 999,
+    handlingChargeType: 'PERCENTAGE', // 'PERCENTAGE' | 'FIXED'
+    handlingChargeValue: 0,
+    standardCourierFee: 100,
+    blueDartCourierFee: 120,
+    adPackage24hPrice: 2000,
+    adPackage3dPrice: 5000,
+    adPackage7dPrice: 10000,
   });
 
   const { fetchSettings } = useStore();
@@ -30,8 +38,15 @@ export default function AdminSettingsPage() {
             contactEmail: data.contactEmail || 'hello@vastraaura.com',
             storeDescription: data.storeDescription || '',
             currency: data.currency || 'INR',
-            flatShippingRate: data.flatShippingRate ?? 250,
-            freeShippingThreshold: data.freeShippingThreshold ?? 10000,
+            flatShippingRate: data.flatShippingRate ?? 100,
+            freeShippingThreshold: data.freeShippingThreshold ?? 999,
+            handlingChargeType: data.handlingChargeType || 'PERCENTAGE',
+            handlingChargeValue: data.handlingChargeValue ?? 0,
+            standardCourierFee: data.standardCourierFee ?? 100,
+            blueDartCourierFee: data.blueDartCourierFee ?? 120,
+            adPackage24hPrice: data.adPackage24hPrice ?? 2000,
+            adPackage3dPrice: data.adPackage3dPrice ?? 5000,
+            adPackage7dPrice: data.adPackage7dPrice ?? 10000,
           });
         }
       } catch (error) {
@@ -47,7 +62,9 @@ export default function AdminSettingsPage() {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
-      [name]: name.includes('Shipping') ? Number(value) : value 
+      [name]: ['flatShippingRate', 'freeShippingThreshold', 'handlingChargeValue', 'standardCourierFee', 'blueDartCourierFee', 'adPackage24hPrice', 'adPackage3dPrice', 'adPackage7dPrice'].includes(name) 
+        ? Number(value) 
+        : value 
     }));
   };
 
@@ -63,7 +80,6 @@ export default function AdminSettingsPage() {
       
       if (res.ok) {
         setMessage('Settings saved successfully!');
-        // Refresh store state as well
         if (fetchSettings) {
           await fetchSettings();
         }
@@ -75,7 +91,7 @@ export default function AdminSettingsPage() {
       setMessage('Error saving settings.');
     } finally {
       setSaving(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 3500);
     }
   };
 
@@ -84,79 +100,229 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="p-10 max-w-4xl">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-500">Manage your store preferences and configuration.</p>
+    <div className="p-6 md:p-10 max-w-4xl space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Platform & Store Settings</h1>
+        <p className="text-gray-500">Configure handling charges, courier fees, and store preferences.</p>
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-lg text-sm font-medium ${message.includes('successfully') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-          {message}
+        <div className={`p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${
+          message.includes('successfully') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          <CheckCircle2 size={16} />
+          <span>{message}</span>
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">Store Details</h2>
-          <p className="text-sm text-gray-500">This information is displayed publicly on your site.</p>
+      {/* 1. ORDER HANDLING CHARGE (DYNAMIC: % OR ₹) */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <ShieldCheck size={20} className="text-indigo-600" />
+              Order Handling / Platform Charge
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Control the handling fee charged to customers at checkout. Set to 0 to keep it completely hidden.
+            </p>
+          </div>
+          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+            formData.handlingChargeValue === 0 
+              ? 'bg-gray-100 text-gray-600' 
+              : 'bg-green-100 text-green-700 font-semibold'
+          }`}>
+            {formData.handlingChargeValue === 0 ? 'Disabled (Hidden)' : `Active (${formData.handlingChargeValue}${formData.handlingChargeType === 'PERCENTAGE' ? '%' : '₹'})`}
+          </span>
         </div>
+
         <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Store Name</label>
-              <input type="text" name="storeName" value={formData.storeName} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Contact Email</label>
-              <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" />
+          {/* Charge Type Selector: % or ₹ */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+              Handling Fee Calculation Mode
+            </label>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, handlingChargeType: 'PERCENTAGE' })}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
+                  formData.handlingChargeType === 'PERCENTAGE'
+                    ? 'border-black bg-black text-white shadow-xs'
+                    : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <Percent size={16} />
+                Percentage (%) on Order
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, handlingChargeType: 'FIXED' })}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
+                  formData.handlingChargeType === 'FIXED'
+                    ? 'border-black bg-black text-white shadow-xs'
+                    : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <IndianRupee size={16} />
+                Fixed Amount (₹) per Order
+              </button>
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Store Description</label>
-            <textarea rows={3} name="storeDescription" value={formData.storeDescription} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" />
+
+          {/* Value Input */}
+          <div className="max-w-md space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Charge Value {formData.handlingChargeType === 'PERCENTAGE' ? '(in %)' : '(in ₹)'}
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
+                {formData.handlingChargeType === 'PERCENTAGE' ? '%' : '₹'}
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                name="handlingChargeValue"
+                value={formData.handlingChargeValue}
+                onChange={handleChange}
+                placeholder="0 = No charge"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black font-semibold text-gray-900"
+              />
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 p-3.5 rounded-xl text-xs text-blue-900 flex items-start gap-2 mt-2">
+              <Info size={16} className="shrink-0 mt-0.5 text-blue-600" />
+              <div>
+                {formData.handlingChargeValue === 0 ? (
+                  <p>
+                    <strong>Currently 0:</strong> Customers will <strong>NOT</strong> see any handling charge on checkout (completely hidden).
+                  </p>
+                ) : formData.handlingChargeType === 'PERCENTAGE' ? (
+                  <p>
+                    <strong>Percentage Active:</strong> Customers will be charged <strong>{formData.handlingChargeValue}%</strong> handling fee on their order subtotal (e.g., on ₹3,000 order = ₹{(3000 * (formData.handlingChargeValue / 100)).toFixed(0)} fee).
+                  </p>
+                ) : (
+                  <p>
+                    <strong>Fixed Rupee Active:</strong> Customers will be charged a flat <strong>₹{formData.handlingChargeValue}</strong> handling fee per order.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">Shipping & Payment</h2>
-          <p className="text-sm text-gray-500">Configure how you charge for shipping and accept payments.</p>
+      {/* 2. COURIER SHIPPING CHARGES (FIXED: BLUE DART ₹120 / OTHERS ₹100) */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Truck size={20} className="text-blue-600" />
+            Courier Shipping Rates (Seller Parcel Charges)
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Compulsory shipping rates deducted from seller order payouts when scheduling doorstep pickups.
+          </p>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 block">
+              Standard Couriers Fee (Compulsory)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+              <input
+                type="number"
+                name="standardCourierFee"
+                value={formData.standardCourierFee}
+                onChange={handleChange}
+                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black font-semibold text-gray-900 bg-white"
+              />
+            </div>
+            <p className="text-[11px] text-gray-500">
+              Fixed rate for Delhivery, Shiprocket, DTDC, and Shadowfax per parcel.
+            </p>
+          </div>
+
+          <div className="space-y-2 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 block">
+              Blue Dart Air Express Fee (Fixed)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+              <input
+                type="number"
+                name="blueDartCourierFee"
+                value={formData.blueDartCourierFee}
+                onChange={handleChange}
+                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black font-semibold text-gray-900 bg-white"
+              />
+            </div>
+            <p className="text-[11px] text-gray-500">
+              Fixed rate for Blue Dart Air priority delivery per parcel.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* AD PACKAGE PRICING */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Percent size={20} className="text-purple-600" />
+            Ad Package Pricing (Digital Real Estate)
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Configure the pricing for seller slot bookings (Hero Banners).
+          </p>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">24 Hours Price (₹)</label>
+            <input type="number" name="adPackage24hPrice" value={formData.adPackage24hPrice} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">3 Days Price (₹)</label>
+            <input type="number" name="adPackage3dPrice" value={formData.adPackage3dPrice} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">7 Days Price (₹)</label>
+            <input type="number" name="adPackage7dPrice" value={formData.adPackage7dPrice} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. STORE DETAILS */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+          <h2 className="text-lg font-bold text-gray-900">General Store Details</h2>
         </div>
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Store Currency</label>
-              <select name="currency" value={formData.currency} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black">
-                <option value="INR">Indian Rupee (INR - ₹)</option>
-                <option value="USD">US Dollar (USD - $)</option>
-                <option value="EUR">Euro (EUR - €)</option>
-              </select>
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">Store Name</label>
+              <input type="text" name="storeName" value={formData.storeName} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">Contact Email</label>
+              <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Flat Shipping Rate (₹)</label>
-              <input type="number" name="flatShippingRate" value={formData.flatShippingRate} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" />
-              <p className="text-xs text-gray-500">Base shipping cost applied to orders.</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Free Shipping Threshold (₹)</label>
-              <input type="number" name="freeShippingThreshold" value={formData.freeShippingThreshold} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black" />
-              <p className="text-xs text-gray-500">Orders above this amount will get free shipping. Set to 0 to always charge shipping.</p>
-            </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700">Store Description</label>
+            <textarea rows={2} name="storeDescription" value={formData.storeDescription} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-black" />
           </div>
         </div>
         
-        <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <div className="p-5 bg-gray-50 border-t border-gray-200 flex justify-end">
           <button 
             onClick={handleSave} 
             disabled={saving}
-            className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-70"
+            className="bg-black text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-70 shadow-sm cursor-pointer"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving Changes...' : 'Save All Settings'}
           </button>
         </div>
       </div>

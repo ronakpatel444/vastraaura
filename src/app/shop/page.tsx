@@ -19,8 +19,12 @@ function ShopContent() {
   };
 
   const [activeCategory, setActiveCategory] = useState(() => getCategoryFromParam(categoryParam));
-  const { setCursorType, addToCart, setCartOpen, adminProducts } = useStore();
+  const { setCursorType, addToCart, setCartOpen, adminProducts, fetchProducts } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filteredProducts = activeCategory === 'All' 
     ? adminProducts.filter(p => p.category?.toLowerCase() !== 'combo')
@@ -81,7 +85,7 @@ function ShopContent() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-12">
           {filteredProducts.map((product) => (
             <div 
               key={product.id} 
@@ -109,7 +113,7 @@ function ShopContent() {
                 )}
 
                 {product.originalPrice && (
-                  <div className="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 uppercase tracking-widest z-20">
+                  <div className="absolute top-3 right-3 bg-accent text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider z-20 shadow-sm">
                     {Math.round(((parseInt(product.originalPrice.replace(/[^\d]/g, ''), 10) - parseInt(product.price.replace(/[^\d]/g, ''), 10)) / parseInt(product.originalPrice.replace(/[^\d]/g, ''), 10)) * 100)}% OFF
                   </div>
                 )}
@@ -139,7 +143,7 @@ function ShopContent() {
               </div>
               
               <div className="text-center transform transition-transform duration-500 ease-out group-hover:-translate-y-2">
-                <Link href={`/product/${product.id}`} className="text-lg font-serif tracking-wide block mb-2 group-hover:text-accent transition-colors">
+                <Link href={`/product/${product.id}`} className="text-sm md:text-base font-serif tracking-wide block mb-2 group-hover:text-accent transition-colors line-clamp-2 overflow-hidden text-ellipsis px-2 h-10 md:h-12">
                   {product.name}
                 </Link>
                 <div className="flex flex-col items-center gap-3">

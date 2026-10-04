@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useStore, AdminProduct } from '@/store/useStore';
 import ProductFormDrawer from '@/components/admin/ProductFormDrawer';
 
 export default function AdminProductsPage() {
-  const { adminProducts, deleteProduct } = useStore();
+  const { adminProducts, fetchProducts, deleteProduct } = useStore();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<AdminProduct | null>(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleAddClick = () => {
     setProductToEdit(null);

@@ -72,8 +72,17 @@ function OrderSuccessContent() {
         <div className="flex flex-col w-full gap-3 mt-6">
           {orderId && (
             <Link 
+              href={`/track-order?id=${orderId}`}
+              className="w-full bg-neutral-900 text-white py-4 rounded font-medium tracking-wide hover:bg-neutral-800 transition-colors block text-center shadow-sm"
+            >
+              Track Order Live (Delhivery Courier)
+            </Link>
+          )}
+
+          {orderId && (
+            <Link 
               href={`/invoice/${orderId}`}
-              className="w-full bg-white text-black border border-black py-4 rounded font-medium tracking-wide hover:bg-gray-50 transition-colors block text-center"
+              className="w-full bg-white text-black border border-black py-3.5 rounded font-medium tracking-wide hover:bg-gray-50 transition-colors block text-center"
             >
               Download Bill / Invoice
             </Link>

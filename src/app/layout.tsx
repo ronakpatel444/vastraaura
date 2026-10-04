@@ -18,7 +18,12 @@ export const metadata: Metadata = {
     template: "%s | VASTRA AURA",
   },
   description: "Shop premium designer Chaniya Choli, Lehengas, and ethnic wear for women and kids at Vastra Aura, Surat. Perfect for Navratri, weddings, and festivals.",
-  keywords: ["Chaniya Choli", "Navratri Collection", "Designer Lehenga", "Ethnic Wear Surat", "Kids Ethnic Wear", "Vastra Aura", "Premium Chaniya Choli"],
+  keywords: [
+    "Chaniya Choli", "Navratri Collection", "Designer Lehenga", 
+    "Ethnic Wear Surat", "Kids Ethnic Wear", "Vastra Aura", 
+    "Premium Chaniya Choli", "Designer Chaniya Choli", 
+    "Women's Ethnic Wear", "vastraaura"
+  ],
   authors: [{ name: "Vastra Aura" }],
   openGraph: {
     title: "VASTRA AURA | Designer Chaniya Choli & Lehengas",
@@ -59,8 +64,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "VASTRA AURA",
+    "url": "https://vastraaura.com",
+    "sameAs": [
+      "https://www.instagram.com/vastraaura_official",
+      "https://vastraaura.store"
+    ]
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="antialiased min-h-screen bg-background text-foreground selection:bg-accent/30 selection:text-foreground">
         <Suspense fallback={null}>
           <FacebookPixel />

@@ -14,7 +14,7 @@ export async function GET() {
     const payouts = await Payout.find({ userType: 'seller' }).sort({ createdAt: -1 }).lean();
     
     // Group seller stats
-    const sellerIds = [...new Set(payouts.map(p => p.userId).filter(Boolean))];
+    const sellerIds = [...new Set(payouts.map(p => p.userId).filter(Boolean))] as string[];
     
     const sellerStats: Record<string, { online: number, cod: number, name: string, businessName: string }> = {};
     

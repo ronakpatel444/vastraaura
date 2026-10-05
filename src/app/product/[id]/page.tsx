@@ -12,8 +12,20 @@ import Image from 'next/image';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const { adminProducts, setCursorType, addToCart } = useStore();
+  const { adminProducts, fetchProducts, setCursorType, addToCart } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (adminProducts.length === 0) {
+        await fetchProducts();
+      }
+      setIsLoading(false);
+    };
+    loadData();
+  }, [adminProducts.length, fetchProducts]);
 
   // Find the actual product from our global state
   const product = adminProducts.find(p => p.id === params.id);
@@ -60,6 +72,15 @@ export default function ProductDetailPage() {
     }, containerRef);
     return () => ctx.revert();
   }, [product]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-sm uppercase tracking-widest font-medium">Loading Product...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

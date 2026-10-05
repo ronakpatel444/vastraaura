@@ -103,7 +103,8 @@ export default function AdminSellerDetails() {
                   <Image 
                     src={product.images?.[0] || product.image || '/images/placeholder.jpg'} 
                     alt={product.name} 
-                    fill 
+                    fill
+                    unoptimized
                     className="object-cover"
                   />
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

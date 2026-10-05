@@ -99,7 +99,8 @@ export default function SearchOverlay() {
                               <Image 
                                 src={product.image} 
                                 alt={product.name} 
-                                fill 
+                                fill
+                                unoptimized
                                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
                               />
                             </div>

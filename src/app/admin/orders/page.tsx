@@ -113,7 +113,7 @@ export default function AdminOrdersPage() {
                       {order.items?.map((item: any, idx: number) => (
                         <div key={idx} className="flex gap-3 text-sm bg-white p-2 rounded border border-gray-100">
                           <div className="w-12 h-16 relative bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                            {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" />}
+                            {item.image && <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />}
                           </div>
                           <div className="flex-1">
                             <p className="font-medium line-clamp-1">{item.name}</p>

@@ -422,7 +422,7 @@ export default function CheckoutPage() {
               <div key={idx} className="flex gap-4 items-center">
                 <div className="relative">
                   <div className="w-16 h-20 rounded border border-gray-200 overflow-hidden relative bg-white">
-                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
                   </div>
                   <span className="absolute -top-2 -right-2 bg-gray-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                     {item.quantity}

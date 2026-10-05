@@ -211,6 +211,52 @@ export default function ProductDetailPage() {
               </div>
             </div>
             
+            {/* Discount Code Offer */}
+            <div className="mb-8 bg-[#8B5E34]/5 border border-[#8B5E34]/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="bg-[#8B5E34]/10 p-2 rounded-full text-[#8B5E34] shrink-0 mt-0.5 sm:mt-0">
+                  <Star className="w-4 h-4 fill-current" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Get 15% OFF on Online Payment</p>
+                  <p className="text-xs text-gray-600 mt-1">Use code <span className="font-bold text-[#8B5E34] bg-white px-1.5 py-0.5 rounded border border-[#8B5E34]/20 ml-1">WELCOME15</span> at checkout</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  const copyText = 'WELCOME15';
+                  try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                      navigator.clipboard.writeText(copyText);
+                    } else {
+                      // Fallback for non-HTTPS local network testing
+                      const textArea = document.createElement("textarea");
+                      textArea.value = copyText;
+                      textArea.style.position = "fixed";
+                      textArea.style.left = "-999999px";
+                      textArea.style.top = "-999999px";
+                      document.body.appendChild(textArea);
+                      textArea.focus();
+                      textArea.select();
+                      document.execCommand('copy');
+                      textArea.remove();
+                    }
+                  } catch (err) {
+                    console.error('Failed to copy', err);
+                  }
+                  
+                  const btn = document.getElementById('copy-btn-text');
+                  if (btn) {
+                    btn.innerText = 'COPIED!';
+                    setTimeout(() => { btn.innerText = 'COPY CODE'; }, 2000);
+                  }
+                }}
+                className="shrink-0 w-full sm:w-auto text-xs font-bold uppercase tracking-widest bg-white text-gray-900 border border-gray-200 px-4 py-2 rounded-lg hover:border-[#8B5E34] hover:text-[#8B5E34] transition-colors"
+              >
+                <span id="copy-btn-text">COPY CODE</span>
+              </button>
+            </div>
+            
 
 
             {/* Color Selector */}

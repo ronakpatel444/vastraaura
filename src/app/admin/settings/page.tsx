@@ -21,7 +21,6 @@ export default function AdminSettingsPage() {
     standardCourierFee: 100,
     blueDartCourierFee: 120,
     adPackage24hPrice: 2000,
-    adPackage24hPrice: 2000,
     adPackage3dPrice: 5000,
     adPackage7dPrice: 10000,
     autoShipToAdminAddress: false,

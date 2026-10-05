@@ -52,7 +52,7 @@ export default function AdminCustomersPage() {
   }, [customers, searchQuery]);
 
   return (
-    <div className="p-4 md:p-10 max-w-7xl mx-auto">
+    <div className="p-4 md:p-10 max-w-7xl mx-auto w-full overflow-hidden">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Customers</h1>
         <p className="text-sm md:text-base text-gray-500">View and manage your registered customers.</p>
@@ -60,7 +60,7 @@ export default function AdminCustomersPage() {
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+        <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-stretch sm:items-center bg-gray-50 gap-4">
           <div className="relative w-full sm:w-auto">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 

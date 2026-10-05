@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { CldUploadWidget } from 'next-cloudinary';
 import { useStore, AdminProduct, ProductSize } from '@/store/useStore';
 
@@ -218,14 +218,52 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 block">Additional Images</label>
-                  <textarea 
-                    value={formData.images}
-                    onChange={(e) => setFormData({...formData, images: e.target.value})}
-                    placeholder="Enter image URLs separated by commas"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black resize-none"
-                    rows={2}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Example: /images/1.jpg, /images/2.jpg</p>
+                  
+                  {formData.images ? (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.images.split(',').map(img => img.trim()).filter(img => img !== '').map((img, idx) => (
+                        <div key={idx} className="relative w-16 h-20 rounded-md overflow-hidden border border-gray-200 group">
+                          <img src={img} alt={`Additional ${idx}`} className="w-full h-full object-cover" />
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const currentImages = formData.images.split(',').map(i => i.trim()).filter(i => i !== '');
+                              currentImages.splice(idx, 1);
+                              setFormData(prev => ({ ...prev, images: currentImages.join(', ') }));
+                            }}
+                            className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <CldUploadWidget 
+                    uploadPreset="vastra_unsigned"
+                    options={{ multiple: true }}
+                    onSuccess={(result: any) => {
+                      const url = result?.info?.secure_url;
+                      if (url) {
+                        setFormData(prev => {
+                          const existing = prev.images ? prev.images.split(',').map(i => i.trim()).filter(i => i !== '') : [];
+                          return { ...prev, images: [...existing, url].join(', ') };
+                        });
+                      }
+                    }}
+                  >
+                    {({ open }) => (
+                      <button 
+                        type="button"
+                        onClick={() => open()}
+                        className="w-full border-2 border-dashed border-gray-300 rounded-lg py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-black hover:border-gray-400 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" /> Upload Additional Images
+                      </button>
+                    )}
+                  </CldUploadWidget>
+                  <p className="text-xs text-gray-500 mt-1">You can upload multiple images at once.</p>
                 </div>
 
                 <div className="space-y-2">

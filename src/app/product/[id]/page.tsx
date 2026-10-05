@@ -137,6 +137,7 @@ export default function ProductDetailPage() {
                 alt={product.name}
                 fill
                 priority
+                unoptimized
                 className="object-cover object-top cursor-zoom-in transition-transform duration-700 ease-out hover:scale-[1.02]"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
@@ -172,6 +173,7 @@ export default function ProductDetailPage() {
                       src={img} 
                       alt={`Thumbnail ${idx}`}
                       fill
+                      unoptimized
                       loading="lazy"
                       className="object-cover object-center"
                       sizes="96px"

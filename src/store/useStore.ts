@@ -209,30 +209,41 @@ export const useStore = create<StoreState>((set) => ({
   adminProducts: [],
   
   fetchProducts: async () => {
-    try {
-      const res = await fetch('/api/products', { cache: 'no-store' });
-      if (!res.ok) {
-        console.error(`Failed to fetch products: ${res.status} ${res.statusText}`);
-        return;
-      }
-      
-      const text = await res.text();
-      if (!text) return;
-      
+    let retries = 3;
+    while (retries > 0) {
       try {
-        const data = JSON.parse(text);
-        if (Array.isArray(data)) {
-          const mappedProducts = data.map((p: any) => ({
-            ...p,
-            id: p._id,
-          }));
-          set({ adminProducts: mappedProducts });
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (!res.ok) {
+          console.error(`Failed to fetch products: ${res.status} ${res.statusText}`);
+          retries--;
+          if (retries === 0) return;
+          await new Promise(r => setTimeout(r, 1000)); // wait 1s before retry
+          continue;
         }
-      } catch (e) {
-        console.error('Invalid JSON from /api/products:', text.substring(0, 100));
+        
+        const text = await res.text();
+        if (!text) return;
+        
+        try {
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) {
+            const mappedProducts = data.map((p: any) => ({
+              ...p,
+              id: p._id,
+            }));
+            set({ adminProducts: mappedProducts });
+            return; // Success, exit the loop
+          }
+        } catch (e) {
+          console.error('Invalid JSON from /api/products:', text.substring(0, 100));
+          return; // Don't retry on invalid JSON
+        }
+      } catch (err) {
+        console.error('Failed to fetch products', err);
+        retries--;
+        if (retries === 0) return;
+        await new Promise(r => setTimeout(r, 1000));
       }
-    } catch (err) {
-      console.error('Failed to fetch products', err);
     }
   },
 

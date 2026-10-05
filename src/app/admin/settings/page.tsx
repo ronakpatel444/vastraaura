@@ -21,8 +21,10 @@ export default function AdminSettingsPage() {
     standardCourierFee: 100,
     blueDartCourierFee: 120,
     adPackage24hPrice: 2000,
+    adPackage24hPrice: 2000,
     adPackage3dPrice: 5000,
     adPackage7dPrice: 10000,
+    autoShipToAdminAddress: false,
   });
 
   const { fetchSettings } = useStore();
@@ -47,6 +49,7 @@ export default function AdminSettingsPage() {
             adPackage24hPrice: data.adPackage24hPrice ?? 2000,
             adPackage3dPrice: data.adPackage3dPrice ?? 5000,
             adPackage7dPrice: data.adPackage7dPrice ?? 10000,
+            autoShipToAdminAddress: data.autoShipToAdminAddress ?? false,
           });
         }
       } catch (error) {
@@ -59,7 +62,14 @@ export default function AdminSettingsPage() {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+      return;
+    }
+
     setFormData(prev => ({ 
       ...prev, 
       [name]: ['flatShippingRate', 'freeShippingThreshold', 'handlingChargeValue', 'standardCourierFee', 'blueDartCourierFee', 'adPackage24hPrice', 'adPackage3dPrice', 'adPackage7dPrice'].includes(name) 
@@ -264,6 +274,43 @@ export default function AdminSettingsPage() {
               Fixed rate for Blue Dart Air priority delivery per parcel.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* ADMIN AUTO-SHIPPING SETTINGS */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Truck size={20} className="text-indigo-600" />
+            Admin Auto-Shipping Settings
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Configure automated shipping for orders fulfilled by Admin.
+          </p>
+        </div>
+        <div className="p-6">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <div className="relative flex items-center mt-0.5">
+              <input
+                type="checkbox"
+                name="autoShipToAdminAddress"
+                checked={formData.autoShipToAdminAddress}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <div className={`w-11 h-6 rounded-full transition-colors ${formData.autoShipToAdminAddress ? 'bg-black' : 'bg-gray-200'}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.autoShipToAdminAddress ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </div>
+            <div>
+              <span className="block text-sm font-semibold text-gray-900 group-hover:text-black">
+                Ship Admin Orders to Admin Address
+              </span>
+              <span className="block text-xs text-gray-500 mt-1">
+                If enabled, physical shipments for admin-sold products will be sent to the Admin's configured address.
+                Shipping details won't be sent to third-party shipping APIs since it is handled automatically from outside.
+              </span>
+            </div>
+          </label>
         </div>
       </div>
 

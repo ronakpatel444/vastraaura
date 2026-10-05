@@ -124,7 +124,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-6">
+    <div ref={containerRef} className="min-h-screen bg-background pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-6">
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
           

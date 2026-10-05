@@ -50,7 +50,7 @@ function ShopContent() {
   }, [activeCategory]);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-6">
+    <div ref={containerRef} className="min-h-screen bg-background pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-6">
       <div className="container mx-auto shop-header">
         <h1 className="text-4xl md:text-5xl lg:text-7xl font-serif text-center mb-10 md:mb-16 tracking-wide">SHOP</h1>
 
@@ -156,8 +156,8 @@ function ShopContent() {
                   
                   {/* Colors display */}
                   {product.colors && product.colors.length > 1 && (
-                    <div className="flex items-center gap-3 pt-3 border-t border-gray-200/50 w-full justify-center">
-                      <div className="flex gap-1">
+                    <div className="flex flex-col xl:flex-row items-center gap-1.5 md:gap-3 pt-3 border-t border-gray-200/50 w-full justify-center">
+                      <div className="flex items-center">
                         {product.colors.slice(0, 4).map((color, i) => {
                           const specificColorDetail = product.colorDetails?.find(c => c.name === color);
                           const colorImage = specificColorDetail?.image;
@@ -165,19 +165,25 @@ function ShopContent() {
                           return (
                             <div 
                               key={i} 
-                              className="w-8 h-8 rounded-full border border-gray-300 shadow-sm bg-cover bg-center transition-transform hover:scale-110"
-                              style={colorImage ? { backgroundImage: `url(${colorImage})` } : { backgroundColor: color.trim().toLowerCase().replace(' ', '') }}
+                              className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white shadow-sm bg-cover bg-center relative flex-shrink-0 ${i > 0 ? '-ml-2' : ''}`}
+                              style={{ 
+                                ...(colorImage ? { backgroundImage: `url(${colorImage})` } : { backgroundColor: color.trim().toLowerCase().replace(' ', '') }),
+                                zIndex: 10 - i 
+                              }}
                               title={color}
                             />
                           );
                         })}
                         {product.colors.length > 4 && (
-                          <div className="w-4 h-4 rounded-full bg-gray-200 text-[8px] flex items-center justify-center text-gray-600">
+                          <div 
+                            className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white shadow-sm bg-gray-100 text-[9px] flex items-center justify-center text-gray-600 relative -ml-2 font-medium flex-shrink-0"
+                            style={{ zIndex: 5 }}
+                          >
                             +{product.colors.length - 4}
                           </div>
                         )}
                       </div>
-                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-medium">
+                      <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-gray-500 font-medium whitespace-nowrap">
                         {product.colors.length} {product.colors.length === 1 ? 'COLOR' : 'COLORS'}
                       </span>
                     </div>

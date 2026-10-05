@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { CldUploadWidget } from 'next-cloudinary';
 import { useStore, AdminProduct, ProductSize } from '@/store/useStore';
 
 interface ProductFormDrawerProps {
@@ -71,34 +72,6 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
       });
     }
   }, [productToEdit, isOpen]);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    
-    const filename = `product-${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-    const formDataObj = new FormData();
-    formDataObj.append('file', file);
-    formDataObj.append('filename', filename);
-
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataObj,
-      });
-
-      if (!res.ok) throw new Error('Upload failed');
-      
-      setFormData(prev => ({ ...prev, image: `/images/${filename}` }));
-    } catch (err) {
-      console.error(err);
-      alert('Failed to upload image. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSizeChange = (sizeName: string, value: string) => {
     const num = parseInt(value) || 0;
@@ -211,34 +184,36 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                 {/* Image Upload Area */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Product Image</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative overflow-hidden group">
-                    {formData.image && formData.image !== '/images/products/product-1/main.jpg' ? (
-                      <div className="w-full h-40 relative rounded-lg overflow-hidden mb-2">
-                        <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-white text-sm font-medium">Change Image</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-full h-40 bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
-                        <span className="text-gray-400 mb-2">No image selected</span>
-                        <span className="text-black text-sm font-medium underline">Click to upload</span>
+                  <CldUploadWidget 
+                    uploadPreset="vastra_unsigned"
+                    onSuccess={(result: any) => {
+                      const url = result?.info?.secure_url;
+                      if (url) {
+                        setFormData(prev => ({ ...prev, image: url }));
+                      }
+                    }}
+                  >
+                    {({ open }) => (
+                      <div 
+                        onClick={() => open()}
+                        className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative overflow-hidden group cursor-pointer"
+                      >
+                        {formData.image && formData.image !== '/images/products/product-1/main.jpg' ? (
+                          <div className="w-full h-40 relative rounded-lg overflow-hidden mb-2">
+                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <span className="text-white text-sm font-medium">Change Image</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-40 bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
+                            <span className="text-gray-400 mb-2">No image selected</span>
+                            <span className="text-black text-sm font-medium underline">Click to upload via Cloudinary</span>
+                          </div>
+                        )}
                       </div>
                     )}
-                    
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={isUploading}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                    />
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <span className="text-black font-medium text-sm animate-pulse">Uploading...</span>
-                      </div>
-                    )}
-                  </div>
+                  </CldUploadWidget>
                 </div>
 
                 <div className="space-y-2">

@@ -16,6 +16,7 @@ export interface ISettings extends Document {
   adPackage24hPrice: number;
   adPackage3dPrice: number;
   adPackage7dPrice: number;
+  autoShipToAdminAddress: boolean;
 }
 
 const SettingsSchema = new Schema(
@@ -42,6 +43,7 @@ const SettingsSchema = new Schema(
     adPackage24hPrice: { type: Number, default: 2000 },
     adPackage3dPrice: { type: Number, default: 5000 },
     adPackage7dPrice: { type: Number, default: 10000 },
+    autoShipToAdminAddress: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

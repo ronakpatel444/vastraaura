@@ -50,8 +50,8 @@ export default function Navbar() {
       </div>
 
       <motion.header
-        className={`fixed top-8 sm:top-8 left-0 right-0 z-50 transition-colors duration-500 ${
-          isScrolled || isMenuOpen ? 'bg-background/95 text-foreground shadow-sm' : 'bg-transparent text-foreground'
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled || isMenuOpen ? 'top-0 bg-background/95 text-foreground shadow-sm' : 'top-8 sm:top-8 bg-transparent text-foreground'
         }`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}

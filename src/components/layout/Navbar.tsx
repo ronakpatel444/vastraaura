@@ -27,7 +27,7 @@ export default function Navbar() {
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-2 px-4 border-b border-white/10 relative z-50">
+      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-2 px-4 border-b border-white/10 relative z-[60]">
         <div className="container mx-auto flex justify-between items-center text-center">
           <div className="hidden md:flex items-center gap-2 text-neutral-400 text-[11px]">
             <span>✨ Authentic Handcrafted Luxury Fashion</span>

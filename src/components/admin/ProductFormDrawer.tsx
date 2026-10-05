@@ -49,7 +49,11 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
         image: productToEdit.image,
         images: productToEdit.images ? productToEdit.images.join(', ') : '',
         fabric: productToEdit.fabric || '',
-        description: productToEdit.description || '',
+        description: productToEdit.description 
+          ? (/<[a-z][\s\S]*>/i.test(productToEdit.description) 
+              ? productToEdit.description 
+              : productToEdit.description.replace(/\n/g, '<br />'))
+          : '',
         originalSellerLink: productToEdit.originalSellerLink || '',
         colors: productToEdit.colors ? productToEdit.colors.join(', ') : '',
         colorDetails: productToEdit.colorDetails ? [...productToEdit.colorDetails] : [],

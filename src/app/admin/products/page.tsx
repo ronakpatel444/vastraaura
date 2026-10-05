@@ -85,7 +85,7 @@ export default function AdminProductsPage() {
                 <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 flex items-center gap-4">
                     <div className="w-12 h-16 relative rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                      <Image src={product.image} alt={product.name} fill unoptimized className="object-cover" />
+                      <Image src={product.image || 'https://via.placeholder.com/150'} alt={product.name || 'Product'} fill unoptimized className="object-cover" />
                     </div>
                     <span className="font-medium text-gray-900 line-clamp-2 max-w-[200px]">{product.name}</span>
                   </td>

@@ -423,7 +423,13 @@ export default function ProductDetailPage() {
               <h3 className="text-sm uppercase tracking-widest font-medium mb-4">Product Details</h3>
               <div 
                 className="text-sm opacity-80 leading-relaxed mb-4 prose prose-sm prose-p:mb-2 prose-a:text-accent prose-strong:font-bold max-w-none"
-                dangerouslySetInnerHTML={{ __html: product.description || 'A masterpiece of traditional craftsmanship.' }}
+                dangerouslySetInnerHTML={{ 
+                  __html: product.description 
+                    ? (/<[a-z][\s\S]*>/i.test(product.description) 
+                        ? product.description 
+                        : product.description.replace(/\n/g, '<br />'))
+                    : 'A masterpiece of traditional craftsmanship.'
+                }}
               />
               {product.fabric && (
                 <p className="text-sm font-medium tracking-wide mt-4">

@@ -5,10 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
 import { CldUploadWidget } from 'next-cloudinary';
 import { useStore, AdminProduct, ProductSize } from '@/store/useStore';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 interface ProductFormDrawerProps {
   isOpen: boolean;
@@ -406,14 +402,13 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Description</label>
-                  <div className="bg-white rounded-lg">
-                    <ReactQuill 
-                      theme="snow"
-                      value={formData.description}
-                      onChange={(content) => setFormData({...formData, description: content})}
-                      className="bg-white"
-                    />
-                  </div>
+                  <textarea 
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black h-32" 
+                    placeholder="Enter product description here. Normal line breaks (Enter) will be preserved automatically."
+                  />
                 </div>
 
                 <div className="space-y-2">

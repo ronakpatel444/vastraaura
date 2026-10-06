@@ -58,6 +58,7 @@ import SearchOverlay from "@/components/layout/SearchOverlay";
 import StoreInitializer from "@/components/providers/StoreInitializer";
 import FacebookPixel from "@/components/providers/FacebookPixel";
 import { Suspense } from "react";
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export default function RootLayout({
   children,
@@ -96,6 +97,7 @@ export default function RootLayout({
           <main className="min-h-screen">{children}</main>
           <Footer />
         </SmoothScrollProvider>
+        <GoogleAnalytics gaId="G-XXXXXXXXXX" />
       </body>
     </html>
   );

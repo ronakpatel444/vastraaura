@@ -1,12 +1,11 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
-import { Heart, Search, Percent } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 export default function MegaDiscount() {
-  const { setCursorType, setCartOpen, addToCart, adminProducts } = useStore();
+  const { setCartOpen, addToCart, adminProducts } = useStore();
   
   const parsePrice = (priceStr?: string) => {
     if (!priceStr) return 0;
@@ -33,149 +32,93 @@ export default function MegaDiscount() {
     return null;
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 40 },
-    show: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { type: "spring", stiffness: 60, damping: 15 }
-    }
-  };
-
   return (
-    <section className="relative z-20 py-20 md:py-32 px-4 md:px-6 bg-[#0a0a0a] text-white overflow-hidden">
-      {/* Background abstract shapes for premium look */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-red-600 blur-[150px]" 
-        />
-        <motion.div 
-          animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.25, 0.1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-orange-600 blur-[150px]" 
-        />
-      </div>
-
-      <div className="container mx-auto relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8"
-        >
-          <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-4 text-red-500">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}>
-                <Percent className="w-5 h-5" />
-              </motion.div>
-              <span className="text-sm tracking-[0.3em] uppercase font-bold">Mega Clearance</span>
-            </div>
-            <h2 className="text-4xl md:text-6xl font-serif tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">
-              Half Price Edit
+    <section className="relative z-20 py-20 px-4 md:px-8 bg-[#F5F2EB]">
+      <div className="max-w-[1400px] mx-auto border-t border-accent/20 pt-20">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
+          <div className="text-left max-w-xl">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-accent mb-3 font-semibold block">
+              Exclusive Opportunity
+            </span>
+            <h2 className="text-3xl md:text-5xl font-serif text-foreground mb-4">
+              The Half Price Edit
             </h2>
-            <p className="mt-4 text-gray-400 max-w-md text-sm md:text-base">
-              Discover our exclusive selection of premium pieces at 50% off or more. Limited time, limited stock.
+            <p className="text-sm text-foreground/60 font-light leading-relaxed">
+              Curated premium pieces now available at exceptional value. 
+              Discover our signature designs at half the price, for a limited time only.
             </p>
           </div>
           <Link 
             href="/shop?sale=true" 
-            className="group flex items-center gap-2 text-sm tracking-widest uppercase hover:text-red-400 transition-colors pb-1 border-b border-white/20 hover:border-red-400"
+            className="text-[10px] uppercase tracking-widest text-foreground border border-foreground px-6 py-3 hover:bg-foreground hover:text-background transition-colors whitespace-nowrap"
           >
-            Shop All Sale
-            <span className="transform transition-transform group-hover:translate-x-1">→</span>
+            Shop The Sale
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-        >
-          {discountedProducts.map((product, idx) => {
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {discountedProducts.map((product) => {
             const discount = getDiscountPercentage(product.price, product.originalPrice);
             return (
-              <motion.div 
-                variants={itemVariants as any}
-                whileHover={{ y: -10, transition: { duration: 0.3 } }}
+              <div 
                 key={product.id} 
-                className="group relative bg-white/5 border border-white/10 p-4 rounded-xl transition-colors duration-500 hover:bg-white/10 hover:shadow-[0_20px_40px_-15px_rgba(220,38,38,0.3)]"
-                onMouseEnter={() => setCursorType('VIEW')}
-                onMouseLeave={() => setCursorType('DEFAULT')}
+                className="group relative bg-white p-4 transition-all duration-300 hover:shadow-xl hover:shadow-accent/5 border border-transparent hover:border-accent/10"
               >
-                <div className="block relative aspect-[4/5] overflow-hidden rounded-lg mb-6">
+                <div className="block relative aspect-[4/5] overflow-hidden mb-4 bg-[#f8f8f8]">
                   <Link href={`/product/${product.id}`} className="absolute inset-0 z-10">
                     <span className="sr-only">View {product.name}</span>
                   </Link>
                   
                   {/* Primary Image */}
-                  <motion.div 
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                    className="absolute inset-0 bg-cover bg-center"
+                  <div 
+                    className="absolute inset-0 bg-cover bg-top transition-opacity duration-700 ease-in-out group-hover:opacity-0"
                     style={{ backgroundImage: `url(${product.image})` }}
                   />
                   
-                  {/* Discount Badge */}
-                  <motion.div 
-                    initial={{ scale: 0, rotate: -20 }}
-                    whileInView={{ scale: 1, rotate: -2 }}
-                    viewport={{ once: true }}
-                    transition={{ type: "spring", delay: 0.5 + (idx * 0.1) }}
-                    className="absolute top-3 left-3 z-20 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg"
-                  >
+                  {/* Secondary Image */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-top opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
+                    style={{ backgroundImage: `url(${product.images?.[0] || product.image})` }}
+                  />
+                  
+                  {/* Premium Discount Badge */}
+                  <div className="absolute top-3 left-3 z-20 bg-background text-accent border border-accent/20 text-[9px] uppercase tracking-widest px-3 py-1 font-medium">
                     {discount}% OFF
-                  </motion.div>
-
-                  {/* Action Buttons */}
-                  <div className="absolute bottom-4 left-4 right-4 flex justify-between gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out z-20">
-                    <button 
-                      onClick={(e) => { 
-                        e.preventDefault(); 
-                        addToCart({
-                          id: product.id, name: product.name, price: product.price,
-                          originalPrice: product.originalPrice, allowCOD: product.allowCOD,
-                          image: product.image, quantity: 1, size: 'M', color: product.colors?.[0] || 'N/A',
-                          originalSellerLink: product.originalSellerLink
-                        });
-                        setCartOpen(true); 
-                      }}
-                      className="flex-1 bg-white/90 backdrop-blur text-black py-2.5 text-xs font-bold uppercase tracking-wider rounded hover:bg-red-600 hover:text-white transition-colors text-center"
-                      onMouseEnter={() => setCursorType('DEFAULT')}
-                      onMouseLeave={() => setCursorType('VIEW')}
-                    >
-                      Quick Add
-                    </button>
                   </div>
                 </div>
                 
-                <div className="text-center">
-                  <Link href={`/product/${product.id}`} className="text-lg font-serif tracking-wide block mb-2 text-white group-hover:text-red-400 transition-colors truncate">
+                <div className="flex flex-col text-center">
+                  <Link href={`/product/${product.id}`} className="text-sm font-serif text-foreground mb-2 group-hover:text-accent transition-colors line-clamp-1">
                     {product.name}
                   </Link>
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-red-500 font-bold">{product.price}</span>
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <span className="text-xs font-semibold text-accent tracking-wider">{product.price}</span>
                     {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">{product.originalPrice}</span>
+                      <span className="text-[10px] text-foreground/40 line-through tracking-wider">{product.originalPrice}</span>
                     )}
                   </div>
+
+                  <button 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      addToCart({
+                        id: product.id, name: product.name, price: product.price,
+                        originalPrice: product.originalPrice, allowCOD: product.allowCOD,
+                        image: product.image, quantity: 1, size: 'M', color: product.colors?.[0] || 'N/A',
+                        originalSellerLink: product.originalSellerLink
+                      });
+                      setCartOpen(true); 
+                    }}
+                    className="w-full border border-foreground/10 text-foreground/70 py-2.5 text-[10px] uppercase tracking-widest font-semibold hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ShoppingBag className="w-3 h-3" />
+                    Add to Cart
+                  </button>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

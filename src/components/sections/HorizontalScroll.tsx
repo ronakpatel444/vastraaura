@@ -30,14 +30,17 @@ export default function HorizontalScroll() {
       
       const totalWidth = container.scrollWidth - window.innerWidth;
       
+      // If there aren't enough items to scroll, don't animate horizontally
+      if (totalWidth <= 0) return;
+      
       gsap.to(container, {
-        x: -totalWidth,
+        x: -(totalWidth + 100), // add a little padding to the end
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
           pin: true,
           scrub: 1,
-          end: () => `+=${totalWidth}`,
+          end: () => `+=${totalWidth + 100}`,
         }
       });
     }, sectionRef);

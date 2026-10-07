@@ -63,13 +63,13 @@ export default function BestSellers() {
                 {/* Primary Image */}
                 <div 
                   className="absolute inset-0 bg-cover bg-top transition-opacity duration-700 ease-in-out group-hover:opacity-0"
-                  style={{ backgroundImage: `url(${product.image})` }}
+                  style={{ backgroundImage: `url("${product.image}")` }}
                 />
                 
                 {/* Secondary Image */}
                 <div 
                   className="absolute inset-0 bg-cover bg-top opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
-                  style={{ backgroundImage: `url(${product.images?.[0] || product.image})` }}
+                  style={{ backgroundImage: `url("${product.images?.[0] || product.image}")` }}
                 />
               </div>
               

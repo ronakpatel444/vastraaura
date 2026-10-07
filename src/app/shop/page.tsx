@@ -99,11 +99,11 @@ function ShopContent() {
                 </Link>
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-in-out group-hover:opacity-0"
-                  style={{ backgroundImage: `url(${product.image})` }}
+                  style={{ backgroundImage: `url("${product.image}")` }}
                 />
                 <div 
                   className="absolute inset-0 bg-cover bg-center opacity-0 scale-105 transition-all duration-700 ease-in-out group-hover:opacity-100 group-hover:scale-100"
-                  style={{ backgroundImage: `url(${product.image})` }}
+                  style={{ backgroundImage: `url("${product.image}")` }}
                 />
                 
                 {product.status === 'Out of Stock' && (
@@ -167,7 +167,7 @@ function ShopContent() {
                               key={i} 
                               className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white shadow-sm bg-cover bg-center relative flex-shrink-0 ${i > 0 ? '-ml-2' : ''}`}
                               style={{ 
-                                ...(colorImage ? { backgroundImage: `url(${colorImage})` } : { backgroundColor: color.trim().toLowerCase().replace(' ', '') }),
+                                ...(colorImage ? { backgroundImage: `url("${colorImage}")` } : { backgroundColor: color.trim().toLowerCase().replace(' ', '') }),
                                 zIndex: 10 - i 
                               }}
                               title={color}

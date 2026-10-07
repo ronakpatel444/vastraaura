@@ -89,6 +89,8 @@ export default function Navbar() {
                 <Link href="/shop?category=chaniya-choli" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Chaniya Choli</Link>
                 <Link href="/shop?category=lehenga" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Lehenga</Link>
                 <Link href="/shop?category=kurta-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
+                <Link href="/shop?category=Short%20Kurtis" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Short Kurtis</Link>
+                <Link href="/shop?category=3%20Piece%20Suit" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">3 Piece Suit</Link>
                 <Link href="/shop?category=kids-wear" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
               </div>
             </div>
@@ -144,42 +146,55 @@ export default function Navbar() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: '-100%' }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '-100%' }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 bg-background pt-24 px-6 flex flex-col"
+            initial={{ opacity: 0, x: '-100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '-100%' }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-md pt-28 px-8 flex flex-col overflow-y-auto pb-10"
           >
-            <nav className="flex flex-col gap-6 text-3xl font-serif mt-10">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="flex flex-col gap-3">
-                  <Link href="/shop" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Shop</Link>
-                  <div className="flex flex-col gap-2 pl-4 border-l-2 border-foreground/10 text-xl text-gray-500 mt-2">
+            <nav className="flex flex-col gap-6 text-2xl md:text-3xl font-serif">
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+                <div className="flex flex-col gap-4">
+                  <Link href="/shop" onClick={() => setMenuOpen(false)} className="text-gray-900 hover:text-accent transition-colors">Shop</Link>
+                  <div className="flex flex-col gap-3 pl-6 border-l-[1px] border-accent/30 text-lg text-gray-600">
                     <Link href="/shop?category=saree" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Saree</Link>
                     <Link href="/shop?category=chaniya-choli" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Chaniya Choli</Link>
                     <Link href="/shop?category=lehenga" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Lehenga</Link>
                     <Link href="/shop?category=kurta-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kurta Sets</Link>
-                    <Link href="/shop?category=kids-wear" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kids Wear</Link>
+                    <Link href="/shop?category=Short%20Kurtis" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Short Kurtis</Link>
+                    <Link href="/shop?category=3%20Piece%20Suit" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">3 Piece Suit</Link>
                   </div>
                 </div>
               </motion.div>
               {['Collections', 'Combo', 'About', 'Journal'].map((item, i) => (
                 <motion.div
                   key={item}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: (i + 1) * 0.1 + 0.2 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: (i + 1) * 0.1 + 0.1 }}
                 >
                   <Link 
                     href={`/${item.toLowerCase()}`}
                     onClick={() => setMenuOpen(false)}
-                    className="hover:text-accent transition-colors"
+                    className="text-gray-900 hover:text-accent transition-colors"
                   >
                     {item}
                   </Link>
                 </motion.div>
               ))}
             </nav>
+            
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-auto pt-12"
+            >
+              <div className="flex flex-wrap items-center gap-6 text-xs font-sans tracking-widest text-gray-500 uppercase">
+                <Link href="/seller" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Seller Login</Link>
+                <Link href="/track-order" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Track Order</Link>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

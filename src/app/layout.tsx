@@ -97,7 +97,7 @@ export default function RootLayout({
           <main className="min-h-screen">{children}</main>
           <Footer />
         </SmoothScrollProvider>
-        <GoogleAnalytics gaId="G-XXXXXXXXXX" />
+        <GoogleAnalytics gaId='G-3757KDL5NJ' />
       </body>
     </html>
   );

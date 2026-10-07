@@ -22,6 +22,7 @@ export interface IProduct extends Document {
     name: string;
     stock: number;
   }[];
+  isPlatformShipping?: boolean;
 }
 
 const ProductSchema = new Schema<IProduct>(
@@ -57,6 +58,7 @@ const ProductSchema = new Schema<IProduct>(
       ],
       default: []
     },
+    isPlatformShipping: { type: Boolean, default: false },
   },
   {
     timestamps: true,

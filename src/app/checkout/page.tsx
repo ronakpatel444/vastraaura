@@ -42,16 +42,20 @@ export default function CheckoutPage() {
   });
 
   const subtotal = getCartTotal();
+  const totalCartItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   
   let discount = 0;
   if (appliedCoupon) {
-    cartItems.forEach(item => {
-      // Apply discount if coupon has no restrictions, or if item is in the restricted list
-      if (appliedCoupon.applicableProductIds.length === 0 || appliedCoupon.applicableProductIds.includes(item.id.toString())) {
-        const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
-        discount += (priceVal * item.quantity) * (appliedCoupon.discountPercent / 100);
-      }
-    });
+    const meetsMinQuantity = !appliedCoupon.minQuantity || totalCartItems >= appliedCoupon.minQuantity;
+    if (meetsMinQuantity) {
+      cartItems.forEach(item => {
+        // Apply discount if coupon has no restrictions, or if item is in the restricted list
+        if (appliedCoupon.applicableProductIds.length === 0 || appliedCoupon.applicableProductIds.includes(item.id.toString())) {
+          const priceVal = parseInt(item.price.replace(/[^\d]/g, ''), 10);
+          discount += (priceVal * item.quantity) * (appliedCoupon.discountPercent / 100);
+        }
+      });
+    }
   }
 
   // Dynamic Shipping Logic
@@ -115,7 +119,10 @@ export default function CheckoutPage() {
       const res = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponInput })
+        body: JSON.stringify({ 
+          code: couponInput,
+          cartCount: totalCartItems 
+        })
       });
       const data = await res.json();
       
@@ -470,16 +477,23 @@ export default function CheckoutPage() {
                 </button>
               </form>
             ) : (
-              <div className="flex items-center justify-between bg-gray-100 p-3 rounded mb-6 border border-gray-200">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded flex items-center gap-1">
-                    {appliedCoupon.code}
-                  </span>
-                  <span className="text-xs text-gray-500">(-{appliedCoupon.discountPercent}%)</span>
+              <div className="flex flex-col bg-gray-100 p-3 rounded mb-6 border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded flex items-center gap-1">
+                      {appliedCoupon.code}
+                    </span>
+                    <span className="text-xs text-gray-500">(-{appliedCoupon.discountPercent}%)</span>
+                  </div>
+                  <button type="button" onClick={handleRemoveCoupon} className="text-xs text-gray-500 hover:text-red-500 underline">
+                    Remove
+                  </button>
                 </div>
-                <button type="button" onClick={handleRemoveCoupon} className="text-xs text-gray-500 hover:text-red-500 underline">
-                  Remove
-                </button>
+                {appliedCoupon.minQuantity && appliedCoupon.minQuantity > 0 && totalCartItems < appliedCoupon.minQuantity && (
+                  <p className="text-xs text-amber-700 mt-2 font-medium bg-amber-50 p-2 rounded border border-amber-200">
+                    ⚠️ Requires minimum {appliedCoupon.minQuantity} items in bag (you have {totalCartItems}). Add {appliedCoupon.minQuantity - totalCartItems} more to get {appliedCoupon.discountPercent}% OFF!
+                  </p>
+                )}
               </div>
             )}
             

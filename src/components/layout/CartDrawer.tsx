@@ -1,7 +1,7 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -9,7 +9,14 @@ import Link from 'next/link';
 
 export default function CartDrawer() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isCartOpen, setCartOpen, setCursorType, cartItems, removeFromCart, updateQuantity, getCartTotal, getComboDiscount } = useStore();
+
+  const handleCheckout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCartOpen(false);
+    router.push('/checkout');
+  };
 
   if (pathname.startsWith('/admin')) {
     return null;
@@ -126,16 +133,16 @@ export default function CartDrawer() {
               </div>
               <p className="text-xs opacity-60 mb-6">Shipping & taxes calculated at checkout.</p>
               
-              <Link 
-                href="/checkout"
-                onClick={() => setCartOpen(false)}
+              <button 
+                type="button"
+                onClick={handleCheckout}
                 onMouseEnter={() => setCursorType('MAGNETIC')}
                 onMouseLeave={() => setCursorType('DEFAULT')}
-                className="w-full bg-foreground text-background py-4 flex items-center justify-center gap-2 group hover:bg-accent transition-colors"
+                className="w-full bg-foreground text-background py-4 flex items-center justify-center gap-2 group hover:bg-accent transition-colors cursor-pointer"
               >
                 <span className="text-sm tracking-widest uppercase">Checkout</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
             </div>
           </motion.div>
         </>

@@ -12,6 +12,7 @@ export default function AdminCouponsPage() {
     code: '',
     discountPercent: 10,
     applicableProductIds: [] as string[],
+    minQuantity: 0,
     isActive: true
   });
 
@@ -27,7 +28,7 @@ export default function AdminCouponsPage() {
     const success = await addCoupon(formData);
     if (success) {
       setIsAdding(false);
-      setFormData({ code: '', discountPercent: 10, applicableProductIds: [], isActive: true });
+      setFormData({ code: '', discountPercent: 10, applicableProductIds: [], minQuantity: 0, isActive: true });
     } else {
       alert('Failed to add coupon. Code might already exist.');
     }
@@ -63,7 +64,7 @@ export default function AdminCouponsPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 mb-8 shadow-sm">
           <h2 className="text-lg md:text-xl font-bold mb-6">Create New Coupon</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Coupon Code</label>
                 <input 
@@ -72,7 +73,7 @@ export default function AdminCouponsPage() {
                   value={formData.code}
                   onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 uppercase focus:ring-2 focus:ring-black focus:border-black"
-                  placeholder="e.g. FESTIVAL50"
+                  placeholder="e.g. WELCOME15"
                 />
               </div>
               <div className="space-y-2">
@@ -82,9 +83,21 @@ export default function AdminCouponsPage() {
                   type="number" 
                   min="1" max="100"
                   value={formData.discountPercent}
-                  onChange={(e) => setFormData({...formData, discountPercent: parseInt(e.target.value)})}
+                  onChange={(e) => setFormData({...formData, discountPercent: parseInt(e.target.value) || 0})}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black"
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Min Items / Quantity</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  value={formData.minQuantity || ''}
+                  onChange={(e) => setFormData({...formData, minQuantity: e.target.value ? parseInt(e.target.value) : 0})}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-black focus:border-black"
+                  placeholder="e.g. 3 (Optional)"
+                />
+                <p className="text-[11px] text-gray-400">Leave empty or 0 for any quantity</p>
               </div>
             </div>
 
@@ -122,6 +135,7 @@ export default function AdminCouponsPage() {
             <tr>
               <th className="px-6 py-4 font-medium">Code</th>
               <th className="px-6 py-4 font-medium">Discount</th>
+              <th className="px-6 py-4 font-medium">Min Items</th>
               <th className="px-6 py-4 font-medium">Applicable To</th>
               <th className="px-6 py-4 font-medium">Status</th>
               <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -130,7 +144,7 @@ export default function AdminCouponsPage() {
           <tbody className="divide-y divide-gray-200">
             {adminCoupons.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                   No coupons found.
                 </td>
               </tr>
@@ -139,6 +153,15 @@ export default function AdminCouponsPage() {
               <tr key={coupon.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-bold text-gray-900">{coupon.code}</td>
                 <td className="px-6 py-4">{coupon.discountPercent}%</td>
+                <td className="px-6 py-4 text-gray-600 font-medium">
+                  {coupon.minQuantity && coupon.minQuantity > 0 ? (
+                    <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-xs">
+                      Min {coupon.minQuantity} Items
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">No Minimum</span>
+                  )}
+                </td>
                 <td className="px-6 py-4 text-gray-500">
                   {coupon.applicableProductIds.length === 0 ? 'All Products' : `${coupon.applicableProductIds.length} Products`}
                 </td>

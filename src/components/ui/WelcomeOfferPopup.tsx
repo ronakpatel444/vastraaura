@@ -49,7 +49,7 @@ export default function WelcomeOfferPopup() {
   };
 
   const copyPromoCode = () => {
-    navigator.clipboard.writeText('ROYAL15');
+    navigator.clipboard.writeText('WELCOME15');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -120,7 +120,7 @@ export default function WelcomeOfferPopup() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-serif text-lg md:text-xl font-bold tracking-wider text-foreground">
-                    <span className="text-accent">🏷️</span> ROYAL15
+                    <span className="text-accent">🏷️</span> WELCOME15
                   </div>
                   <button 
                     onClick={copyPromoCode}

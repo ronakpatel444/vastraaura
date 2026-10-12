@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type CursorType = 'DEFAULT' | 'VIEW' | 'DRAG' | 'MAGNETIC';
 
@@ -44,6 +45,7 @@ export interface AdminCoupon {
   code: string;
   discountPercent: number;
   applicableProductIds: string[];
+  minQuantity?: number;
   isActive: boolean;
 }
 
@@ -103,22 +105,24 @@ interface StoreState {
   fetchSettings: () => Promise<void>;
 }
 
-export const useStore = create<StoreState>((set) => ({
-  cursorType: 'DEFAULT',
-  setCursorType: (type) => set({ cursorType: type }),
-  
-  isCartOpen: false,
-  setCartOpen: (isOpen) => set({ isCartOpen: isOpen }),
-  
-  isMenuOpen: false,
-  setMenuOpen: (isOpen) => set({ isMenuOpen: isOpen }),
-  
-  isSearchOpen: false,
-  setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
+export const useStore = create<StoreState>()(
+  persist(
+    (set) => ({
+      cursorType: 'DEFAULT',
+      setCursorType: (type) => set({ cursorType: type }),
+      
+      isCartOpen: false,
+      setCartOpen: (isOpen) => set({ isCartOpen: isOpen }),
+      
+      isMenuOpen: false,
+      setMenuOpen: (isOpen) => set({ isMenuOpen: isOpen }),
+      
+      isSearchOpen: false,
+      setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
 
-  cartItems: [],
-  appliedCoupon: null,
-  setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
+      cartItems: [],
+      appliedCoupon: null,
+      setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
   addToCart: (item) => set((state) => {
     const existingIndex = state.cartItems.findIndex(i => i.id === item.id && i.size === item.size && i.color === item.color);
     if (existingIndex >= 0) {
@@ -421,4 +425,12 @@ export const useStore = create<StoreState>((set) => ({
       console.error('Failed to fetch store settings', err);
     }
   }
-}));
+}),
+{
+  name: 'vastra-aura-cart-storage',
+  partialize: (state) => ({
+    cartItems: state.cartItems,
+    appliedCoupon: state.appliedCoupon
+  }),
+}
+));

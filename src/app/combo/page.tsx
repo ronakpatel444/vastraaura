@@ -7,7 +7,7 @@ import { Minus, Plus, Search } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function ComboPage() {
-  const { setCursorType, addToCart, setCartOpen, adminProducts, cartItems, updateQuantity, removeFromCart } = useStore();
+  const { setCursorType, addToCart, setCartOpen, adminProducts, cartItems, updateQuantity, removeFromCart, formatPrice } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -105,9 +105,9 @@ export default function ComboPage() {
                     </Link>
                   </h3>
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-sm text-gray-900 font-semibold">₹ {parseInt(product.price).toLocaleString('en-IN')}</span>
+                    <span className="text-sm text-gray-900 font-semibold">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-xs text-gray-400 line-through">₹ {parseInt(product.originalPrice).toLocaleString('en-IN')}</span>
+                      <span className="text-xs text-gray-400 line-through">{formatPrice(product.originalPrice)}</span>
                     )}
                   </div>
 

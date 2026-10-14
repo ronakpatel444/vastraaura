@@ -14,9 +14,25 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { COUNTRIES, COUNTRY_LIST } from '@/lib/currency';
+import { Globe } from 'lucide-react';
 
 export default function CheckoutPage() {
-  const { cartItems, setCartOpen, setCursorType, appliedCoupon, setAppliedCoupon, storeSettings, fetchSettings, getCartTotal, getComboDiscount } = useStore();
+  const { 
+    cartItems, 
+    setCartOpen, 
+    setCursorType, 
+    appliedCoupon, 
+    setAppliedCoupon, 
+    storeSettings, 
+    fetchSettings, 
+    getCartTotal, 
+    getComboDiscount,
+    currentCountry,
+    setCountry,
+    formatPrice,
+    getConvertedPrice
+  } = useStore();
   const router = useRouter();
   
   useEffect(() => {
@@ -58,17 +74,20 @@ export default function CheckoutPage() {
     }
   }
 
-  // Dynamic Shipping Logic
+  const isInternational = currentCountry !== 'IN';
+  const activeCountryConfig = COUNTRIES[currentCountry] || COUNTRIES.IN;
+
+  // Dynamic Shipping Logic (Free Express Shipping for International orders)
   const freeThreshold = storeSettings?.freeShippingThreshold ?? 999;
   const flatRate = storeSettings?.flatShippingRate ?? 100;
   
-  const shipping = (freeThreshold > 0 && subtotal > freeThreshold) ? 0 : flatRate;
+  const shipping = isInternational ? 0 : ((freeThreshold > 0 && subtotal > freeThreshold) ? 0 : flatRate);
 
   // Dynamic Handling Charge (0 = hidden, % or ₹ applied if > 0)
   const handlingType = storeSettings?.handlingChargeType || 'PERCENTAGE';
   const handlingValue = storeSettings?.handlingChargeValue || 0;
   let handlingFee = 0;
-  if (handlingValue > 0) {
+  if (!isInternational && handlingValue > 0) {
     if (handlingType === 'PERCENTAGE') {
       handlingFee = Math.round((subtotal - discount) * (handlingValue / 100));
     } else {
@@ -76,11 +95,13 @@ export default function CheckoutPage() {
     }
   }
 
-  const total = subtotal - discount + shipping + handlingFee;
+  const baseInrTotal = subtotal - discount + shipping + handlingFee;
+  const convertedTotal = getConvertedPrice(baseInrTotal);
+  const total = baseInrTotal; // for backward compatibility
 
   const isCODRestrictedByProduct = cartItems.some(item => item.allowCOD === false);
   const isCODRestrictedByCoupon = appliedCoupon !== null;
-  const isCODDisabled = isCODRestrictedByProduct || isCODRestrictedByCoupon;
+  const isCODDisabled = isCODRestrictedByProduct || isCODRestrictedByCoupon || isInternational;
 
   // Auto-switch to Online if COD is disabled
   if (isCODDisabled && paymentMethod === 'COD') {
@@ -88,7 +109,7 @@ export default function CheckoutPage() {
   }
 
   useEffect(() => {
-    if (formData.pincode.length === 6 && /^\d+$/.test(formData.pincode)) {
+    if (!isInternational && formData.pincode.length === 6 && /^\d+$/.test(formData.pincode)) {
       const fetchPincodeDetails = async () => {
         try {
           const response = await fetch(`https://api.postalpincode.in/pincode/${formData.pincode}`);
@@ -107,7 +128,7 @@ export default function CheckoutPage() {
       };
       fetchPincodeDetails();
     }
-  }, [formData.pincode]);
+  }, [formData.pincode, isInternational]);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,17 +184,18 @@ export default function CheckoutPage() {
         items: cartItems.map(item => ({
           productId: item.id.toString(),
           name: item.name,
-          price: item.price,
+          price: formatPrice(item.price),
           image: item.image,
           quantity: item.quantity,
           size: item.size || 'N/A',
           color: item.color || 'N/A',
           originalSellerLink: item.originalSellerLink
         })),
-        subtotal,
+        subtotal: isInternational ? convertedTotal.finalInrEquivalent : subtotal,
         discount,
         shippingFee: shipping,
-        totalAmount: total,
+        totalAmount: isInternational ? convertedTotal.finalInrEquivalent : total,
+        currency: isInternational ? activeCountryConfig.currency : 'INR',
         paymentMethod: paymentMethod,
         couponCode: appliedCoupon?.code,
         status: paymentMethod === 'ONLINE' ? 'Paid' : 'Pending'
@@ -290,7 +312,26 @@ export default function CheckoutPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-serif mb-4">Shipping Address</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-serif">Shipping Address</h2>
+                <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-neutral-100 rounded border border-neutral-200">
+                  <span>{activeCountryConfig.flag}</span>
+                  <span>{activeCountryConfig.name}</span>
+                  <span className="text-accent font-mono">({activeCountryConfig.currency})</span>
+                </div>
+              </div>
+
+              {isInternational && (
+                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded text-xs text-emerald-900 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    ✈️ Free International Express Priority Shipping (DHL / FedEx)
+                  </span>
+                  <span className="text-[10px] bg-emerald-200/70 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                    Tier-1 Verified
+                  </span>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <input 
                   type="text" 
@@ -312,7 +353,7 @@ export default function CheckoutPage() {
               <input 
                 type="text" 
                 required
-                placeholder="Address" 
+                placeholder="Street Address" 
                 className="w-full border border-gray-300 rounded p-3 text-sm mb-4 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
                 value={formData.address}
                 onChange={e => setFormData({...formData, address: e.target.value})}
@@ -321,10 +362,10 @@ export default function CheckoutPage() {
                 <input 
                   type="text" 
                   required
-                  placeholder="PIN Code" 
+                  placeholder={isInternational ? "ZIP / Postal" : "PIN Code"} 
                   className="w-full border border-gray-300 rounded p-3 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
                   value={formData.pincode}
-                  onChange={e => setFormData({...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
+                  onChange={e => setFormData({...formData, pincode: isInternational ? e.target.value : e.target.value.replace(/\D/g, '').slice(0, 6)})}
                 />
                 <input 
                   type="text" 
@@ -368,8 +409,12 @@ export default function CheckoutPage() {
                   className="accent-black w-4 h-4 cursor-pointer" 
                 />
                 <div className="flex-1">
-                  <label htmlFor="online" className="text-sm font-medium cursor-pointer block">Pay Online (Dummy Test)</label>
-                  <p className="text-xs text-gray-500 mt-1">Simulate online payment for testing.</p>
+                  <label htmlFor="online" className="text-sm font-medium cursor-pointer block">
+                    {isInternational ? `Pay Online (${activeCountryConfig.currency} / Cards)` : 'Pay Online (UPI / Card / Netbanking)'}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isInternational ? `Secure payment processed via Razorpay International in ${activeCountryConfig.currency}.` : 'Secure payment via Razorpay / UPI / Cards.'}
+                  </p>
                 </div>
               </div>
 
@@ -388,13 +433,17 @@ export default function CheckoutPage() {
                 />
                 <div className="flex-1">
                   <label htmlFor="cod" className={`text-sm font-medium ${isCODDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} block`}>Cash on Delivery (COD)</label>
-                  <p className="text-xs text-gray-500 mt-1">Pay with cash upon delivery.</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isInternational ? 'Only available within India' : 'Pay with cash upon doorstep delivery.'}
+                  </p>
                 </div>
               </div>
               
               {isCODDisabled && (
-                <div className="mt-3 p-3 bg-red-50 text-red-600 text-xs rounded border border-red-100">
-                  {isCODRestrictedByCoupon 
+                <div className="mt-3 p-3 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
+                  {isInternational 
+                    ? `🌍 Cash on Delivery is only available within India. For orders to ${activeCountryConfig.name}, please complete your order via secure online payment.`
+                    : isCODRestrictedByCoupon 
                     ? "Cash on Delivery is not available when a coupon code is applied."
                     : "Cash on Delivery is not available for some items in your cart."}
                 </div>
@@ -444,7 +493,7 @@ export default function CheckoutPage() {
                   </p>
                 </div>
                 <div className="text-sm font-medium">
-                  ₹{(parseInt(item.price.replace(/[^\d]/g, ''), 10) * item.quantity).toLocaleString('en-IN')}
+                  {formatPrice(parseInt(item.price.replace(/[^\d]/g, ''), 10) * item.quantity)}
                 </div>
               </div>
             ))}
@@ -453,7 +502,7 @@ export default function CheckoutPage() {
           {getComboDiscount() > 0 && (
             <div className="mb-6 bg-[#8A5A44]/10 border border-[#8A5A44]/20 p-4 rounded-sm flex justify-between items-center">
               <span className="text-sm font-semibold text-[#8A5A44]">✨ Combo Offer Applied!</span>
-              <span className="text-sm font-bold text-accent">You saved ₹{getComboDiscount().toLocaleString('en-IN')}</span>
+              <span className="text-sm font-bold text-accent">You saved {formatPrice(getComboDiscount())}</span>
             </div>
           )}
 
@@ -501,19 +550,21 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
+              <span className="font-medium">{formatPrice(subtotal)}</span>
             </div>
             
             {discount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>Discount</span>
-                <span className="font-medium">-₹{discount.toLocaleString('en-IN')}</span>
+                <span className="font-medium">-{formatPrice(discount)}</span>
               </div>
             )}
             
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Shipping</span>
-              <span className="font-medium">{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+              <span className="font-medium">
+                {isInternational ? 'Free Express Shipping' : (shipping === 0 ? 'Free' : `₹${shipping}`)}
+              </span>
             </div>
 
             {handlingFee > 0 && (
@@ -528,10 +579,17 @@ export default function CheckoutPage() {
 
           <div className="border-t border-gray-200 pt-6 flex justify-between items-end">
             <span className="text-base font-medium">Total</span>
-            <span className="text-2xl font-serif">
-              <span className="text-sm text-gray-500 mr-2">INR</span>
-              ₹{total.toLocaleString('en-IN')}
-            </span>
+            <div className="text-right">
+              <span className="text-2xl font-serif">
+                <span className="text-sm text-gray-500 mr-2">{isInternational ? activeCountryConfig.currency : 'INR'}</span>
+                {convertedTotal.formatted}
+              </span>
+              {isInternational && (
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  (Charged securely as ₹{convertedTotal.finalInrEquivalent.toLocaleString('en-IN')} via Card)
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

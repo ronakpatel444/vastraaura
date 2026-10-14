@@ -19,7 +19,7 @@ function ShopContent() {
   };
 
   const [activeCategory, setActiveCategory] = useState(() => getCategoryFromParam(categoryParam));
-  const { setCursorType, addToCart, setCartOpen, adminProducts, fetchProducts } = useStore();
+  const { setCursorType, addToCart, setCartOpen, adminProducts, fetchProducts, formatPrice } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -148,9 +148,9 @@ function ShopContent() {
                 </Link>
                 <div className="flex flex-col items-center gap-3">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-sm opacity-70 tracking-widest">{product.price}</span>
+                    <span className="text-sm opacity-70 tracking-widest">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-xs text-gray-400 line-through tracking-widest">{product.originalPrice}</span>
+                      <span className="text-xs text-gray-400 line-through tracking-widest">{formatPrice(product.originalPrice)}</span>
                     )}
                   </div>
                   

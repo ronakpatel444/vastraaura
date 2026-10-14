@@ -6,7 +6,7 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BestSellers() {
-  const { setCartOpen, addToCart, adminProducts, fetchProducts } = useStore();
+  const { setCartOpen, addToCart, adminProducts, fetchProducts, formatPrice } = useStore();
   
   useEffect(() => {
     if (adminProducts.length === 0) {
@@ -79,9 +79,9 @@ export default function BestSellers() {
                 </Link>
                 
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-semibold text-foreground tracking-wider">{product.price}</span>
+                  <span className="text-xs font-semibold text-foreground tracking-wider">{formatPrice(product.price)}</span>
                   {product.originalPrice && (
-                    <span className="text-[10px] text-foreground/40 line-through tracking-wider">{product.originalPrice}</span>
+                    <span className="text-[10px] text-foreground/40 line-through tracking-wider">{formatPrice(product.originalPrice)}</span>
                   )}
                 </div>
 

@@ -7,7 +7,7 @@ import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NewArrivalsSlider() {
-  const { setCartOpen, addToCart, adminProducts, fetchProducts, setCursorType } = useStore();
+  const { setCartOpen, addToCart, adminProducts, fetchProducts, setCursorType, formatPrice } = useStore();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function NewArrivalsSlider() {
                     {currentProduct.name}
                   </Link>
                   <div className="text-sm md:text-lg mb-4 md:mb-8 tracking-wider font-light">
-                    {currentProduct.price}
+                    {formatPrice(currentProduct.price)}
                   </div>
                   
                   <button 

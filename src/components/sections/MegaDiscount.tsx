@@ -5,7 +5,7 @@ import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MegaDiscount() {
-  const { setCartOpen, addToCart, adminProducts } = useStore();
+  const { setCartOpen, addToCart, adminProducts, formatPrice } = useStore();
   
   const parsePrice = (priceStr?: string) => {
     if (!priceStr) return 0;
@@ -92,9 +92,9 @@ export default function MegaDiscount() {
                     {product.name}
                   </Link>
                   <div className="flex items-center justify-center gap-3 mb-4">
-                    <span className="text-xs font-semibold text-accent tracking-wider">{product.price}</span>
+                    <span className="text-xs font-semibold text-accent tracking-wider">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-[10px] text-foreground/40 line-through tracking-wider">{product.originalPrice}</span>
+                      <span className="text-[10px] text-foreground/40 line-through tracking-wider">{formatPrice(product.originalPrice)}</span>
                     )}
                   </div>
 

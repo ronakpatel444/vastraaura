@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { convertPrice, formatCurrencyPrice, ConvertedPriceResult } from '@/lib/currency';
 
 type CursorType = 'DEFAULT' | 'VIEW' | 'DRAG' | 'MAGNETIC';
 
@@ -103,11 +104,19 @@ interface StoreState {
 
   storeSettings: any;
   fetchSettings: () => Promise<void>;
+
+  // Multi-Currency & Tier-1 Geo Pricing
+  currentCountry: string;
+  isCountryDetected: boolean;
+  setCountry: (countryCode: string) => void;
+  detectUserCountry: () => Promise<void>;
+  formatPrice: (price: string | number | undefined | null) => string;
+  getConvertedPrice: (price: string | number | undefined | null) => ConvertedPriceResult;
 }
 
 export const useStore = create<StoreState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       cursorType: 'DEFAULT',
       setCursorType: (type) => set({ cursorType: type }),
       
@@ -120,8 +129,8 @@ export const useStore = create<StoreState>()(
       isSearchOpen: false,
       setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
 
-      cartItems: [],
-      appliedCoupon: null,
+      cartItems: [] as CartItem[],
+      appliedCoupon: null as AdminCoupon | null,
       setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
   addToCart: (item) => set((state) => {
     const existingIndex = state.cartItems.findIndex(i => i.id === item.id && i.size === item.size && i.color === item.color);
@@ -143,7 +152,7 @@ export const useStore = create<StoreState>()(
     )
   })),
   getCartTotal: () => {
-    const state = useStore.getState();
+    const state = get();
     let total = 0;
     
     // Combo Logic arrays
@@ -178,7 +187,7 @@ export const useStore = create<StoreState>()(
     return total;
   },
   getComboDiscount: () => {
-    const state = useStore.getState();
+    const state = get();
     let discount = 0;
     const comboItemPrices: number[] = [];
     
@@ -424,13 +433,65 @@ export const useStore = create<StoreState>()(
     } catch (err) {
       console.error('Failed to fetch store settings', err);
     }
-  }
+  },
+
+  // Multi-Currency & Tier-1 Geo Pricing Implementation
+  currentCountry: 'IN',
+  isCountryDetected: false,
+  setCountry: (countryCode: string) => {
+    set({ currentCountry: countryCode, isCountryDetected: true });
+  },
+  detectUserCountry: async () => {
+    const state = get();
+    if (state.isCountryDetected) return;
+    try {
+      const res = await fetch('/api/geo');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.country) {
+          set({ currentCountry: data.country, isCountryDetected: true });
+          return;
+        }
+      }
+    } catch {
+      // Fallback to client browser timezone
+      try {
+        const tz = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || '';
+        let detected = 'IN';
+        if (tz.includes('America') || tz.includes('New_York') || tz.includes('Chicago') || tz.includes('Los_Angeles')) detected = 'US';
+        else if (tz.includes('London') || tz.includes('Europe/Belfast')) detected = 'GB';
+        else if (tz.includes('Toronto') || tz.includes('Vancouver')) detected = 'CA';
+        else if (tz.includes('Sydney') || tz.includes('Melbourne') || tz.includes('Australia')) detected = 'AU';
+        else if (tz.includes('Europe')) detected = 'EU';
+        else if (tz.includes('Dubai')) detected = 'AE';
+        
+        set({ currentCountry: detected, isCountryDetected: true });
+      } catch {
+        set({ isCountryDetected: true });
+      }
+    }
+  },
+  formatPrice: (price: string | number | undefined | null) => {
+    const state = get();
+    const mult = state.storeSettings?.enableInternationalPricing !== false 
+      ? state.storeSettings?.internationalMultiplier 
+      : 1.0;
+    return formatCurrencyPrice(price, state.currentCountry, mult);
+  },
+  getConvertedPrice: (price: string | number | undefined | null) => {
+    const state = get();
+    const mult = state.storeSettings?.enableInternationalPricing !== false 
+      ? state.storeSettings?.internationalMultiplier 
+      : 1.0;
+    return convertPrice(price, state.currentCountry, mult);
+  },
 }),
 {
   name: 'vastra-aura-cart-storage',
   partialize: (state) => ({
     cartItems: state.cartItems,
-    appliedCoupon: state.appliedCoupon
-  }),
+    appliedCoupon: state.appliedCoupon,
+    currentCountry: state.currentCountry,
+  }) as any,
 }
 ));

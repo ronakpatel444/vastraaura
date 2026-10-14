@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function SearchOverlay() {
-  const { isSearchOpen, setSearchOpen, setCursorType, adminProducts } = useStore();
+  const { isSearchOpen, setSearchOpen, setCursorType, adminProducts, formatPrice } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   const searchResults = adminProducts.filter(p => 
@@ -108,7 +108,7 @@ export default function SearchOverlay() {
                               <h4 className="font-serif text-lg group-hover:text-accent transition-colors line-clamp-2 leading-tight mb-2">
                                 {product.name}
                               </h4>
-                              <p className="text-sm tracking-widest opacity-70 mb-1">{product.price}</p>
+                              <p className="text-sm tracking-widest opacity-70 mb-1">{formatPrice(product.price)}</p>
                               <p className="text-xs uppercase tracking-widest text-accent">{product.category}</p>
                             </div>
                           </Link>

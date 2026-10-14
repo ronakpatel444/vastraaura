@@ -10,7 +10,7 @@ import Link from 'next/link';
 export default function CartDrawer() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isCartOpen, setCartOpen, setCursorType, cartItems, removeFromCart, updateQuantity, getCartTotal, getComboDiscount } = useStore();
+  const { isCartOpen, setCartOpen, setCursorType, cartItems, removeFromCart, updateQuantity, getCartTotal, getComboDiscount, formatPrice } = useStore();
 
   const handleCheckout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -87,7 +87,7 @@ export default function CartDrawer() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                      <span className="text-sm opacity-70 mb-2">{item.price}</span>
+                      <span className="text-sm opacity-70 mb-2">{formatPrice(item.price)}</span>
                       <div className="flex gap-2 text-xs uppercase tracking-widest opacity-60 mb-auto">
                         {item.size && <span>Size: {item.size}</span>}
                         {item.size && item.color && <span>|</span>}
@@ -121,14 +121,14 @@ export default function CartDrawer() {
               {getComboDiscount() > 0 && (
                 <div className="mb-4 bg-[#8A5A44]/10 border border-[#8A5A44]/20 p-3 flex justify-between items-center">
                   <span className="text-sm font-semibold text-[#8A5A44]">✨ Combo Offer Applied!</span>
-                  <span className="text-sm font-bold text-accent">You saved ₹{getComboDiscount().toLocaleString('en-IN')}</span>
+                  <span className="text-sm font-bold text-accent">You saved {formatPrice(getComboDiscount())}</span>
                 </div>
               )}
               
               <div className="flex justify-between mb-4">
                 <span className="text-sm uppercase tracking-widest">Subtotal</span>
                 <span className="font-medium">
-                  ₹{getCartTotal().toLocaleString('en-IN')}
+                  {formatPrice(getCartTotal())}
                 </span>
               </div>
               <p className="text-xs opacity-60 mb-6">Shipping & taxes calculated at checkout.</p>

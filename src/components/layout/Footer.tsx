@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import CurrencySelector from '@/components/common/CurrencySelector';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -116,8 +117,8 @@ export default function Footer() {
           <p className="text-xs text-gray-500">
             © {new Date().getFullYear()} Vastra Aura. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            <span className="text-xs text-gray-500">INR (₹)</span>
+          <div className="flex items-center gap-4">
+            <CurrencySelector />
             <span className="text-xs text-gray-500">EN</span>
           </div>
         </div>

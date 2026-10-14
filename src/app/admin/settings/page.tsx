@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { Percent, IndianRupee, Truck, ShieldCheck, Info, CheckCircle2 } from 'lucide-react';
+import { Percent, IndianRupee, Truck, ShieldCheck, Info, CheckCircle2, Globe } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -24,6 +24,8 @@ export default function AdminSettingsPage() {
     adPackage3dPrice: 5000,
     adPackage7dPrice: 10000,
     autoShipToAdminAddress: false,
+    internationalMultiplier: 2.5,
+    enableInternationalPricing: true,
   });
 
   const { fetchSettings } = useStore();
@@ -49,6 +51,8 @@ export default function AdminSettingsPage() {
             adPackage3dPrice: data.adPackage3dPrice ?? 5000,
             adPackage7dPrice: data.adPackage7dPrice ?? 10000,
             autoShipToAdminAddress: data.autoShipToAdminAddress ?? false,
+            internationalMultiplier: data.internationalMultiplier ?? 2.5,
+            enableInternationalPricing: data.enableInternationalPricing ?? true,
           });
         }
       } catch (error) {
@@ -71,7 +75,7 @@ export default function AdminSettingsPage() {
 
     setFormData(prev => ({ 
       ...prev, 
-      [name]: ['flatShippingRate', 'freeShippingThreshold', 'handlingChargeValue', 'standardCourierFee', 'blueDartCourierFee', 'adPackage24hPrice', 'adPackage3dPrice', 'adPackage7dPrice'].includes(name) 
+      [name]: ['flatShippingRate', 'freeShippingThreshold', 'handlingChargeValue', 'standardCourierFee', 'blueDartCourierFee', 'adPackage24hPrice', 'adPackage3dPrice', 'adPackage7dPrice', 'internationalMultiplier'].includes(name) 
         ? Number(value) 
         : value 
     }));
@@ -340,7 +344,96 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {/* 3. STORE DETAILS */}
+      {/* 3. TIER-1 INTERNATIONAL DYNAMIC PRICING */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Globe size={20} className="text-emerald-600" />
+              Tier-1 International Dynamic Pricing (US, UK, Canada, Australia)
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Automatically detect international visitors from Tier-1 countries and multiply selling price (2x to 3x) in their local currency.
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              name="enableInternationalPricing"
+              checked={formData.enableInternationalPricing}
+              onChange={handleChange}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            <span className="ml-3 text-xs font-semibold text-gray-700">
+              {formData.enableInternationalPricing ? 'Enabled' : 'Disabled'}
+            </span>
+          </label>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="max-w-md space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              International Multiplier (e.g. 2.0x, 2.5x, 3.0x)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                min="1.0"
+                max="5.0"
+                name="internationalMultiplier"
+                value={formData.internationalMultiplier}
+                onChange={handleChange}
+                disabled={!formData.enableInternationalPricing}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black font-semibold text-gray-900 disabled:opacity-50"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">X</span>
+            </div>
+            <p className="text-xs text-gray-500">
+              Recommended: <strong>2.5x</strong>. This absorbs international courier fees (DHL/FedEx ₹1,500+) and delivers premium profit margins.
+            </p>
+          </div>
+
+          {/* Live Calculation Preview */}
+          <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl text-xs text-emerald-950 space-y-2">
+            <div className="font-semibold text-emerald-900 flex items-center gap-1.5">
+              <CheckCircle2 size={16} className="text-emerald-600" />
+              Live Pricing Preview based on ₹1,499 Base Product:
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                <div className="text-[10px] text-gray-500 font-medium">🇮🇳 India (1.0x)</div>
+                <div className="text-base font-bold text-gray-900 mt-1">₹1,499</div>
+                <div className="text-[10px] text-gray-400">COD Available</div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                <div className="text-[10px] text-gray-500 font-medium">🇺🇸 USA ({formData.internationalMultiplier}x)</div>
+                <div className="text-base font-bold text-gray-900 mt-1">
+                  ${Math.round((1499 * formData.internationalMultiplier) / 87)}
+                </div>
+                <div className="text-[10px] text-gray-400">Prepaid Only</div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                <div className="text-[10px] text-gray-500 font-medium">🇬🇧 UK ({formData.internationalMultiplier}x)</div>
+                <div className="text-base font-bold text-gray-900 mt-1">
+                  £{Math.round((1499 * formData.internationalMultiplier) / 112)}
+                </div>
+                <div className="text-[10px] text-gray-400">Prepaid Only</div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                <div className="text-[10px] text-gray-500 font-medium">🇨🇦 Canada ({formData.internationalMultiplier}x)</div>
+                <div className="text-base font-bold text-gray-900 mt-1">
+                  CA${Math.round((1499 * formData.internationalMultiplier) / 64)}
+                </div>
+                <div className="text-[10px] text-gray-400">Prepaid Only</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. STORE DETAILS */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-200 bg-gray-50/50">
           <h2 className="text-lg font-bold text-gray-900">General Store Details</h2>

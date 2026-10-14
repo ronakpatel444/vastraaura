@@ -12,7 +12,7 @@ import Image from 'next/image';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const { adminProducts, fetchProducts, setCursorType, addToCart } = useStore();
+  const { adminProducts, fetchProducts, setCursorType, addToCart, formatPrice } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -225,10 +225,10 @@ export default function ProductDetailPage() {
             <div className="mb-8">
               <h1 className="text-3xl md:text-5xl font-serif mb-4">{product.name}</h1>
               <div className="flex items-center gap-4">
-                <p className="text-2xl font-serif text-accent">{product.price}</p>
+                <p className="text-2xl font-serif text-accent">{formatPrice(product.price)}</p>
                 {product.originalPrice && (
                   <p className="text-lg font-serif text-gray-400 line-through">
-                    {product.originalPrice}
+                    {formatPrice(product.originalPrice)}
                   </p>
                 )}
               </div>

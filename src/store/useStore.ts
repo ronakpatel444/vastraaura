@@ -491,7 +491,6 @@ export const useStore = create<StoreState>()(
   partialize: (state) => ({
     cartItems: state.cartItems,
     appliedCoupon: state.appliedCoupon,
-    currentCountry: state.currentCountry,
   }) as any,
 }
 ));

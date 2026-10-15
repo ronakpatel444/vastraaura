@@ -312,22 +312,12 @@ export default function CheckoutPage() {
             </section>
 
             <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-serif">Shipping Address</h2>
-                <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-neutral-100 rounded border border-neutral-200">
-                  <span>{activeCountryConfig.flag}</span>
-                  <span>{activeCountryConfig.name}</span>
-                  <span className="text-accent font-mono">({activeCountryConfig.currency})</span>
-                </div>
-              </div>
+              <h2 className="text-lg font-serif mb-4">Shipping Address</h2>
 
               {isInternational && (
                 <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded text-xs text-emerald-900 flex items-center justify-between">
                   <span className="flex items-center gap-1.5 font-medium">
                     ✈️ Free International Express Priority Shipping (DHL / FedEx)
-                  </span>
-                  <span className="text-[10px] bg-emerald-200/70 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                    Tier-1 Verified
                   </span>
                 </div>
               )}

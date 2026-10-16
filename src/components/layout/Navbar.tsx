@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { Search, ShoppingBag, Heart, User, Menu, X } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import CurrencySelector from '@/components/common/CurrencySelector';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -40,12 +39,12 @@ export default function Navbar() {
               Apply & Launch →
             </Link>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-neutral-400 shrink-0">
-            <Link href="/track-order" className="hidden sm:inline hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
-            <span className="hidden sm:inline">|</span>
-            <Link href="/seller" className="hidden md:inline hover:text-white transition-colors">Seller Login</Link>
-            <span className="hidden md:inline">|</span>
-            <CurrencySelector />
+          <div className="hidden md:flex items-center gap-3 text-[11px] text-neutral-400">
+            <Link href="/track-order" className="hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
+            <span>|</span>
+            <Link href="/seller" className="hover:text-white transition-colors">Seller Login</Link>
+            <span>|</span>
+            <Link href="/influencer" className="hover:text-white transition-colors">Influencer Portal</Link>
           </div>
         </div>
       </div>
@@ -190,9 +189,8 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="mt-auto pt-8"
+              className="mt-auto pt-12"
             >
-              <CurrencySelector variant="drawer" className="mb-6" />
               <div className="flex flex-wrap items-center gap-6 text-xs font-sans tracking-widest text-gray-500 uppercase">
                 <Link href="/seller" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Seller Login</Link>
                 <Link href="/track-order" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Track Order</Link>

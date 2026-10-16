@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Search, ShoppingBag, Heart, User, Menu, X } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import CurrencySelector from '@/components/common/CurrencySelector';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -27,24 +28,24 @@ export default function Navbar() {
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-2 px-4 border-b border-white/10 relative z-[60]">
-        <div className="container mx-auto flex justify-between items-center text-center">
-          <div className="hidden md:flex items-center gap-2 text-neutral-400 text-[11px]">
+      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-white/10 relative z-[60]">
+        <div className="container mx-auto flex justify-between items-center text-center gap-2">
+          <div className="hidden lg:flex items-center gap-2 text-neutral-400 text-[11px]">
             <span>✨ Authentic Handcrafted Luxury Fashion</span>
           </div>
-          <div className="flex items-center justify-center gap-2 mx-auto md:mx-0 flex-wrap">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mx-auto lg:mx-0 flex-wrap text-[10px] sm:text-xs">
             <span className="text-amber-400 font-semibold tracking-wider">SELL WITH US:</span>
-            <span>Register as a Designer Seller (₹3,999 One-Time)</span>
+            <span className="hidden sm:inline">Register as Designer Seller (₹3,999 One-Time)</span>
             <Link href="/seller/register" className="font-bold underline text-amber-300 hover:text-white transition-colors ml-1">
               Apply & Launch →
             </Link>
           </div>
-          <div className="hidden md:flex items-center gap-3 text-[11px] text-neutral-400">
-            <Link href="/track-order" className="hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
-            <span>|</span>
-            <Link href="/seller" className="hover:text-white transition-colors">Seller Login</Link>
-            <span>|</span>
-            <Link href="/influencer" className="hover:text-white transition-colors">Influencer Portal</Link>
+          <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-neutral-400 shrink-0">
+            <Link href="/track-order" className="hidden sm:inline hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
+            <span className="hidden sm:inline">|</span>
+            <Link href="/seller" className="hidden md:inline hover:text-white transition-colors">Seller Login</Link>
+            <span className="hidden md:inline">|</span>
+            <CurrencySelector />
           </div>
         </div>
       </div>
@@ -89,8 +90,8 @@ export default function Navbar() {
                 <Link href="/shop?category=chaniya-choli" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Chaniya Choli</Link>
                 <Link href="/shop?category=lehenga" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Lehenga</Link>
                 <Link href="/shop?category=kurta-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
-                <Link href="/shop?category=Short%20Kurtis" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Short Kurtis</Link>
-                <Link href="/shop?category=3%20Piece%20Suit" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">3 Piece Suit</Link>
+                <Link href="/shop?category=short-kurtis" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Short Kurtis</Link>
+                <Link href="/shop?category=3-piece-suit" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">3 Piece Suit</Link>
                 <Link href="/shop?category=kids-wear" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
               </div>
             </div>
@@ -161,8 +162,9 @@ export default function Navbar() {
                     <Link href="/shop?category=chaniya-choli" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Chaniya Choli</Link>
                     <Link href="/shop?category=lehenga" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Lehenga</Link>
                     <Link href="/shop?category=kurta-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kurta Sets</Link>
-                    <Link href="/shop?category=Short%20Kurtis" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Short Kurtis</Link>
-                    <Link href="/shop?category=3%20Piece%20Suit" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">3 Piece Suit</Link>
+                    <Link href="/shop?category=short-kurtis" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Short Kurtis</Link>
+                    <Link href="/shop?category=3-piece-suit" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">3 Piece Suit</Link>
+                    <Link href="/shop?category=kids-wear" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kids Wear</Link>
                   </div>
                 </div>
               </motion.div>
@@ -188,8 +190,9 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="mt-auto pt-12"
+              className="mt-auto pt-8"
             >
+              <CurrencySelector variant="drawer" className="mb-6" />
               <div className="flex flex-wrap items-center gap-6 text-xs font-sans tracking-widest text-gray-500 uppercase">
                 <Link href="/seller" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Seller Login</Link>
                 <Link href="/track-order" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Track Order</Link>

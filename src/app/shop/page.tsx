@@ -7,15 +7,51 @@ import { Heart, Search, Filter } from 'lucide-react';
 import gsap from 'gsap';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-const categories = ['All', 'Saree', 'Chaniya Choli', 'Lehenga', 'Kurta Sets', 'Kids Wear', 'Casual'];
+const categories = [
+  'All',
+  'Saree',
+  'Chaniya Choli',
+  'Lehenga',
+  'Kurta Sets',
+  'Short Kurtis',
+  '3 Piece Suit',
+  'Kids Wear',
+  'Casual',
+];
 
 function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryParam = searchParams.get('category');
   
-  const getCategoryFromParam = (param: string | null) => {
-    return categories.find(c => c.toLowerCase().replace(/\s+/g, '-') === param) || 'All';
+  const getCategoryFromParam = (param: string | null): string => {
+    if (!param) return 'All';
+    const clean = decodeURIComponent(param).trim().toLowerCase();
+
+    // Direct alias mappings for all common forms
+    if (['3-piece-suit', '3-piece-suits', '3 piece suit', '3 piece suits', '3-piece', '3 piece', '3-pics', '3-pis', '3pics', '3 pis', '3 pics'].includes(clean)) {
+      return '3 Piece Suit';
+    }
+    if (['short-kurtis', 'short kurtis', 'short-kurti', 'short kurti', 'shortkurtis'].includes(clean)) {
+      return 'Short Kurtis';
+    }
+    if (['kurta-sets', 'kurta sets', 'kurta-set', 'kurta set'].includes(clean)) {
+      return 'Kurta Sets';
+    }
+    if (['chaniya-choli', 'chaniya choli'].includes(clean)) {
+      return 'Chaniya Choli';
+    }
+    if (['kids-wear', 'kids wear', 'kids'].includes(clean)) {
+      return 'Kids Wear';
+    }
+
+    const found = categories.find(c => {
+      const cLower = c.toLowerCase();
+      const cSlug = cLower.replace(/\s+/g, '-');
+      return cLower === clean || cSlug === clean;
+    });
+
+    return found || 'All';
   };
 
   const [activeCategory, setActiveCategory] = useState(() => getCategoryFromParam(categoryParam));
@@ -28,7 +64,21 @@ function ShopContent() {
 
   const filteredProducts = activeCategory === 'All' 
     ? adminProducts.filter(p => p.category?.toLowerCase() !== 'combo')
-    : adminProducts.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
+    : adminProducts.filter(p => {
+        const cat = (p.category || '').trim().toLowerCase();
+        const target = activeCategory.toLowerCase();
+        
+        if (target === '3 piece suit') {
+          return cat === '3 piece suit' || cat === '3 piece suits' || cat === '3 pis suit' || cat.includes('3 piece') || cat.includes('3 pis') || cat.includes('3 pics');
+        }
+        if (target === 'short kurtis') {
+          return cat === 'short kurtis' || cat === 'short kurti' || cat.includes('short kurti');
+        }
+        if (target === 'kurta sets') {
+          return cat === 'kurta sets' || cat === 'kurta set';
+        }
+        return cat === target;
+      });
 
   useEffect(() => {
     setActiveCategory(getCategoryFromParam(categoryParam));
@@ -85,7 +135,22 @@ function ShopContent() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-12">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 px-4">
+            <p className="text-2xl font-serif mb-2">No products found in {activeCategory}</p>
+            <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">We are currently curating new exclusive designs for this collection. Please check back shortly or browse other collections.</p>
+            <button 
+              onClick={() => {
+                setActiveCategory('All');
+                router.push('/shop', { scroll: false });
+              }}
+              className="px-6 py-2.5 bg-black text-white text-xs uppercase tracking-widest hover:bg-neutral-800 transition-colors"
+            >
+              View All Products
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-12">
           {filteredProducts.map((product) => (
             <div 
               key={product.id} 
@@ -192,7 +257,8 @@ function ShopContent() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -28,6 +28,18 @@ const collections = [
     link: '/shop?category=kurta-sets'
   },
   {
+    id: '3-piece-suit',
+    title: '3 Piece Suit',
+    image: '/images/3 Pis suit/D3P_10/1.png',
+    link: '/shop?category=3-piece-suit'
+  },
+  {
+    id: 'short-kurtis',
+    title: 'Short Kurtis',
+    image: '/images/Short Kurti/DK-201/DK201_1.png',
+    link: '/shop?category=short-kurtis'
+  },
+  {
     id: 'saree',
     title: 'Sarees',
     image: '/api/collection-image?name=collection-saree',

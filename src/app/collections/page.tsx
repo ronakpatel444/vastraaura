@@ -32,6 +32,20 @@ const collections = [
     align: 'left'
   },
   {
+    title: '3 Piece Suit',
+    description: 'Exquisite 3-piece ensembles with rich embroidery, dupatta and tailored bottoms.',
+    image: '/images/3 Pis suit/D3P_10/1.png',
+    link: '/shop?category=3-piece-suit',
+    align: 'right'
+  },
+  {
+    title: 'Short Kurtis',
+    description: 'Chic, breathable cotton short kurtis with artisanal prints for effortless everyday charm.',
+    image: '/images/Short Kurti/DK-201/DK201_1.png',
+    link: '/shop?category=short-kurtis',
+    align: 'left'
+  },
+  {
     title: 'Saree',
     description: 'Drape yourself in the elegance of six yards of pure grace. Timeless Indian luxury.',
     image: '/api/collection-image?name=collection-saree',

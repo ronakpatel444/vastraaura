@@ -292,6 +292,8 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                       <option>Chaniya Choli</option>
                       <option>Lehenga</option>
                       <option>Kurta Sets</option>
+                      <option>Short Kurtis</option>
+                      <option>3 Piece Suit</option>
                       <option>Saree</option>
                       <option>Casual</option>
                       <option>Kids Wear</option>

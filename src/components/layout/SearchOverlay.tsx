@@ -60,7 +60,7 @@ export default function SearchOverlay() {
                   <>
                     <h3 className="text-sm tracking-widest uppercase text-accent mb-6">Popular Searches</h3>
                     <div className="flex flex-wrap gap-4">
-                      {['Bandhani', 'Navratri Special', 'Mirror Work', 'Bridal Lehenga', 'Silk Kurta'].map((term) => (
+                      {['Bandhani', 'Coord Sets', 'Short Kurtis', 'Navratri Special', 'Mirror Work', 'Bridal Lehenga', 'Silk Kurta'].map((term) => (
                         <button 
                           key={term}
                           onClick={() => setSearchQuery(term)}

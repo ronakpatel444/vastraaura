@@ -15,6 +15,7 @@ const categories = [
   'Kurta Sets',
   'Short Kurtis',
   '3 Piece Suit',
+  'Coord Sets',
   'Kids Wear',
   'Casual',
 ];
@@ -31,6 +32,9 @@ function ShopContent() {
     // Direct alias mappings for all common forms
     if (['3-piece-suit', '3-piece-suits', '3 piece suit', '3 piece suits', '3-piece', '3 piece', '3-pics', '3-pis', '3pics', '3 pis', '3 pics'].includes(clean)) {
       return '3 Piece Suit';
+    }
+    if (['coord-sets', 'coord sets', 'coord-set', 'coord set', 'coord set - 2 piece', 'coord-set-2-piece', 'codset', 'coordset', 'cordset', 'cord-set', 'cord sets'].includes(clean)) {
+      return 'Coord Sets';
     }
     if (['short-kurtis', 'short kurtis', 'short-kurti', 'short kurti', 'shortkurtis'].includes(clean)) {
       return 'Short Kurtis';
@@ -55,7 +59,7 @@ function ShopContent() {
   };
 
   const [activeCategory, setActiveCategory] = useState(() => getCategoryFromParam(categoryParam));
-  const { setCursorType, addToCart, setCartOpen, adminProducts, fetchProducts, formatPrice } = useStore();
+  const { setCursorType, addToCart, setCartOpen, adminProducts, isProductsLoading, hasFetchedProducts, fetchProducts, formatPrice } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +74,9 @@ function ShopContent() {
         
         if (target === '3 piece suit') {
           return cat === '3 piece suit' || cat === '3 piece suits' || cat === '3 pis suit' || cat.includes('3 piece') || cat.includes('3 pis') || cat.includes('3 pics');
+        }
+        if (target === 'coord sets') {
+          return cat === 'coord sets' || cat === 'coord set' || cat.includes('coord') || cat.includes('cord');
         }
         if (target === 'short kurtis') {
           return cat === 'short kurtis' || cat === 'short kurti' || cat.includes('short kurti');
@@ -135,19 +142,37 @@ function ShopContent() {
         </div>
 
         {/* Product Grid */}
-        {filteredProducts.length === 0 ? (
+        {(!hasFetchedProducts || (isProductsLoading && filteredProducts.length === 0)) ? (
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-12 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div key={idx} className="space-y-4">
+                <div className="aspect-[3/4] bg-neutral-200 rounded-none w-full" />
+                <div className="h-4 bg-neutral-200 w-3/4 rounded" />
+                <div className="h-3 bg-neutral-200 w-1/3 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 px-4">
             <p className="text-2xl font-serif mb-2">No products found in {activeCategory}</p>
             <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">We are currently curating new exclusive designs for this collection. Please check back shortly or browse other collections.</p>
-            <button 
-              onClick={() => {
-                setActiveCategory('All');
-                router.push('/shop', { scroll: false });
-              }}
-              className="px-6 py-2.5 bg-black text-white text-xs uppercase tracking-widest hover:bg-neutral-800 transition-colors"
-            >
-              View All Products
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => fetchProducts()}
+                className="px-6 py-2.5 border border-black text-black text-xs uppercase tracking-widest hover:bg-neutral-100 transition-colors"
+              >
+                Reload
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveCategory('All');
+                  router.push('/shop', { scroll: false });
+                }}
+                className="px-6 py-2.5 bg-black text-white text-xs uppercase tracking-widest hover:bg-neutral-800 transition-colors"
+              >
+                View All Products
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-12">

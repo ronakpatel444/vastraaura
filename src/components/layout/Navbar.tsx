@@ -91,6 +91,7 @@ export default function Navbar() {
                 <Link href="/shop?category=kurta-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
                 <Link href="/shop?category=short-kurtis" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Short Kurtis</Link>
                 <Link href="/shop?category=3-piece-suit" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">3 Piece Suit</Link>
+                <Link href="/shop?category=coord-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Coord Sets</Link>
                 <Link href="/shop?category=kids-wear" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
               </div>
             </div>
@@ -163,6 +164,7 @@ export default function Navbar() {
                     <Link href="/shop?category=kurta-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kurta Sets</Link>
                     <Link href="/shop?category=short-kurtis" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Short Kurtis</Link>
                     <Link href="/shop?category=3-piece-suit" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">3 Piece Suit</Link>
+                    <Link href="/shop?category=coord-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Coord Sets</Link>
                     <Link href="/shop?category=kids-wear" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kids Wear</Link>
                   </div>
                 </div>

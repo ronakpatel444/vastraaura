@@ -84,6 +84,8 @@ interface StoreState {
 
   // Admin State
   adminProducts: AdminProduct[];
+  isProductsLoading: boolean;
+  hasFetchedProducts: boolean;
   fetchProducts: () => Promise<void>;
   addProduct: (product: AdminProduct) => void;
   updateProduct: (id: string, product: AdminProduct) => void;
@@ -220,8 +222,12 @@ export const useStore = create<StoreState>()(
 
   // Admin State Implementation
   adminProducts: [],
+  isProductsLoading: true,
+  hasFetchedProducts: false,
   
   fetchProducts: async () => {
+    set({ isProductsLoading: true });
+
     let retries = 3;
     while (retries > 0) {
       try {
@@ -229,13 +235,19 @@ export const useStore = create<StoreState>()(
         if (!res.ok) {
           console.error(`Failed to fetch products: ${res.status} ${res.statusText}`);
           retries--;
-          if (retries === 0) return;
+          if (retries === 0) {
+            set({ isProductsLoading: false, hasFetchedProducts: true });
+            return;
+          }
           await new Promise(r => setTimeout(r, 1000)); // wait 1s before retry
           continue;
         }
         
         const text = await res.text();
-        if (!text) return;
+        if (!text) {
+          set({ isProductsLoading: false, hasFetchedProducts: true });
+          return;
+        }
         
         try {
           const data = JSON.parse(text);
@@ -244,20 +256,25 @@ export const useStore = create<StoreState>()(
               ...p,
               id: p._id,
             }));
-            set({ adminProducts: mappedProducts });
+            set({ adminProducts: mappedProducts, isProductsLoading: false, hasFetchedProducts: true });
             return; // Success, exit the loop
           }
         } catch (e) {
           console.error('Invalid JSON from /api/products:', text.substring(0, 100));
+          set({ isProductsLoading: false, hasFetchedProducts: true });
           return; // Don't retry on invalid JSON
         }
       } catch (err) {
         console.error('Failed to fetch products', err);
         retries--;
-        if (retries === 0) return;
+        if (retries === 0) {
+          set({ isProductsLoading: false, hasFetchedProducts: true });
+          return;
+        }
         await new Promise(r => setTimeout(r, 1000));
       }
     }
+    set({ isProductsLoading: false, hasFetchedProducts: true });
   },
 
   addProduct: async (product) => {

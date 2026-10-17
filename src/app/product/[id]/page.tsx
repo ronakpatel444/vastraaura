@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useStore, ProductSize } from '@/store/useStore';
-import { Heart, ArrowRight, Star } from 'lucide-react';
+import { Heart, ArrowRight, Star, Ruler } from 'lucide-react';
 import gsap from 'gsap';
 import Link from 'next/link';
 import Image from 'next/image';
+import SizeChartModal from '@/components/ui/SizeChartModal';
 
 // Removed static SIZES array
 
@@ -16,19 +17,40 @@ export default function ProductDetailPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [isLoading, setIsLoading] = useState(true);
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const loadData = async () => {
-      if (adminProducts.length === 0) {
+      const existing = adminProducts.find(p => p.id === params.id || (p as any)._id === params.id);
+      if (!existing) {
+        setIsLoading(true);
+        try {
+          const res = await fetch(`/api/products/${params.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && (data._id || data.id)) {
+              const mapped = { ...data, id: data._id || data.id };
+              useStore.setState(state => ({
+                adminProducts: state.adminProducts.some(p => p.id === mapped.id)
+                  ? state.adminProducts
+                  : [mapped, ...state.adminProducts]
+              }));
+            }
+          }
+        } catch (e) {
+          console.error('Error loading product directly:', e);
+        }
         await fetchProducts();
       }
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     };
     loadData();
-  }, [adminProducts.length, fetchProducts]);
+    return () => { isMounted = false; };
+  }, [params.id, adminProducts.length, fetchProducts]);
 
   // Find the actual product from our global state
-  const product = adminProducts.find(p => p.id === params.id);
+  const product = adminProducts.find(p => p.id === params.id || (p as any)._id === params.id);
   
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
@@ -143,6 +165,15 @@ export default function ProductDetailPage() {
       alert('Failed to submit review. Please try again.');
     }
   };
+
+  const productCategory = (product?.category || '').toLowerCase();
+  const hasSizeChart = 
+    productCategory.includes('short kurti') || 
+    productCategory.includes('coord') || 
+    productCategory.includes('cord') || 
+    productCategory.includes('3 piece') || 
+    productCategory.includes('3 pis') || 
+    productCategory.includes('3 pics');
 
   return (
     <div ref={containerRef} className="min-h-screen bg-background pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-6">
@@ -323,6 +354,16 @@ export default function ProductDetailPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm uppercase tracking-widest font-medium">Select Size</span>
+                {hasSizeChart && (
+                  <button 
+                    type="button"
+                    onClick={() => setIsSizeChartOpen(true)}
+                    className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#8B5E34] hover:text-black font-semibold transition-colors group"
+                  >
+                    <Ruler className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                    <span>Size Guide</span>
+                  </button>
+                )}
               </div>
               <div className="flex flex-wrap gap-4">
                 {(product.sizes || []).map((sizeObj) => {
@@ -527,6 +568,19 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
+              {/* Size Guide Accordion */}
+              {hasSizeChart && (
+                <div className="mb-4 border-b border-foreground/10 pb-4">
+                  <div 
+                    className="text-sm uppercase tracking-widest font-medium flex justify-between items-center cursor-pointer hover:text-[#8B5E34] transition-colors"
+                    onClick={() => setIsSizeChartOpen(true)}
+                  >
+                    <span>Size Guide & Measurements</span>
+                    <span className="text-[10px] bg-[#8B5E34]/10 text-[#8B5E34] font-bold px-2 py-0.5 rounded tracking-wider">VIEW</span>
+                  </div>
+                </div>
+              )}
+
               <div className="text-sm uppercase tracking-widest font-medium mb-4 flex justify-between cursor-pointer opacity-60 hover:opacity-100">
                 Returns & Exchanges <span>+</span>
               </div>
@@ -535,6 +589,15 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Size Chart Modal */}
+      {hasSizeChart && product && (
+        <SizeChartModal 
+          isOpen={isSizeChartOpen} 
+          onClose={() => setIsSizeChartOpen(false)} 
+          category={product.category} 
+        />
+      )}
     </div>
   );
 }

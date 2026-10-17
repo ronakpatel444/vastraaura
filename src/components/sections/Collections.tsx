@@ -34,6 +34,12 @@ const collections = [
     link: '/shop?category=3-piece-suit'
   },
   {
+    id: 'coord-sets',
+    title: 'Coord Sets',
+    image: '/images/Coord set - 2 piece/DC-104/D104.png',
+    link: '/shop?category=coord-sets'
+  },
+  {
     id: 'short-kurtis',
     title: 'Short Kurtis',
     image: '/images/Short Kurti/DK-201/DK201_1.png',

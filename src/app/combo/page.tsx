@@ -7,9 +7,13 @@ import { Minus, Plus, Search } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function ComboPage() {
-  const { setCursorType, addToCart, setCartOpen, adminProducts, cartItems, updateQuantity, removeFromCart, formatPrice } = useStore();
+  const { setCursorType, addToCart, setCartOpen, adminProducts, isProductsLoading, hasFetchedProducts, fetchProducts, cartItems, updateQuantity, removeFromCart, formatPrice } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const comboProducts = adminProducts.filter(p => p.category === 'Combo');
 
@@ -153,13 +157,23 @@ export default function ComboPage() {
           })}
         </div>
 
-        {comboProducts.length === 0 && (
+        {(!hasFetchedProducts || (isProductsLoading && comboProducts.length === 0)) ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+            {[1, 2, 3, 4].map((idx) => (
+              <div key={idx} className="space-y-4 bg-white p-3 rounded-md">
+                <div className="aspect-[3/4] bg-neutral-200 w-full rounded" />
+                <div className="h-4 bg-neutral-200 w-3/4 rounded" />
+                <div className="h-3 bg-neutral-200 w-1/3 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : comboProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <Search className="w-12 h-12 mb-6 opacity-20" />
             <p className="text-xl font-serif mb-2">No combo products available</p>
             <p className="text-sm opacity-60">We are currently updating our combo collection.</p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

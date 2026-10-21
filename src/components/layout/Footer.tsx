@@ -21,12 +21,16 @@ export default function Footer() {
           
           {/* Brand Info */}
           <div className="lg:pr-8">
-            <h2 className="text-3xl font-serif mb-6 tracking-wider">VASTRA AURA</h2>
-            <p className="text-sm text-gray-400 leading-relaxed mb-8">
-              Reviving India's royal heritage through handcrafted luxury fashion. Every piece is a testament to centuries of artisanal craftsmanship.
+            <h2 className="text-3xl font-serif mb-4 tracking-wider">VASTRA AURA</h2>
+            <p className="text-sm text-gray-400 leading-relaxed mb-4">
+              Surat's premier luxury label reviving India's royal textile heritage through handcrafted designer Chaniya Choli, bridal Lehengas, and ethnic fashion.
+            </p>
+            <p className="text-xs text-gray-500 leading-relaxed mb-6">
+              <strong className="text-gray-400 block mb-1">Flagship Studio:</strong>
+              183 - Vijay Nagar, Yogi Chowk, Surat, Gujarat, India
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all text-xs font-medium">
+              <a href="https://www.instagram.com/vastraaura_official" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all text-xs font-medium">
                 IG
               </a>
               <a href="#" className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all text-xs font-medium">

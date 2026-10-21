@@ -31,7 +31,7 @@ async function seed3PieceSuits() {
         continue;
       }
 
-      const imageUrls = files.map(file => `/images/3 Pis suit/${folder}/${file}`);
+      const imageUrls = files.map(file => encodeURI(`/images/3 Pis suit/${folder}/${file}`));
       const mainImage = imageUrls[0];
 
       const product = {

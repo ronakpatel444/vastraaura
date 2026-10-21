@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useStore } from '@/store/useStore';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,19 +31,19 @@ const collections = [
   {
     id: '3-piece-suit',
     title: '3 Piece Suit',
-    image: '/images/3 Pis suit/D3P_10/1.png',
+    image: '/images/3%20Pis%20suit/D3P_10/1.png',
     link: '/shop?category=3-piece-suit'
   },
   {
     id: 'coord-sets',
     title: 'Coord Sets',
-    image: '/images/Coord set - 2 piece/DC-104/D104.png',
+    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
     link: '/shop?category=coord-sets'
   },
   {
     id: 'short-kurtis',
     title: 'Short Kurtis',
-    image: '/images/Short Kurti/DK-201/DK201_1.png',
+    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
     link: '/shop?category=short-kurtis'
   },
   {
@@ -109,7 +110,7 @@ export default function Collections() {
               <div className="w-full relative aspect-[4/5] overflow-hidden mb-4 bg-white/50">
                 <div 
                   className="w-full h-full bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
-                  style={{ backgroundImage: `url(${collection.image})` }}
+                  style={{ backgroundImage: `url("${formatCssUrl(collection.image)}")` }}
                 />
               </div>
               

@@ -19,6 +19,10 @@ export interface ISettings extends Document {
   autoShipToAdminAddress: boolean;
   internationalMultiplier: number;
   enableInternationalPricing: boolean;
+  metaAccessToken?: string;
+  metaPageId?: string;
+  metaIgAccountId?: string;
+  metaAdAccountId?: string;
 }
 
 const SettingsSchema = new Schema(
@@ -48,6 +52,10 @@ const SettingsSchema = new Schema(
     autoShipToAdminAddress: { type: Boolean, default: false },
     internationalMultiplier: { type: Number, default: 2.5 }, // 2x to 3x for US/UK/Canada
     enableInternationalPricing: { type: Boolean, default: true },
+    metaAccessToken: { type: String, default: '' },
+    metaPageId: { type: String, default: '' },
+    metaIgAccountId: { type: String, default: '' },
+    metaAdAccountId: { type: String, default: '' },
   },
   { timestamps: true }
 );

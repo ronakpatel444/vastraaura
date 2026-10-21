@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useStore } from '@/store/useStore';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 const articles = [
   {
@@ -89,7 +90,7 @@ export default function JournalPage() {
               >
                 <div 
                   className="absolute inset-0 bg-cover bg-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
-                  style={{ backgroundImage: `url(${article.image})` }}
+                  style={{ backgroundImage: `url("${formatCssUrl(article.image)}")` }}
                 />
               </Link>
               

@@ -8,6 +8,7 @@ import gsap from 'gsap';
 import Link from 'next/link';
 import Image from 'next/image';
 import SizeChartModal from '@/components/ui/SizeChartModal';
+import { formatCssUrl } from '@/lib/image';
 
 // Removed static SIZES array
 
@@ -338,7 +339,7 @@ export default function ProductDetailPage() {
                       >
                         <div 
                           className={`w-20 h-28 bg-cover bg-center rounded-md border ${isSelected ? 'border-[#8B5E34]/30' : 'border-gray-200'}`}
-                          style={{ backgroundImage: `url(${colorImage})` }}
+                          style={{ backgroundImage: `url("${formatCssUrl(colorImage)}")` }}
                         />
                         <span className={`text-xs font-medium px-1 ${isSelected ? 'text-[#8B5E34]' : 'text-gray-600 group-hover:text-black'}`}>
                           {color.length > 15 ? color.substring(0, 12) + '...' : color}

@@ -1,3 +1,13 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Vastra Aura',
+  description: 'Understand how Vastra Aura collects, protects, and uses customer information for a secure online shopping experience.',
+  alternates: {
+    canonical: 'https://vastraaura.com/privacy',
+  },
+};
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background pt-32 pb-24 px-6">

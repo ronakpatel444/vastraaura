@@ -3,6 +3,7 @@
 import { useStore } from '@/store/useStore';
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 export default function MegaDiscount() {
   const { setCartOpen, addToCart, adminProducts, formatPrice } = useStore();
@@ -72,13 +73,13 @@ export default function MegaDiscount() {
                   {/* Primary Image */}
                   <div 
                     className="absolute inset-0 bg-cover bg-top transition-opacity duration-700 ease-in-out group-hover:opacity-0"
-                    style={{ backgroundImage: `url(${product.image})` }}
+                    style={{ backgroundImage: `url("${formatCssUrl(product.image)}")` }}
                   />
                   
                   {/* Secondary Image */}
                   <div 
                     className="absolute inset-0 bg-cover bg-top opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
-                    style={{ backgroundImage: `url(${product.images?.[0] || product.image})` }}
+                    style={{ backgroundImage: `url("${formatCssUrl(product.images?.[0] || product.image)}")` }}
                   />
                   
                   {/* Premium Discount Badge */}

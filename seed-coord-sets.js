@@ -35,7 +35,7 @@ async function seedCoordSets() {
         continue;
       }
 
-      const imageUrls = files.map(file => `/images/Coord set - 2 piece/${folder}/${file}`);
+      const imageUrls = files.map(file => encodeURI(`/images/Coord set - 2 piece/${folder}/${file}`));
       const mainImage = imageUrls[0];
 
       const product = {

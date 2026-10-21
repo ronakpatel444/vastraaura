@@ -96,15 +96,18 @@ export default function Hero() {
 
       {/* Content */}
       <div className="hero-text-container relative z-10 h-full container mx-auto px-6 flex flex-col justify-center items-center text-center text-white pt-24">
-        <p className="hero-sub text-sm tracking-[0.3em] uppercase mb-6 font-medium text-accent">Vastra Aura Exclusive</p>
+        <p className="hero-sub text-sm tracking-[0.35em] uppercase mb-6 font-medium text-accent">
+          Vastra Aura • Designer Ethnic Wear
+        </p>
         
         <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-serif leading-none mb-8 overflow-hidden drop-shadow-2xl">
+          <span className="sr-only">Vastra Aura — Luxury Designer Chaniya Choli, Lehengas & Ethnic Fashion Surat</span>
           <div ref={(el) => { if (el) textRefs.current[0] = el; }}>TIMELESS</div>
           <div ref={(el) => { if (el) textRefs.current[1] = el; }} className="italic font-light">ELEGANCE</div>
         </h1>
 
-        <p className="hero-sub text-lg md:text-xl font-serif italic mb-12 opacity-90 max-w-lg">
-          Rooted in tradition, crafted for today.
+        <p className="hero-sub text-lg md:text-xl font-serif italic mb-12 opacity-90 max-w-xl">
+          Surat's premier destination for handcrafted luxury, rooted in tradition and crafted for today.
         </p>
 
         <Link 

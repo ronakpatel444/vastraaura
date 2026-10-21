@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
 import { CldUploadWidget } from 'next-cloudinary';
 import { useStore, AdminProduct, ProductSize } from '@/store/useStore';
+import { formatCssUrl } from '@/lib/image';
 
 interface ProductFormDrawerProps {
   isOpen: boolean;
@@ -368,7 +369,7 @@ export default function ProductFormDrawer({ isOpen, onClose, productToEdit }: Pr
                               setFormData({ ...formData, colorDetails: newDetails });
                             }}
                           />
-                          <div className="w-8 h-8 rounded border border-gray-200 bg-cover bg-center" style={{ backgroundImage: `url(${cd.image})` }} />
+                          <div className="w-8 h-8 rounded border border-gray-200 bg-cover bg-center" style={{ backgroundImage: `url("${formatCssUrl(cd.image)}")` }} />
                         </div>
                       ))}
                     </div>

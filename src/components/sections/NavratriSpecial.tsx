@@ -3,6 +3,7 @@
 import { useStore } from '@/store/useStore';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 export default function NavratriSpecial() {
   const { setCursorType } = useStore();
@@ -50,7 +51,7 @@ export default function NavratriSpecial() {
             >
               <div 
                 className="w-full h-full bg-cover bg-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
-                style={{ backgroundImage: `url(${item.image})` }}
+                style={{ backgroundImage: `url("${formatCssUrl(item.image)}")` }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
               

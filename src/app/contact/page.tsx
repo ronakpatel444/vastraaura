@@ -1,3 +1,13 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Contact Vastra Aura | Surat Studio & Customer Assistance',
+  description: 'Get in touch with Vastra Aura in Surat, Gujarat. Contact our styling experts for bridal consultations, orders, custom sizing, and inquiries.',
+  alternates: {
+    canonical: 'https://vastraaura.com/contact',
+  },
+};
+
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background pt-32 pb-24 px-6">

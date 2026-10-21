@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, ShoppingBag, Users, Settings, LogOut, Menu, X, Tag, Star, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, ShoppingBag, Users, Settings, LogOut, Menu, X, Tag, Star, DollarSign, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({
@@ -23,6 +23,7 @@ export default function AdminLayout({
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
     { href: '/admin/products', icon: ShoppingBag, label: 'Products' },
+    { href: '/admin/social', icon: Share2, label: 'Social Studio' },
     { href: '/admin/sellers', icon: Users, label: 'Sellers' },
     { href: '/admin/payouts', icon: DollarSign, label: 'Payouts' },
     { href: '/admin/coupons', icon: Tag, label: 'Coupons' },

@@ -13,29 +13,50 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vastraaura.com'),
   title: {
-    default: "VASTRA AURA | Designer Chaniya Choli & Lehengas in Surat",
-    template: "%s | VASTRA AURA",
+    default: "Vastra Aura | Designer Chaniya Choli, Lehengas & Ethnic Wear Surat",
+    template: "%s | Vastra Aura",
   },
-  description: "Shop premium designer Chaniya Choli, Lehengas, and ethnic wear for women and kids at Vastra Aura, Surat. Perfect for Navratri, weddings, and festivals.",
+  description: "Shop authentic designer Chaniya Choli, bridal Lehengas, and luxury ethnic wear at Vastra Aura (VastraAura), Surat. Explore handcrafted festive collections, suits, and kurtis online.",
   keywords: [
-    "Chaniya Choli", "Navratri Collection", "Designer Lehenga", 
-    "Ethnic Wear Surat", "Kids Ethnic Wear", "Vastra Aura", 
-    "Premium Chaniya Choli", "Designer Chaniya Choli", 
-    "Women's Ethnic Wear", "vastraaura"
+    "Vastra Aura",
+    "vastra aura",
+    "vastraaura",
+    "vastra aura surat",
+    "vastra aura online",
+    "vastra aura website",
+    "vastra aura official",
+    "vastra aura boutique",
+    "vastra aura lehenga",
+    "vastra aura chaniya choli",
+    "Chaniya Choli",
+    "Navratri Collection",
+    "Designer Lehenga",
+    "Ethnic Wear Surat",
+    "Kids Ethnic Wear",
+    "Premium Chaniya Choli",
+    "Designer Chaniya Choli",
+    "Women's Ethnic Wear",
+    "vastraaura.com"
   ],
-  authors: [{ name: "Vastra Aura" }],
+  authors: [{ name: "Vastra Aura", url: "https://vastraaura.com" }],
+  creator: "Vastra Aura",
+  publisher: "Vastra Aura",
+  alternates: {
+    canonical: "https://vastraaura.com",
+  },
   openGraph: {
-    title: "VASTRA AURA | Designer Chaniya Choli & Lehengas",
-    description: "Shop premium designer Chaniya Choli, Lehengas, and ethnic wear in Surat.",
+    title: "Vastra Aura | Designer Chaniya Choli, Lehengas & Ethnic Wear",
+    description: "Shop authentic designer Chaniya Cholis, Lehengas, and luxury ethnic fashion at Vastra Aura, Surat.",
     url: "https://vastraaura.com",
-    siteName: "VASTRA AURA",
+    siteName: "Vastra Aura",
     images: [
       {
-        url: "https://vastraaura.com/og-image.jpg", // Replace with your actual OG image
+        url: "https://vastraaura.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "VASTRA AURA Luxury Fashion",
+        alt: "Vastra Aura Luxury Ethnic Fashion Surat",
       }
     ],
     locale: "en_IN",
@@ -43,10 +64,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "VASTRA AURA | Timeless Elegance",
-    description: "Ultra-luxury traditional Indian fashion.",
+    title: "Vastra Aura | Timeless Elegance & Ethnic Luxury",
+    description: "Ultra-luxury traditional Indian fashion and designer Chaniya Cholis from Surat.",
     images: ["https://vastraaura.com/og-image.jpg"],
-  }
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
@@ -65,11 +97,64 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const websiteSchema = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "VASTRA AURA",
+    "@type": "WebSite",
+    "@id": "https://vastraaura.com/#website",
+    "name": "Vastra Aura",
+    "alternateName": [
+      "VastraAura",
+      "vastra aura",
+      "vastraaura",
+      "Vastra Aura Surat",
+      "vastraaura.com",
+      "The Vastra Aura"
+    ],
     "url": "https://vastraaura.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://vastraaura.com/shop?category={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const storeSchema = {
+    "@context": "https://schema.org",
+    "@type": ["ClothingStore", "Organization"],
+    "@id": "https://vastraaura.com/#organization",
+    "name": "Vastra Aura",
+    "alternateName": [
+      "VastraAura",
+      "vastra aura",
+      "vastraaura",
+      "Vastra Aura Surat",
+      "The Vastra Aura"
+    ],
+    "url": "https://vastraaura.com",
+    "logo": "https://vastraaura.com/icon.png",
+    "image": "https://vastraaura.com/og-image.jpg",
+    "description": "Vastra Aura is Surat's premier designer label specializing in handcrafted Indian ethnic wear, designer Chaniya Choli, bridal lehengas, 3-piece suits, and festive collections.",
+    "telephone": "+91 98765 43210",
+    "email": "hello@vastraaura.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "183 - Vijay Nagar, Yogi Chowk",
+      "addressLocality": "Surat",
+      "addressRegion": "Gujarat",
+      "postalCode": "395010",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 21.2185,
+      "longitude": 72.8887
+    },
+    "priceRange": "₹₹",
+    "currenciesAccepted": "INR",
+    "paymentAccepted": "Cash, Credit Card, UPI, Net Banking",
     "sameAs": [
       "https://www.instagram.com/vastraaura_official",
       "https://vastraaura.store"
@@ -81,7 +166,11 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
         />
       </head>
       <body className="antialiased min-h-screen bg-background text-foreground selection:bg-accent/30 selection:text-foreground">

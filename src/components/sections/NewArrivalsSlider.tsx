@@ -5,6 +5,7 @@ import { useStore } from '@/store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 export default function NewArrivalsSlider() {
   const { setCartOpen, addToCart, adminProducts, fetchProducts, setCursorType, formatPrice } = useStore();
@@ -93,7 +94,7 @@ export default function NewArrivalsSlider() {
                 <Link href={`/product/${currentProduct.id}`} className="w-full h-[65%] md:h-full md:w-2/3 relative block overflow-hidden">
                   <div 
                     className="absolute inset-0 bg-cover bg-top"
-                    style={{ backgroundImage: `url(${currentProduct.image})` }}
+                    style={{ backgroundImage: `url("${formatCssUrl(currentProduct.image)}")` }}
                   />
                 </Link>
 

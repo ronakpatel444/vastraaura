@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useStore } from '@/store/useStore';
 import Image from 'next/image';
+import { formatCssUrl } from '@/lib/image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,7 +47,7 @@ export default function HorizontalScroll() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [liveProducts.length]);
 
   return (
     <div>
@@ -58,7 +59,7 @@ export default function HorizontalScroll() {
         <div ref={containerRef} className="flex h-[55vh] md:h-[60vh] px-6 md:px-24 gap-8 md:gap-12 w-max items-center mt-20 md:mt-12">
           {liveProducts.map((product, index) => (
             <div 
-              key={product.id} 
+              key={product.id || index} 
               className="h-full aspect-[3/4] relative group"
               onMouseEnter={() => setCursorType('VIEW')}
               onMouseLeave={() => setCursorType('DEFAULT')}
@@ -66,10 +67,10 @@ export default function HorizontalScroll() {
               <div className="absolute -top-12 left-0 text-sm tracking-widest opacity-50 font-serif">
                 0{index + 1} / 0{liveProducts.length}
               </div>
-              <div className="w-full h-full overflow-hidden">
+              <div className="w-full h-full overflow-hidden bg-neutral-900">
                 <div 
                   className="w-full h-full bg-cover bg-center transform transition-transform duration-1000 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${product.image})` }}
+                  style={{ backgroundImage: `url("${formatCssUrl(product.image)}")` }}
                 />
               </div>
             </div>

@@ -31,7 +31,7 @@ async function seedRomanSilkSuits() {
         continue;
       }
 
-      const imageUrls = files.map(file => `/images/3Pis Roman Silk/${folder}/${file}`);
+      const imageUrls = files.map(file => encodeURI(`/images/3Pis Roman Silk/${folder}/${file}`));
       const mainImage = imageUrls[0];
 
       const product = {

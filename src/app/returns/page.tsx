@@ -1,3 +1,13 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Returns & Exchanges Policy | Vastra Aura',
+  description: 'Learn about Vastra Aura\'s hassle-free 14-day return and exchange policy for designer ethnic wear and Chaniya Cholis.',
+  alternates: {
+    canonical: 'https://vastraaura.com/returns',
+  },
+};
+
 export default function ReturnsPage() {
   return (
     <div className="min-h-screen bg-background pt-32 pb-24 px-6">

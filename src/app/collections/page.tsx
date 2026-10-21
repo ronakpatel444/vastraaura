@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useStore } from '@/store/useStore';
 import Link from 'next/link';
+import { formatCssUrl } from '@/lib/image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,16 +35,23 @@ const collections = [
   {
     title: '3 Piece Suit',
     description: 'Exquisite 3-piece ensembles with rich embroidery, dupatta and tailored bottoms.',
-    image: '/images/3 Pis suit/D3P_10/1.png',
+    image: '/images/3%20Pis%20suit/D3P_10/1.png',
     link: '/shop?category=3-piece-suit',
     align: 'right'
   },
   {
+    title: 'Coord Sets',
+    description: 'Effortlessly chic 2-piece printed and embroidered matching sets for modern versatility.',
+    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
+    link: '/shop?category=coord-sets',
+    align: 'left'
+  },
+  {
     title: 'Short Kurtis',
     description: 'Chic, breathable cotton short kurtis with artisanal prints for effortless everyday charm.',
-    image: '/images/Short Kurti/DK-201/DK201_1.png',
+    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
     link: '/shop?category=short-kurtis',
-    align: 'left'
+    align: 'right'
   },
   {
     title: 'Saree',
@@ -123,7 +131,7 @@ export default function CollectionsPage() {
               >
                 <div 
                   className="absolute inset-0 bg-cover bg-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
-                  style={{ backgroundImage: `url(${collection.image})` }}
+                  style={{ backgroundImage: `url("${formatCssUrl(collection.image)}")` }}
                 />
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-700" />
               </Link>

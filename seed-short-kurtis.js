@@ -31,7 +31,7 @@ async function seedShortKurtis() {
         continue;
       }
 
-      const imageUrls = files.map(file => `/images/Short Kurti/${folder}/${file}`);
+      const imageUrls = files.map(file => encodeURI(`/images/Short Kurti/${folder}/${file}`));
       const mainImage = imageUrls[0];
 
       const product = {

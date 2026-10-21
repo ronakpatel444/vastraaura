@@ -9,6 +9,7 @@ import Craftsmanship from '@/components/sections/Craftsmanship';
 import NavratriSpecial from '@/components/sections/NavratriSpecial';
 import VideoShowcase from '@/components/sections/VideoShowcase';
 import Testimonials from '@/components/sections/Testimonials';
+import FaqSection from '@/components/sections/FaqSection';
 import Newsletter from '@/components/sections/Newsletter';
 import MegaDiscount from '@/components/sections/MegaDiscount';
 import WelcomeOfferPopup from '@/components/ui/WelcomeOfferPopup';
@@ -29,6 +30,7 @@ export default function Home() {
       <ScrollReveal><Craftsmanship /></ScrollReveal>
       <ScrollReveal><NavratriSpecial /></ScrollReveal>
       <ScrollReveal><Testimonials /></ScrollReveal>
+      <ScrollReveal><FaqSection /></ScrollReveal>
       <ScrollReveal><Newsletter /></ScrollReveal>
     </>
   );

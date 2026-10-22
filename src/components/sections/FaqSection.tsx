@@ -23,7 +23,7 @@ const faqs: FaqItem[] = [
   },
   {
     question: "What collections does Vastra Aura offer?",
-    answer: "Our curated catalog features exclusive Navratri Chaniya Choli, bridal and wedding Lehengas, embroidered 3-Piece Suits, breathable cotton Short Kurtis, luxury Roman Silk ensembles, modern Co-ord sets, and classic Indian Sarees."
+    answer: "Our curated catalog features exclusive Diwali 3-Piece Suits, breathable cotton Short Kurtis, modern 2-Piece Co-ord sets, royal bridal and wedding Lehengas, luxury Roman Silk ensembles, festive Chaniya Cholis, and classic Indian Sarees."
   },
   {
     question: "How do I contact Vastra Aura for bridal consultations or customer support?",

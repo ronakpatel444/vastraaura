@@ -11,8 +11,30 @@ gsap.registerPlugin(ScrollTrigger);
 
 const collections = [
   {
+    id: '3-piece-suit',
+    title: '3 Piece Suit',
+    badge: '🪔 Diwali Special',
+    image: '/images/3%20Pis%20suit/D3P_10/1.png',
+    link: '/shop?category=3-piece-suit'
+  },
+  {
+    id: 'coord-sets',
+    title: 'Coord Sets (2-Piece)',
+    badge: '✨ Festive Trending',
+    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
+    link: '/shop?category=coord-sets'
+  },
+  {
+    id: 'short-kurtis',
+    title: 'Short Kurtis',
+    badge: '🌸 Cotton Print',
+    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
+    link: '/shop?category=short-kurtis'
+  },
+  {
     id: 1,
     title: 'Chaniya Choli',
+    badge: 'Royal Heritage',
     image: '/api/collection-image?name=collection-chaniya-choli',
     link: '/shop?category=chaniya-choli'
   },
@@ -27,24 +49,6 @@ const collections = [
     title: 'Kurta Sets',
     image: '/api/collection-image?name=collection-kurta',
     link: '/shop?category=kurta-sets'
-  },
-  {
-    id: '3-piece-suit',
-    title: '3 Piece Suit',
-    image: '/images/3%20Pis%20suit/D3P_10/1.png',
-    link: '/shop?category=3-piece-suit'
-  },
-  {
-    id: 'coord-sets',
-    title: 'Coord Sets',
-    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
-    link: '/shop?category=coord-sets'
-  },
-  {
-    id: 'short-kurtis',
-    title: 'Short Kurtis',
-    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
-    link: '/shop?category=short-kurtis'
   },
   {
     id: 'saree',
@@ -93,8 +97,15 @@ export default function Collections() {
     <section ref={containerRef} className="py-20 px-4 md:px-8 bg-[#F5F2EB]">
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-serif tracking-wide text-foreground mb-4">Categories</h2>
-          <p className="text-[10px] uppercase tracking-widest text-foreground/50">Discover our elegant collections curated just for you</p>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-accent font-bold mb-2">
+            🪔 Curated Festive Edits
+          </div>
+          <h2 className="text-3xl md:text-4xl font-serif tracking-wide text-foreground mb-4">
+            Shop By Collection
+          </h2>
+          <p className="text-[10px] uppercase tracking-widest text-foreground/60 max-w-md mx-auto">
+            Discover our celebrated 3-Piece Suits, 2-Piece Coord Sets &amp; Artisanal Short Kurtis
+          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10 md:gap-x-12 md:gap-y-16">
@@ -107,16 +118,22 @@ export default function Collections() {
               onMouseLeave={() => setCursorType('DEFAULT')}
             >
               {/* Image Container */}
-              <div className="w-full relative aspect-[4/5] overflow-hidden mb-4 bg-white/50">
+              <div className="w-full relative aspect-[4/5] overflow-hidden mb-4 bg-white/50 shadow-sm group-hover:shadow-md transition-shadow">
                 <div 
                   className="w-full h-full bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
                   style={{ backgroundImage: `url("${formatCssUrl(collection.image)}")` }}
                 />
+
+                {collection.badge && (
+                  <div className="absolute top-2 left-2 z-10 bg-amber-600/90 text-white text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded shadow">
+                    {collection.badge}
+                  </div>
+                )}
               </div>
               
               {/* Text Container */}
               <div className="w-full flex justify-between items-center px-1">
-                <h3 className="text-sm font-serif tracking-wide text-foreground group-hover:text-accent transition-colors">
+                <h3 className="text-sm font-serif tracking-wide text-foreground group-hover:text-accent transition-colors font-medium">
                   {collection.title}
                 </h3>
                 <span className="text-[9px] uppercase tracking-widest text-foreground/40 group-hover:text-accent transition-colors flex items-center gap-1">

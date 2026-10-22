@@ -11,46 +11,46 @@ gsap.registerPlugin(ScrollTrigger);
 
 const collections = [
   {
+    title: '3 Piece Suit',
+    description: 'Exquisite festive 3-piece ensembles with rich embroidery, matching tailored pant, and sheer dupatta. Perfect for Diwali puja & grand celebrations.',
+    image: '/images/3%20Pis%20suit/D3P_10/1.png',
+    link: '/shop?category=3-piece-suit',
+    align: 'left'
+  },
+  {
+    title: 'Coord Sets (2-Piece)',
+    description: 'Effortlessly chic 2-piece printed matching sets for modern versatility. Lightweight, breathable, and designed for contemporary festive gatherings.',
+    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
+    link: '/shop?category=coord-sets',
+    align: 'right'
+  },
+  {
+    title: 'Short Kurtis',
+    description: 'Chic, breathable cotton short kurtis with artisanal prints. Comfortable yet stylish for day-to-day wear and casual festive elegance.',
+    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
+    link: '/shop?category=short-kurtis',
+    align: 'left'
+  },
+  {
     title: 'Chaniya Choli',
-    description: 'Vibrant colors and intricate mirror work for the perfect festive Navratri look.',
+    description: 'Vibrant colors and intricate mirror work for the perfect festive celebration and traditional elegance.',
     image: '/api/collection-image?name=collection-chaniya-choli',
     link: '/shop?category=chaniya-choli',
-    align: 'left'
+    align: 'right'
   },
   {
     id: 2,
     title: 'Lehenga',
-    description: 'Timeless elegance crafted for your most memorable moments.',
+    description: 'Timeless elegance crafted for your most memorable moments and grand wedding festivities.',
     image: '/api/collection-image?name=collection-new',
     link: '/shop?category=lehenga',
-    align: 'right'
+    align: 'left'
   },
   {
     title: 'Kurta Sets',
-    description: 'Contemporary grace meets traditional roots. Perfect for everyday luxury.',
+    description: 'Contemporary grace meets traditional roots. Perfect for everyday luxury and family get-togethers.',
     image: '/api/collection-image?name=collection-kurta',
     link: '/shop?category=kurta-sets',
-    align: 'left'
-  },
-  {
-    title: '3 Piece Suit',
-    description: 'Exquisite 3-piece ensembles with rich embroidery, dupatta and tailored bottoms.',
-    image: '/images/3%20Pis%20suit/D3P_10/1.png',
-    link: '/shop?category=3-piece-suit',
-    align: 'right'
-  },
-  {
-    title: 'Coord Sets',
-    description: 'Effortlessly chic 2-piece printed and embroidered matching sets for modern versatility.',
-    image: '/images/Coord%20set%20-%202%20piece/DC-104/D104.png',
-    link: '/shop?category=coord-sets',
-    align: 'left'
-  },
-  {
-    title: 'Short Kurtis',
-    description: 'Chic, breathable cotton short kurtis with artisanal prints for effortless everyday charm.',
-    image: '/images/Short%20Kurti/DK-201/DK201_1.png',
-    link: '/shop?category=short-kurtis',
     align: 'right'
   },
   {
@@ -58,21 +58,21 @@ const collections = [
     description: 'Drape yourself in the elegance of six yards of pure grace. Timeless Indian luxury.',
     image: '/api/collection-image?name=collection-saree',
     link: '/shop?category=saree',
-    align: 'right'
+    align: 'left'
   },
   {
     title: 'Casual',
     description: 'Effortless style for your everyday moments. Comfort meets premium aesthetics.',
     image: '/api/collection-image?name=collection-casual',
     link: '/shop?category=casual',
-    align: 'left'
+    align: 'right'
   },
   {
     title: 'Kids Wear',
-    description: 'Adorable traditional wear for your little ones. Specially crafted kids lehengas and ethnic sets.',
+    description: 'Adorable traditional wear for your little ones. Specially crafted kids ethnic sets.',
     image: '/api/collection-image?name=collection-kids',
     link: '/shop?category=kids-wear',
-    align: 'right'
+    align: 'left'
   }
 ];
 

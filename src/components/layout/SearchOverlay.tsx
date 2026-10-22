@@ -48,8 +48,8 @@ export default function SearchOverlay() {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Chaniya Choli, Lehenga..."
-                  className="w-full bg-transparent text-2xl md:text-4xl font-serif outline-none placeholder:text-foreground/30"
+                  placeholder="Search Diwali Special, 3-Piece Suits, Coord Sets, Short Kurtis..."
+                  className="w-full bg-transparent text-xl md:text-3xl font-serif outline-none placeholder:text-foreground/30"
                   autoFocus
                 />
               </div>
@@ -58,15 +58,18 @@ export default function SearchOverlay() {
               <div className="mt-12 flex-1 overflow-y-auto pb-12">
                 {searchQuery.length === 0 ? (
                   <>
-                    <h3 className="text-sm tracking-widest uppercase text-accent mb-6">Popular Searches</h3>
-                    <div className="flex flex-wrap gap-4">
-                      {['Bandhani', 'Coord Sets', 'Short Kurtis', 'Navratri Special', 'Mirror Work', 'Bridal Lehenga', 'Silk Kurta'].map((term) => (
+                    <h3 className="text-sm tracking-widest uppercase text-accent mb-6 font-semibold flex items-center gap-2">
+                      <span>🪔</span>
+                      <span>Trending Diwali Searches</span>
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {['Diwali Special', '3 Piece Suit', 'Coord Sets', 'Short Kurtis', 'Embroidered Suit', 'Bandhani', 'Silk Kurta', 'Lehenga'].map((term) => (
                         <button 
                           key={term}
                           onClick={() => setSearchQuery(term)}
                           onMouseEnter={() => setCursorType('MAGNETIC')}
                           onMouseLeave={() => setCursorType('DEFAULT')}
-                          className="px-6 py-2 border border-foreground/10 rounded-full text-sm hover:border-accent hover:text-accent transition-colors"
+                          className="px-5 py-2 border border-amber-600/20 rounded-full text-xs md:text-sm hover:border-amber-600 hover:text-amber-800 transition-colors bg-amber-50/30"
                         >
                           {term}
                         </button>

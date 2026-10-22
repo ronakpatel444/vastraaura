@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Curated Ethnic Fashion Collections | Vastra Aura',
-  description: 'Explore curated collections by Vastra Aura Surat — from vibrant Navratri Chaniya Cholis and royal wedding Lehengas to designer suits and sarees.',
+  title: 'Diwali Festive & Ethnic Fashion Collections | Vastra Aura',
+  description: 'Explore Diwali Special collections by Vastra Aura Surat — from grand 3-Piece Suits and designer 2-Piece Coord Sets to artisanal Short Kurtis, Lehengas and sarees.',
   alternates: {
     canonical: 'https://vastraaura.com/collections',
   },
   openGraph: {
-    title: 'Curated Ethnic Fashion Collections | Vastra Aura',
-    description: 'Explore signature collections by Vastra Aura Surat.',
+    title: 'Diwali Special Ethnic Fashion Collections | Vastra Aura',
+    description: 'Explore signature Diwali 3-Piece Suits, Coord Sets, Short Kurtis and festive edits by Vastra Aura Surat.',
     url: 'https://vastraaura.com/collections',
     siteName: 'Vastra Aura',
   },

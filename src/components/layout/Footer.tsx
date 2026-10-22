@@ -47,16 +47,24 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-widest mb-6">Shop</h3>
             <ul className="space-y-4">
               <li>
-                <Link href="/shop" className="text-sm text-gray-400 hover:text-white transition-colors">All Collections</Link>
+                <Link href="/shop?category=3-piece-suit" className="text-sm text-amber-300 hover:text-white transition-colors flex items-center gap-1 font-medium">
+                  🪔 Diwali Special 3-Piece Suits
+                </Link>
               </li>
               <li>
-                <Link href="/shop" className="text-sm text-gray-400 hover:text-white transition-colors">Chaniya Choli</Link>
+                <Link href="/shop?category=coord-sets" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  ✨ Designer Coord Sets (2-Piece)
+                </Link>
               </li>
               <li>
-                <Link href="/shop" className="text-sm text-gray-400 hover:text-white transition-colors">Lehenga</Link>
+                <Link href="/shop?category=short-kurtis" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  🌸 Cotton Short Kurtis
+                </Link>
               </li>
               <li>
-                <Link href="/shop" className="text-sm text-gray-400 hover:text-white transition-colors">Accessories</Link>
+                <Link href="/shop" className="text-sm text-gray-400 hover:text-white transition-colors">
+                  All Collections
+                </Link>
               </li>
             </ul>
           </div>

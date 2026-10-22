@@ -96,32 +96,66 @@ export default function Hero() {
 
       {/* Content */}
       <div className="hero-text-container relative z-10 h-full container mx-auto px-6 flex flex-col justify-center items-center text-center text-white pt-24">
-        <p className="hero-sub text-sm tracking-[0.35em] uppercase mb-6 font-medium text-accent">
-          Vastra Aura • Designer Ethnic Wear
-        </p>
+        <div className="hero-sub inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs tracking-[0.25em] uppercase mb-6 font-semibold backdrop-blur-md shadow-[0_0_20px_rgba(251,191,36,0.25)]">
+          <span>🪔</span>
+          <span>DIWALI FESTIVE EDIT 2026</span>
+          <span>🪔</span>
+        </div>
         
-        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-serif leading-none mb-8 overflow-hidden drop-shadow-2xl">
-          <span className="sr-only">Vastra Aura — Luxury Designer Chaniya Choli, Lehengas & Ethnic Fashion Surat</span>
-          <div ref={(el) => { if (el) textRefs.current[0] = el; }}>TIMELESS</div>
-          <div ref={(el) => { if (el) textRefs.current[1] = el; }} className="italic font-light">ELEGANCE</div>
+        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9.5rem] font-serif leading-none mb-6 overflow-hidden drop-shadow-2xl">
+          <span className="sr-only">Vastra Aura — Luxury Designer 3-Piece Suits, Coord Sets, Short Kurtis & Ethnic Fashion Surat</span>
+          <div ref={(el) => { if (el) textRefs.current[0] = el; }}>FESTIVE</div>
+          <div ref={(el) => { if (el) textRefs.current[1] = el; }} className="italic font-light text-amber-200">SPLENDOR</div>
         </h1>
 
-        <p className="hero-sub text-lg md:text-xl font-serif italic mb-12 opacity-90 max-w-xl">
-          Surat's premier destination for handcrafted luxury, rooted in tradition and crafted for today.
+        <p className="hero-sub text-base sm:text-lg md:text-xl font-serif italic mb-8 opacity-90 max-w-2xl text-amber-50/90">
+          Surat&apos;s premier destination for handcrafted 3-Piece Suits, Designer Coord Sets &amp; Breathable Short Kurtis for your brightest Diwali celebrations.
         </p>
 
-        <Link 
-          href="/shop"
-          className="hero-sub group relative overflow-hidden px-8 py-4 bg-background text-foreground tracking-widest text-sm uppercase transition-colors inline-block"
-          onMouseEnter={() => setCursorType('MAGNETIC')}
-          onMouseLeave={() => setCursorType('DEFAULT')}
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            Explore Collection 
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </span>
-          <div className="absolute inset-0 bg-accent transform scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out z-0" />
-        </Link>
+        <div className="hero-sub flex flex-col sm:flex-row items-center gap-4 mb-8">
+          <Link 
+            href="/shop?category=3-piece-suit"
+            className="group relative overflow-hidden px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-950 font-bold tracking-widest text-xs sm:text-sm uppercase transition-all shadow-[0_0_25px_rgba(251,191,36,0.4)] hover:scale-105 inline-block rounded-sm"
+            onMouseEnter={() => setCursorType('MAGNETIC')}
+            onMouseLeave={() => setCursorType('DEFAULT')}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Shop Diwali Special Edit 
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+          </Link>
+          <Link 
+            href="/shop"
+            className="px-6 py-4 border border-white/40 hover:border-amber-300 text-white hover:text-amber-300 text-xs sm:text-sm tracking-widest uppercase transition-colors rounded-sm backdrop-blur-sm"
+            onMouseEnter={() => setCursorType('MAGNETIC')}
+            onMouseLeave={() => setCursorType('DEFAULT')}
+          >
+            All Collections
+          </Link>
+        </div>
+
+        {/* Quick Category Festive Highlights */}
+        <div className="hero-sub hidden sm:flex items-center gap-3 text-xs tracking-wider">
+          <span className="text-amber-400/90 font-medium uppercase text-[10px] tracking-widest">Trending Now:</span>
+          <Link 
+            href="/shop?category=3-piece-suit" 
+            className="px-3 py-1 rounded-full bg-white/10 hover:bg-amber-400 hover:text-black border border-white/20 transition-all text-white/90 text-[11px]"
+          >
+            ✨ 3-Piece Suits (From ₹1,499)
+          </Link>
+          <Link 
+            href="/shop?category=coord-sets" 
+            className="px-3 py-1 rounded-full bg-white/10 hover:bg-amber-400 hover:text-black border border-white/20 transition-all text-white/90 text-[11px]"
+          >
+            ✨ 2-Piece Coord Sets (From ₹999)
+          </Link>
+          <Link 
+            href="/shop?category=short-kurtis" 
+            className="px-3 py-1 rounded-full bg-white/10 hover:bg-amber-400 hover:text-black border border-white/20 transition-all text-white/90 text-[11px]"
+          >
+            ✨ Short Kurtis (From ₹599)
+          </Link>
+        </div>
       </div>
     </section>
   );

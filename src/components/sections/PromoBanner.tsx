@@ -33,17 +33,17 @@ export default function PromoBanner() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="flex items-center justify-center md:justify-start gap-2 text-accent mb-3"
+              className="flex items-center justify-center md:justify-start gap-2 text-amber-400 mb-3"
             >
-              <Sparkles className="w-5 h-5" />
-              <span className="text-sm font-bold tracking-widest uppercase">Festive Special</span>
+              <Sparkles className="w-5 h-5 text-amber-400" />
+              <span className="text-sm font-bold tracking-widest uppercase">🪔 Diwali Dhamaka Festive Sale</span>
             </motion.div>
             
-            <h2 className="text-3xl md:text-4xl font-serif mb-4 leading-tight">
-              Elevate Your Wardrobe <br className="hidden md:block"/> With Our Premium Collection
+            <h2 className="text-3xl md:text-4xl font-serif mb-4 leading-tight text-white">
+              Celebrate The Festival of Lights <br className="hidden md:block"/> In Royal Handcrafted Luxury
             </h2>
-            <p className="text-gray-400 max-w-md mx-auto md:mx-0">
-              Experience the luxury of traditional craftsmanship. Enjoy a special discount on your next purchase.
+            <p className="text-gray-300 max-w-lg mx-auto md:mx-0 text-sm leading-relaxed">
+              Special Diwali savings on Surat&apos;s finest <strong>Grand 3-Piece Suits</strong>, chic <strong>2-Piece Coord Sets</strong>, and breathable <strong>Cotton Short Kurtis</strong>. Enjoy insured free shipping across India!
             </p>
           </div>
           
@@ -54,13 +54,17 @@ export default function PromoBanner() {
             transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
             className="flex-1 w-full flex justify-center md:justify-end"
           >
-            <div className="bg-white text-black p-6 rounded-xl flex flex-col items-center shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-300 w-full max-w-sm">
-              <Gift className="w-8 h-8 mb-3 text-black" />
-              <div className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-1">Use Code</div>
-              <div className="text-3xl font-black tracking-wider border-2 border-dashed border-black py-3 px-8 rounded-lg mb-3 bg-gray-50 w-full text-center">
-                WELCOME15
+            <div className="bg-gradient-to-b from-[#FFFDF9] to-[#F5EEDC] text-neutral-900 p-6 rounded-2xl flex flex-col items-center shadow-2xl border-2 border-amber-400/60 transform rotate-1 hover:rotate-0 transition-transform duration-300 w-full max-w-sm">
+              <div className="text-2xl mb-2">🪔</div>
+              <div className="text-xs uppercase tracking-widest text-amber-800 font-bold mb-1">Diwali Festive Promo Code</div>
+              <div className="text-3xl font-mono font-black tracking-widest border-2 border-dashed border-amber-600 py-2.5 px-6 rounded-xl mb-2 bg-white w-full text-center text-amber-950 shadow-inner">
+                DIWALI20
               </div>
-              <div className="text-sm font-medium">Get 15% OFF on all orders</div>
+              <div className="text-xs font-semibold text-neutral-800 flex items-center gap-1.5">
+                <span className="text-amber-600">✨</span>
+                <span>Flat 20% OFF on all Festive Orders</span>
+                <span className="text-amber-600">✨</span>
+              </div>
             </div>
           </motion.div>
         </motion.div>

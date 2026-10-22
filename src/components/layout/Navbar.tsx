@@ -27,17 +27,17 @@ export default function Navbar() {
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-[#141414] text-[#EAEAEA] text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-white/10 relative z-[60]">
+      <div className="bg-[#14080a] text-[#F5EEDC] text-[11px] sm:text-xs py-2 px-3 sm:px-4 border-b border-amber-500/20 relative z-[60]">
         <div className="container mx-auto flex justify-between items-center text-center gap-2">
-          <div className="hidden lg:flex items-center gap-2 text-neutral-400 text-[11px]">
-            <span>✨ Authentic Handcrafted Luxury Fashion</span>
+          <div className="hidden lg:flex items-center gap-2 text-amber-200/80 text-[11px]">
+            <span>✨ Authentic Handcrafted Luxury From Surat</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 sm:gap-2 mx-auto lg:mx-0 flex-wrap text-[10px] sm:text-xs">
-            <span className="text-amber-400 font-semibold tracking-wider">SELL WITH US:</span>
-            <span className="hidden sm:inline">Register as Designer Seller (₹3,999 One-Time)</span>
-            <Link href="/seller/register" className="font-bold underline text-amber-300 hover:text-white transition-colors ml-1">
-              Apply & Launch →
-            </Link>
+            <span className="text-amber-400 font-extrabold tracking-wider">🪔 DIWALI SPECIAL:</span>
+            <span className="hidden sm:inline text-white/90">Flat 20% OFF on 3-Piece Suits, Coord Sets &amp; Short Kurtis</span>
+            <span className="bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-mono font-bold text-[10px] border border-amber-400/30">
+              Code: DIWALI20
+            </span>
           </div>
           <div className="hidden md:flex items-center gap-3 text-[11px] text-neutral-400">
             <Link href="/track-order" className="hover:text-amber-300 transition-colors text-white font-medium">Track Order</Link>
@@ -69,7 +69,18 @@ export default function Navbar() {
           </button>
 
           {/* Desktop Links */}
-          <nav className="hidden lg:flex flex-1 gap-8 text-sm tracking-widest uppercase items-center">
+          <nav className="hidden lg:flex flex-1 gap-7 text-xs sm:text-sm tracking-widest uppercase items-center">
+            {/* Glowing Diwali Special Link */}
+            <Link 
+              href="/shop?category=3-piece-suit"
+              className="text-amber-600 hover:text-amber-700 font-bold transition-all flex items-center gap-1.5 py-4 relative group"
+              onMouseEnter={() => setCursorType('MAGNETIC')}
+              onMouseLeave={() => setCursorType('DEFAULT')}
+            >
+              <span>🪔</span>
+              <span className="border-b-2 border-amber-500 pb-0.5">DIWALI EDIT</span>
+            </Link>
+
             {/* Shop Dropdown */}
             <div className="relative group py-4">
               <Link 
@@ -83,16 +94,25 @@ export default function Navbar() {
               </Link>
               
               {/* Dropdown Menu */}
-              <div className="absolute top-[100%] left-0 w-48 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
-                <Link href="/shop" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">All Products</Link>
-                <Link href="/shop?category=saree" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Saree</Link>
-                <Link href="/shop?category=chaniya-choli" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Chaniya Choli</Link>
-                <Link href="/shop?category=lehenga" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Lehenga</Link>
-                <Link href="/shop?category=kurta-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
-                <Link href="/shop?category=short-kurtis" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Short Kurtis</Link>
-                <Link href="/shop?category=3-piece-suit" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">3 Piece Suit</Link>
-                <Link href="/shop?category=coord-sets" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Coord Sets</Link>
-                <Link href="/shop?category=kids-wear" className="px-6 py-3 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
+              <div className="absolute top-[100%] left-0 w-52 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50 rounded-b-md overflow-hidden">
+                <Link href="/shop" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800 font-medium">All Products</Link>
+                <Link href="/shop?category=3-piece-suit" className="px-5 py-2.5 text-xs bg-amber-50/70 hover:bg-amber-100 text-amber-900 font-bold transition-colors border-b border-gray-100 flex items-center justify-between">
+                  <span>3 Piece Suit</span>
+                  <span className="text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded">Diwali</span>
+                </Link>
+                <Link href="/shop?category=coord-sets" className="px-5 py-2.5 text-xs bg-amber-50/40 hover:bg-amber-100 text-amber-900 font-bold transition-colors border-b border-gray-100 flex items-center justify-between">
+                  <span>Coord Sets (2-Piece)</span>
+                  <span className="text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded">Hot</span>
+                </Link>
+                <Link href="/shop?category=short-kurtis" className="px-5 py-2.5 text-xs bg-amber-50/40 hover:bg-amber-100 text-amber-900 font-bold transition-colors border-b border-gray-100 flex items-center justify-between">
+                  <span>Short Kurtis</span>
+                  <span className="text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded">Hot</span>
+                </Link>
+                <Link href="/shop?category=chaniya-choli" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Chaniya Choli</Link>
+                <Link href="/shop?category=lehenga" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Lehenga</Link>
+                <Link href="/shop?category=kurta-sets" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Kurta Sets</Link>
+                <Link href="/shop?category=saree" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors border-b border-gray-50 text-gray-800">Saree</Link>
+                <Link href="/shop?category=kids-wear" className="px-5 py-2.5 text-xs hover:bg-gray-50 hover:text-accent transition-colors text-gray-800">Kids Wear</Link>
               </div>
             </div>
 
@@ -156,15 +176,37 @@ export default function Navbar() {
             <nav className="flex flex-col gap-6 text-2xl md:text-3xl font-serif">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                 <div className="flex flex-col gap-4">
+                  {/* Diwali Mobile Banner */}
+                  <Link 
+                    href="/shop?category=3-piece-suit" 
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-900 text-lg font-bold"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🪔</span>
+                      <span>Diwali Special Edit</span>
+                    </span>
+                    <span className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded uppercase tracking-wider font-sans">20% OFF</span>
+                  </Link>
+
                   <Link href="/shop" onClick={() => setMenuOpen(false)} className="text-gray-900 hover:text-accent transition-colors">Shop</Link>
                   <div className="flex flex-col gap-3 pl-6 border-l-[1px] border-accent/30 text-lg text-gray-600">
-                    <Link href="/shop?category=saree" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Saree</Link>
+                    <Link href="/shop?category=3-piece-suit" onClick={() => setMenuOpen(false)} className="text-amber-900 font-semibold hover:text-accent transition-colors flex items-center justify-between">
+                      <span>3 Piece Suit</span>
+                      <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-sans">Diwali</span>
+                    </Link>
+                    <Link href="/shop?category=coord-sets" onClick={() => setMenuOpen(false)} className="text-amber-900 font-semibold hover:text-accent transition-colors flex items-center justify-between">
+                      <span>Coord Sets (2-Piece)</span>
+                      <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-sans">Hot</span>
+                    </Link>
+                    <Link href="/shop?category=short-kurtis" onClick={() => setMenuOpen(false)} className="text-amber-900 font-semibold hover:text-accent transition-colors flex items-center justify-between">
+                      <span>Short Kurtis</span>
+                      <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-sans">Hot</span>
+                    </Link>
                     <Link href="/shop?category=chaniya-choli" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Chaniya Choli</Link>
                     <Link href="/shop?category=lehenga" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Lehenga</Link>
                     <Link href="/shop?category=kurta-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kurta Sets</Link>
-                    <Link href="/shop?category=short-kurtis" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Short Kurtis</Link>
-                    <Link href="/shop?category=3-piece-suit" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">3 Piece Suit</Link>
-                    <Link href="/shop?category=coord-sets" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Coord Sets</Link>
+                    <Link href="/shop?category=saree" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Saree</Link>
                     <Link href="/shop?category=kids-wear" onClick={() => setMenuOpen(false)} className="hover:text-accent transition-colors">Kids Wear</Link>
                   </div>
                 </div>

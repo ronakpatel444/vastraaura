@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const testimonials = [
   {
-    quote: "The craftsmanship is unparalleled. I felt like royalty wearing my VASTRA AURA Chaniya Choli for Navratri.",
+    quote: "The craftsmanship is unparalleled. I felt like royalty wearing my VASTRA AURA 3-Piece Embroidered Suit and Coord Set for the Diwali festivities.",
     name: "Aanya Patel",
     location: "Mumbai",
   },

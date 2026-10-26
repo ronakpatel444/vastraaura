@@ -23,6 +23,8 @@ export interface ISettings extends Document {
   metaPageId?: string;
   metaIgAccountId?: string;
   metaAdAccountId?: string;
+  pinterestAccessToken?: string;
+  pinterestBoardId?: string;
 }
 
 const SettingsSchema = new Schema(
@@ -56,6 +58,8 @@ const SettingsSchema = new Schema(
     metaPageId: { type: String, default: '' },
     metaIgAccountId: { type: String, default: '' },
     metaAdAccountId: { type: String, default: '' },
+    pinterestAccessToken: { type: String, default: '' },
+    pinterestBoardId: { type: String, default: '' },
   },
   { timestamps: true }
 );

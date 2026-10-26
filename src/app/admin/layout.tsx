@@ -35,12 +35,16 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-white text-black flex flex-col md:flex-row">
       {/* Mobile Top Bar */}
-      <div className="md:hidden flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-gray-50 z-30">
+      <div className="md:hidden sticky top-0 flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-white/95 backdrop-blur-md z-30 shadow-sm">
         <div className="flex items-center">
-          <span className="font-serif text-xl tracking-widest">VASTRA AURA</span>
-          <span className="ml-2 text-[10px] font-sans font-bold text-accent">ADMIN</span>
+          <span className="font-serif text-xl tracking-widest font-bold">VASTRA AURA</span>
+          <span className="ml-2 text-[10px] font-sans font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded">ADMIN</span>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 -mr-2">
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          className="p-2 -mr-2 rounded-lg text-gray-700 hover:bg-gray-100"
+          aria-label="Toggle menu"
+        >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>

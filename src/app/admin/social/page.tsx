@@ -42,6 +42,12 @@ const FacebookIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
+const PinterestIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.334 1.357-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.627 0 12-5.373 12-12C24 5.372 18.627 0 12 0z"/>
+  </svg>
+);
+
 interface Product {
   _id: string;
   name: string;
@@ -52,6 +58,7 @@ interface Product {
   images?: string[];
   description?: string;
   status?: string;
+  slug?: string;
 }
 
 interface MetaConfig {
@@ -64,6 +71,13 @@ interface MetaConfig {
   igAccountId: string;
   adAccountId: string;
   hasToken: boolean;
+  // Pinterest
+  hasPinterestToken?: boolean;
+  isPinterestConnected?: boolean;
+  pinterestUsername?: string;
+  pinterestBoardId?: string;
+  pinterestBoards?: { id: string; name: string }[];
+  pinterestConnectionError?: string;
 }
 
 export default function SocialStudioPage() {
@@ -80,10 +94,12 @@ export default function SocialStudioPage() {
     instagram_feed: boolean;
     instagram_story: boolean;
     facebook_page: boolean;
+    pinterest_pin: boolean;
   }>({
     instagram_feed: true,
     instagram_story: false,
     facebook_page: true,
+    pinterest_pin: true,
   });
 
   // Story config
@@ -102,6 +118,8 @@ export default function SocialStudioPage() {
     metaPageId: '',
     metaIgAccountId: '',
     metaAdAccountId: '',
+    pinterestAccessToken: '',
+    pinterestBoardId: '',
   });
   const [savingConfig, setSavingConfig] = useState(false);
 
@@ -115,6 +133,7 @@ export default function SocialStudioPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [publisherGroupText, setPublisherGroupText] = useState<string>('');
   const [generatingCaption, setGeneratingCaption] = useState<boolean>(false);
+  const [showMobileCatalog, setShowMobileCatalog] = useState<boolean>(false);
 
   // Fetch products and meta config on mount
   useEffect(() => {
@@ -152,9 +171,11 @@ export default function SocialStudioPage() {
         metaPageId: data.pageId || '',
         metaIgAccountId: data.igAccountId || '',
         metaAdAccountId: data.adAccountId || '',
+        pinterestAccessToken: '',
+        pinterestBoardId: data.pinterestBoardId || '',
       });
     } catch (e) {
-      console.error('Failed to load Meta config', e);
+      console.error('Failed to load Meta/Pinterest config', e);
     }
   };
 
@@ -312,6 +333,7 @@ export default function SocialStudioPage() {
     setSelectedProduct(product);
     setErrorMsg('');
     setPublishResult(null);
+    setShowMobileCatalog(false);
 
     const allImgs = product.images && product.images.length > 0 
       ? [product.image, ...product.images] 
@@ -374,7 +396,7 @@ export default function SocialStudioPage() {
       .map(([channel]) => channel);
 
     if (activeChannels.length === 0) {
-      alert('Please select at least one channel (Feed, Story, or Facebook).');
+      alert('Please select at least one channel (Instagram, Facebook, or Pinterest).');
       return;
     }
 
@@ -388,6 +410,11 @@ export default function SocialStudioPage() {
       setErrorMsg('');
       setPublishResult(null);
 
+      const productSlugOrId = selectedProduct.slug || selectedProduct._id;
+      const productUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/products/${productSlugOrId}`
+        : `https://vastraaura.com/products/${productSlugOrId}`;
+
       const res = await fetch('/api/admin/social/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -397,11 +424,14 @@ export default function SocialStudioPage() {
           images: selectedImages,
           storyImageCount,
           productId: selectedProduct._id,
+          productTitle: selectedProduct.name,
+          productLink: productUrl,
+          boardId: config?.pinterestBoardId || '',
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to publish to Meta');
+      if (!res.ok) throw new Error(data.error || 'Failed to publish to selected channels');
       setPublishResult(data);
     } catch (err: any) {
       setErrorMsg(err.message || 'An error occurred while publishing');
@@ -413,66 +443,67 @@ export default function SocialStudioPage() {
   const categories = ['All', 'Chaniya Choli', 'Lehenga', '3 Piece Suit', 'Short Kurtis', 'Saree', 'Kurta Sets'];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-3 sm:p-5 md:p-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 md:space-y-8 w-full overflow-x-hidden">
       
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5 sm:pb-6">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="p-2.5 bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 text-white rounded-xl shadow-md">
-              <Bot className="w-6 h-6" />
+          <div className="flex items-start sm:items-center gap-3">
+            <span className="p-2 sm:p-2.5 bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 text-white rounded-xl shadow-md flex-shrink-0">
+              <Bot className="w-5 h-5 sm:w-6 sm:h-6" />
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-gray-900 leading-tight">
                   AI Social Growth Studio
                 </h1>
-                <span className="px-2.5 py-0.5 text-[11px] font-bold bg-pink-100 text-pink-700 border border-pink-200 rounded-full flex items-center gap-1">
+                <span className="px-2 py-0.5 text-[10px] sm:text-[11px] font-bold bg-pink-100 text-pink-700 border border-pink-200 rounded-full flex items-center gap-1">
                   <Flame className="w-3 h-3 text-pink-600 fill-pink-600" /> @vastraaura21
                 </span>
               </div>
-              <p className="text-xs md:text-sm text-gray-500 mt-0.5">
-                Viral Reel Scripts, 7-Day Content Roadmap, and Direct Instagram & Facebook Publishing.
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                Viral Reel Scripts, Content Calendar, and Direct Instagram, Facebook & Pinterest Publishing.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowConfigModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="w-full sm:w-auto justify-center flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors shadow-sm"
           >
-            <SettingsIcon className="w-4 h-4" /> Meta API Keys
+            <SettingsIcon className="w-4 h-4 text-gray-600" /> Social API Keys (Meta & Pinterest)
           </button>
         </div>
       </div>
 
-      {/* Main Tab Switcher */}
-      <div className="flex gap-3 border-b border-gray-200 pb-1">
+      {/* Main Tab Switcher (Segmented Control on Mobile, Tabs on Desktop) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 bg-gray-100/90 rounded-2xl sm:bg-transparent sm:p-0 sm:border-b sm:border-gray-200 sm:rounded-none">
         <button
           onClick={() => setActiveTab('agent')}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-all ${
+          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
             activeTab === 'agent'
-              ? 'border-black text-black'
-              : 'border-transparent text-gray-400 hover:text-gray-700'
+              ? 'bg-white text-black shadow-sm sm:bg-transparent sm:shadow-none sm:border-black'
+              : 'text-gray-500 hover:text-black sm:border-transparent'
           }`}
         >
           <Sparkles className="w-4 h-4 text-accent" />
-          🤖 AI Viral Growth Agent (@vastraaura21)
-          <span className="px-2 py-0.5 text-[10px] bg-amber-100 text-amber-800 rounded-full">Viral Copilot</span>
+          <span>🤖 AI Viral Growth Agent</span>
+          <span className="px-1.5 py-0.5 text-[9px] bg-amber-100 text-amber-800 rounded-full font-semibold">Copilot</span>
         </button>
 
         <button
           onClick={() => setActiveTab('publisher')}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-all ${
+          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
             activeTab === 'publisher'
-              ? 'border-black text-black'
-              : 'border-transparent text-gray-400 hover:text-gray-700'
+              ? 'bg-white text-black shadow-sm sm:bg-transparent sm:shadow-none sm:border-black'
+              : 'text-gray-500 hover:text-black sm:border-transparent'
           }`}
         >
           <Send className="w-4 h-4 text-pink-600" />
-          📸 1-Click Direct Publisher (Feed & Story)
+          <span>📸 1-Click Publisher</span>
+          <span className="text-[10px] text-gray-500 hidden sm:inline">(Feed, Story, Pin)</span>
         </button>
       </div>
 
@@ -551,16 +582,16 @@ export default function SocialStudioPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {[
-                  { idx: 0, label: '⚡ POV: Metro Shopper', desc: 'Target Mumbai & Delhi buyers' },
-                  { idx: 1, label: '💸 The Markup Expose', desc: 'Exposing 5x boutique markups' },
-                  { idx: 2, label: '💃 10-Meter Flare Twirl', desc: 'All-India Free Cash on Delivery' },
-                  { idx: 3, label: '🛍️ Relatable Dilemma', desc: 'Viral girl math & shopping urge' },
-                  { idx: 4, label: '✈️ NRI Bride & Global', desc: 'USA, UK, Canada & Dubai wedding' },
-                  { idx: 5, label: '🧵 Master Karigar BTS', desc: 'Surat loom craft & real zari' },
-                  { idx: 6, label: '🔥 Navratri & Sangeet', desc: 'Garba night twirl showstopper' },
-                  { idx: 7, label: '⏰ Limited Studio Batch', desc: 'Scarcity & instant checkout' },
+                  { idx: 0, label: '⚡ Metro Shopper', desc: 'Target Mumbai & Delhi' },
+                  { idx: 1, label: '💸 Markup Expose', desc: '5x boutique price truth' },
+                  { idx: 2, label: '💃 10m Flare Twirl', desc: 'All-India Free COD' },
+                  { idx: 3, label: '🛍️ Girl Math', desc: 'Relatable shopping urge' },
+                  { idx: 4, label: '✈️ NRI Bride & Global', desc: 'USA, UK, Dubai wedding' },
+                  { idx: 5, label: '🧵 Master Karigar', desc: 'Surat loom craft' },
+                  { idx: 6, label: '🔥 Navratri Garba', desc: 'Garba night twirl' },
+                  { idx: 7, label: '⏰ Limited Batch', desc: 'Scarcity & fast checkout' },
                 ].map(angle => (
                   <button
                     key={angle.idx}
@@ -642,21 +673,21 @@ export default function SocialStudioPage() {
 
                 {/* Full Caption Box + Publisher Integration */}
                 <div className="pt-2 border-t space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <span className="text-xs font-bold text-gray-700">Unique Dynamic Caption (Product-Specific):</span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => copyToClipboard(reelScript.caption, 'caption')}
-                        className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-semibold rounded-md flex items-center gap-1 transition-colors"
+                        className="flex-1 sm:flex-none justify-center px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors"
                       >
                         {copiedKey === 'caption' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                        {copiedKey === 'caption' ? 'Copied!' : 'Copy Caption'}
+                        {copiedKey === 'caption' ? 'Copied!' : 'Copy'}
                       </button>
                       <button
                         onClick={() => handleUseInPublisher(reelScript.caption, reelScript.groupBroadcastText)}
-                        className="px-3 py-1 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-md flex items-center gap-1 transition-colors"
+                        className="flex-1 sm:flex-none justify-center px-3 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors"
                       >
-                        <Send className="w-3 h-3" /> Use in 1-Click Publisher →
+                        <Send className="w-3 h-3" /> Use in Publisher →
                       </button>
                     </div>
                   </div>
@@ -667,52 +698,52 @@ export default function SocialStudioPage() {
 
                 {/* VIRAL GROUP SEEDING & BROADCAST ENGINE */}
                 {reelScript.groupBroadcastText && (
-                  <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                  <div className="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-xl space-y-2.5 sm:space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Share2 className="w-4 h-4 text-emerald-700" />
-                        <span className="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                          🚀 Viral Group Seeding (Distribute to 1,000s of Viewers)
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Share2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                        <span className="text-[11px] sm:text-xs font-bold text-emerald-900 uppercase tracking-wide">
+                          🚀 Viral Group Seeding
                         </span>
                       </div>
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
-                        Triggers Initial Velocity
+                      <span className="text-[9px] sm:text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                        Initial Velocity
                       </span>
                     </div>
 
-                    <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                      Reels go viral when they get rapid initial views from external shares in the first 30 minutes. Blast this post to WhatsApp reseller groups, Facebook communities, and Telegram channels:
+                    <p className="text-[10px] sm:text-[11px] text-emerald-800/90 leading-relaxed">
+                      Reels go viral when they get rapid initial views from external shares in the first 30 minutes. Blast this post to reseller groups:
                     </p>
 
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 pt-1">
                       <a
                         href={`https://api.whatsapp.com/send?text=${encodeURIComponent(reelScript.groupBroadcastText)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                        className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                       >
                         📲 Share to WhatsApp Groups
                       </a>
                       <a
-                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/product/${selectedProduct._id}` : 'https://vastraaura.com')}`}
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/products/${selectedProduct.slug || selectedProduct._id}` : 'https://vastraaura.com')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                        className="px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                       >
                         🌐 Share to Facebook Groups
                       </a>
                       <a
-                        href={`https://t.me/share/url?url=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/product/${selectedProduct._id}` : 'https://vastraaura.com')}&text=${encodeURIComponent(reelScript.groupBroadcastText)}`}
+                        href={`https://t.me/share/url?url=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/products/${selectedProduct.slug || selectedProduct._id}` : 'https://vastraaura.com')}&text=${encodeURIComponent(reelScript.groupBroadcastText)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                        className="px-3.5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                       >
                         ✈️ Share to Telegram
                       </a>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(reelScript.groupBroadcastText, 'group_text')}
-                        className="px-3 py-2 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        className="px-3.5 py-2.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors text-center"
                       >
                         {copiedKey === 'group_text' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                         {copiedKey === 'group_text' ? 'Copied Message!' : 'Copy Group Message'}
@@ -914,19 +945,46 @@ export default function SocialStudioPage() {
       {/* TAB 2: 1-CLICK DIRECT PUBLISHER (Feed & Story)                 */}
       {/* ============================================================== */}
       {activeTab === 'publisher' && (
-        <div className="animate-in fade-in duration-300 space-y-6">
+        <div className="animate-in fade-in duration-300 space-y-4 sm:space-y-6">
           
+          {/* Mobile Selected Product Quick Pill (Only on mobile when product is chosen) */}
+          {selectedProduct && (
+            <div className="lg:hidden p-3 bg-neutral-900 text-white rounded-2xl flex items-center justify-between gap-3 shadow-md border border-neutral-800">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img 
+                  src={selectedProduct.image || '/images/hero.jpg'} 
+                  alt={selectedProduct.name} 
+                  className="w-11 h-13 object-cover rounded-xl flex-shrink-0 bg-neutral-800 border border-neutral-700"
+                />
+                <div className="min-w-0">
+                  <span className="text-[9px] uppercase tracking-wider text-accent font-bold">Selected Outfit</span>
+                  <h4 className="text-xs font-bold text-white truncate">{selectedProduct.name}</h4>
+                  <p className="text-[11px] font-bold text-amber-300">₹{selectedProduct.price}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileCatalog(!showMobileCatalog)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl flex-shrink-0 border border-white/15 transition-colors"
+              >
+                {showMobileCatalog ? 'Close List ▲' : 'Change ▼'}
+              </button>
+            </div>
+          )}
+
           {/* Main Studio Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
             
             {/* LEFT COLUMN: Product Catalog Picker (5 cols) */}
-            <div className="lg:col-span-5 bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div className={`lg:col-span-5 bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 ${
+              selectedProduct && !showMobileCatalog ? 'hidden lg:block' : 'block'
+            }`}>
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div>
-                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-bold text-gray-900 flex items-center gap-2">
                     <Layers className="w-4 h-4 text-accent" /> 1. Select Product to Post
                   </h2>
-                  <p className="text-xs text-gray-500">Pick any active outfit from your catalog</p>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Pick any active outfit from your catalog</p>
                 </div>
                 <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-medium">
                   {filteredProducts.length} items
@@ -941,17 +999,17 @@ export default function SocialStudioPage() {
                   placeholder="Search by title or category..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-black transition-colors"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-black transition-colors"
                 />
               </div>
 
               {/* Category Filter Pills */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[11px]">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[11px] -mx-1 px-1">
                 {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-2.5 py-1 rounded-full whitespace-nowrap transition-colors ${
+                    className={`px-2.5 py-1 rounded-full whitespace-nowrap transition-colors flex-shrink-0 ${
                       selectedCategory === cat 
                         ? 'bg-black text-white font-medium' 
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -963,7 +1021,7 @@ export default function SocialStudioPage() {
               </div>
 
               {/* Products List */}
-              <div className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[380px] sm:max-h-[500px] lg:max-h-[560px] overflow-y-auto pr-1">
                 {loading ? (
                   <div className="text-center py-12 text-gray-400 text-xs">Loading catalog...</div>
                 ) : filteredProducts.length === 0 ? (
@@ -984,11 +1042,11 @@ export default function SocialStudioPage() {
                         <img 
                           src={p.image || '/images/hero.jpg'} 
                           alt={p.name} 
-                          className="w-14 h-16 object-cover rounded-lg flex-shrink-0 bg-gray-200"
+                          className="w-12 h-14 sm:w-14 sm:h-16 object-cover rounded-lg flex-shrink-0 bg-gray-200"
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-semibold truncate leading-tight">{p.name}</h4>
-                          <p className={`text-[11px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+                          <p className={`text-[10px] sm:text-[11px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
                             {p.category || 'Ethnic Wear'}
                           </p>
                           <p className={`text-xs font-bold mt-1 ${isSelected ? 'text-amber-300' : 'text-gray-900'}`}>
@@ -1004,45 +1062,45 @@ export default function SocialStudioPage() {
             </div>
 
             {/* RIGHT COLUMN: Composer & Studio (7 cols) */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               {selectedProduct ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
                   
                   {/* Product Header in Studio */}
-                  <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100 gap-2">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       <img
                         src={selectedProduct.image}
                         alt={selectedProduct.name}
-                        className="w-12 h-12 object-cover rounded-lg"
+                        className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
                       />
-                      <div>
-                        <h3 className="text-sm md:text-base font-bold text-gray-900">{selectedProduct.name}</h3>
-                        <p className="text-xs text-gray-500">
-                          Price: <strong className="text-black">₹{selectedProduct.price}</strong> • Category: {selectedProduct.category}
+                      <div className="min-w-0">
+                        <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 truncate">{selectedProduct.name}</h3>
+                        <p className="text-[10px] sm:text-xs text-gray-500">
+                          Price: <strong className="text-black">₹{selectedProduct.price}</strong> • {selectedProduct.category}
                         </p>
                       </div>
                     </div>
 
                     <a
-                      href={`/product/${selectedProduct._id}`}
+                      href={`/products/${selectedProduct.slug || selectedProduct._id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-accent hover:underline flex items-center gap-1 font-medium"
+                      className="text-xs text-accent hover:underline flex items-center gap-1 font-semibold flex-shrink-0"
                     >
-                      View on Site <ExternalLink className="w-3 h-3" />
+                      View Link <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
 
                   {/* STEP 2: Choose Channels */}
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-gray-500 block">
                       2. Publish Destinations
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                       
                       {/* Instagram Feed */}
-                      <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                      <label className={`p-2.5 sm:p-3.5 rounded-xl border flex items-center gap-2 sm:gap-3 cursor-pointer transition-all ${
                         channels.instagram_feed 
                           ? 'border-pink-500 bg-pink-50/50 text-gray-900 ring-1 ring-pink-500' 
                           : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -1053,16 +1111,16 @@ export default function SocialStudioPage() {
                           onChange={(e) => setChannels({ ...channels, instagram_feed: e.target.checked })}
                           className="rounded text-pink-600 focus:ring-pink-500"
                         />
-                        <div>
-                          <div className="text-xs font-bold flex items-center gap-1.5">
-                            <InstagramIcon className="w-3.5 h-3.5 text-pink-600" /> Insta Feed
+                        <div className="min-w-0">
+                          <div className="text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+                            <InstagramIcon className="w-3.5 h-3.5 text-pink-600 flex-shrink-0" /> Insta Feed
                           </div>
-                          <p className="text-[10px] text-gray-500 mt-0.5">Post / Carousel</p>
+                          <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 truncate">Post/Carousel</p>
                         </div>
                       </label>
 
                       {/* Instagram Story */}
-                      <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                      <label className={`p-2.5 sm:p-3.5 rounded-xl border flex items-center gap-2 sm:gap-3 cursor-pointer transition-all ${
                         channels.instagram_story 
                           ? 'border-amber-500 bg-amber-50/50 text-gray-900 ring-1 ring-amber-500' 
                           : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -1073,16 +1131,16 @@ export default function SocialStudioPage() {
                           onChange={(e) => setChannels({ ...channels, instagram_story: e.target.checked })}
                           className="rounded text-amber-600 focus:ring-amber-500"
                         />
-                        <div>
-                          <div className="text-xs font-bold flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Insta Story
+                        <div className="min-w-0">
+                          <div className="text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" /> Insta Story
                           </div>
-                          <p className="text-[10px] text-gray-500 mt-0.5">24h Direct View</p>
+                          <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 truncate">24h Direct View</p>
                         </div>
                       </label>
 
                       {/* Facebook Page */}
-                      <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                      <label className={`p-2.5 sm:p-3.5 rounded-xl border flex items-center gap-2 sm:gap-3 cursor-pointer transition-all ${
                         channels.facebook_page 
                           ? 'border-blue-600 bg-blue-50/50 text-gray-900 ring-1 ring-blue-600' 
                           : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -1093,11 +1151,31 @@ export default function SocialStudioPage() {
                           onChange={(e) => setChannels({ ...channels, facebook_page: e.target.checked })}
                           className="rounded text-blue-600 focus:ring-blue-600"
                         />
-                        <div>
-                          <div className="text-xs font-bold flex items-center gap-1.5">
-                            <FacebookIcon className="w-3.5 h-3.5 text-blue-600" /> FB Page
+                        <div className="min-w-0">
+                          <div className="text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+                            <FacebookIcon className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" /> FB Page
                           </div>
-                          <p className="text-[10px] text-gray-500 mt-0.5">Photo & Caption</p>
+                          <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 truncate">Photo & Text</p>
+                        </div>
+                      </label>
+
+                      {/* Pinterest Pin */}
+                      <label className={`p-2.5 sm:p-3.5 rounded-xl border flex items-center gap-2 sm:gap-3 cursor-pointer transition-all ${
+                        channels.pinterest_pin 
+                          ? 'border-red-600 bg-red-50/50 text-gray-900 ring-1 ring-red-600' 
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={channels.pinterest_pin}
+                          onChange={(e) => setChannels({ ...channels, pinterest_pin: e.target.checked })}
+                          className="rounded text-red-600 focus:ring-red-600"
+                        />
+                        <div className="min-w-0">
+                          <div className="text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+                            <PinterestIcon className="w-3.5 h-3.5 text-red-600 flex-shrink-0" /> Pinterest Pin
+                          </div>
+                          <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 truncate">Site Backlink</p>
                         </div>
                       </label>
                     </div>
@@ -1105,10 +1183,10 @@ export default function SocialStudioPage() {
 
                   {/* Story Quantity Selector (If Story checked) */}
                   {channels.instagram_story && (
-                    <div className="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-xl space-y-2">
+                    <div className="p-3 sm:p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-xl space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-600" /> How many images to post to Story?
+                          <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Story Images Count:
                         </span>
                         <span className="text-xs font-semibold text-amber-800">
                           {storyImageCount === 1 ? '1 Image (First Photo)' : `${storyImageCount} Images`}
@@ -1127,7 +1205,7 @@ export default function SocialStudioPage() {
                                 : 'bg-white text-gray-700 hover:bg-amber-100 border border-amber-200'
                             }`}
                           >
-                            {num === 1 ? '1 (First Photo Only)' : `${num} Photos`}
+                            {num === 1 ? '1 Photo' : `${num} Photos`}
                           </button>
                         ))}
                       </div>
@@ -1145,11 +1223,11 @@ export default function SocialStudioPage() {
                         3. Select Photos ({selectedImages.length} selected)
                       </label>
                       <span className="text-[11px] text-gray-400">
-                        If multiple selected, will publish as a Carousel
+                        Tap photo to include
                       </span>
                     </div>
 
-                    <div className="flex gap-2.5 overflow-x-auto pb-2">
+                    <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-1 px-1 touch-pan-x no-scrollbar">
                       {([
                         selectedProduct.image, 
                         ...(selectedProduct.images || [])
@@ -1159,7 +1237,7 @@ export default function SocialStudioPage() {
                           <div
                             key={idx}
                             onClick={() => toggleImageSelection(img)}
-                            className={`relative w-20 h-24 rounded-lg overflow-hidden border-2 cursor-pointer flex-shrink-0 transition-all ${
+                            className={`relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden border-2 cursor-pointer flex-shrink-0 transition-all ${
                               isPicked ? 'border-black ring-2 ring-black/20' : 'border-gray-200 opacity-60 hover:opacity-100'
                             }`}
                           >
@@ -1184,59 +1262,61 @@ export default function SocialStudioPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-gray-500 block">
-                        4. Post Caption (100% Dynamic • No Fixed Tags)
+                        4. Caption & Dynamic AI Angles
                       </label>
-                      <div className="flex items-center gap-1.5 text-xs flex-wrap">
-                        <span className="text-gray-400 text-[11px]">Dynamic AI Angle:</span>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'random')}
-                          className="px-2.5 py-1 text-[11px] bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-90 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm transition-all"
-                        >
-                          <Sparkles className="w-3 h-3" /> 🎲 Spin AI
-                        </button>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'metro')}
-                          className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors"
-                        >
-                          🏙️ Metro Expose
-                        </button>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'flare')}
-                          className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors"
-                        >
-                          💃 10m Flare
-                        </button>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'nri')}
-                          className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors"
-                        >
-                          ✈️ NRI Global
-                        </button>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'artisan')}
-                          className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors"
-                        >
-                          🧵 Karigar BTS
-                        </button>
-                        <button
-                          type="button"
-                          disabled={generatingCaption}
-                          onClick={() => generateCaption(selectedProduct, 'garba')}
-                          className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors"
-                        >
-                          🔥 Navratri
-                        </button>
-                      </div>
+                    </div>
+
+                    {/* AI Angle Switcher Ribbon */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 -mx-1 px-1 no-scrollbar w-full">
+                      <span className="text-gray-400 text-[10px] sm:text-[11px] flex-shrink-0">Spin:</span>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'random')}
+                        className="px-2.5 py-1 text-[11px] bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-90 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm transition-all flex-shrink-0 whitespace-nowrap"
+                      >
+                        <Sparkles className="w-3 h-3" /> 🎲 Spin AI
+                      </button>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'metro')}
+                        className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+                      >
+                        🏙️ Metro
+                      </button>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'flare')}
+                        className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+                      >
+                        💃 10m Flare
+                      </button>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'nri')}
+                        className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+                      >
+                        ✈️ NRI Global
+                      </button>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'artisan')}
+                        className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+                      >
+                        🧵 Karigar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={generatingCaption}
+                        onClick={() => generateCaption(selectedProduct, 'garba')}
+                        className="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+                      >
+                        🔥 Navratri
+                      </button>
                     </div>
 
                     {generatingCaption ? (
@@ -1246,10 +1326,10 @@ export default function SocialStudioPage() {
                       </div>
                     ) : (
                       <textarea
-                        rows={8}
+                        rows={7}
                         value={caption}
                         onChange={(e) => setCaption(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm focus:outline-none focus:border-black font-sans leading-relaxed transition-colors"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-black font-sans leading-relaxed transition-colors"
                         placeholder="Write your post caption..."
                       />
                     )}
@@ -1257,52 +1337,52 @@ export default function SocialStudioPage() {
 
                   {/* VIRAL GROUP SEEDING LAUNCHPAD IN TAB 2 */}
                   {publisherGroupText && (
-                    <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                    <div className="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-xl space-y-2.5 sm:space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Share2 className="w-4 h-4 text-emerald-700" />
-                          <span className="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                            🚀 Viral Group Seeding (Distribute to 1,000s of Viewers)
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Share2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                          <span className="text-[11px] sm:text-xs font-bold text-emerald-900 uppercase tracking-wide">
+                            🚀 Viral Group Seeding
                           </span>
                         </div>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
-                          Triggers Fast 30-Min Velocity
+                        <span className="text-[9px] sm:text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                          First 30 Mins
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                        Reels go viral when external viewers from WhatsApp and Facebook click & watch in the first 30 minutes! Share this drop directly to reseller & buyer groups:
+                      <p className="text-[10px] sm:text-[11px] text-emerald-800/90 leading-relaxed">
+                        Reels go viral when external viewers watch in the first 30 minutes! Share this drop directly:
                       </p>
 
-                      <div className="flex flex-wrap gap-2 pt-1">
+                      <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 pt-1">
                         <a
                           href={`https://api.whatsapp.com/send?text=${encodeURIComponent(publisherGroupText)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                         >
-                          📲 Blast to WhatsApp Groups
+                          📲 WhatsApp Groups
                         </a>
                         <a
-                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/product/${selectedProduct._id}` : 'https://vastraaura.com')}`}
+                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/products/${selectedProduct.slug || selectedProduct._id}` : 'https://vastraaura.com')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                         >
-                          🌐 Share to Facebook Groups
+                          🌐 Facebook Groups
                         </a>
                         <a
-                          href={`https://t.me/share/url?url=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/product/${selectedProduct._id}` : 'https://vastraaura.com')}&text=${encodeURIComponent(publisherGroupText)}`}
+                          href={`https://t.me/share/url?url=${encodeURIComponent(selectedProduct ? `https://vastraaura.com/products/${selectedProduct.slug || selectedProduct._id}` : 'https://vastraaura.com')}&text=${encodeURIComponent(publisherGroupText)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-3.5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors text-center"
                         >
-                          ✈️ Share on Telegram
+                          ✈️ Telegram
                         </a>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(publisherGroupText, 'tab2_group_text')}
-                          className="px-3 py-2 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                          className="px-3.5 py-2.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors text-center"
                         >
                           {copiedKey === 'tab2_group_text' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           {copiedKey === 'tab2_group_text' ? 'Copied Message!' : 'Copy Group Text'}
@@ -1337,6 +1417,19 @@ export default function SocialStudioPage() {
                       {publishResult.results?.facebookPage && (
                         <p>🌐 Facebook Page Photo ID: <span className="font-mono">{publishResult.results.facebookPage.postId}</span></p>
                       )}
+                      {publishResult.results?.pinterestPin && (
+                        <p className="flex items-center gap-1.5 font-medium">
+                          📌 Pinterest Pin Created: 
+                          <a 
+                            href={publishResult.results.pinterestPin.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-red-600 underline font-bold hover:text-red-700 flex items-center gap-0.5"
+                          >
+                            View Pin on Pinterest <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </p>
+                      )}
 
                       {/* Post-Publish Velocity Reminder */}
                       <div className="pt-2 border-t border-emerald-200/80">
@@ -1367,7 +1460,7 @@ export default function SocialStudioPage() {
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
-                          Publish Now to Instagram & Facebook
+                          Publish Now to Social Channels
                         </>
                       )}
                     </button>
@@ -1387,13 +1480,13 @@ export default function SocialStudioPage() {
         </div>
       )}
 
-      {/* META CONFIG MODAL */}
+      {/* SOCIAL CONFIG MODAL (META & PINTEREST) */}
       {showConfigModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-                <SettingsIcon className="w-5 h-5 text-accent" /> Meta Graph API Credentials
+                <SettingsIcon className="w-5 h-5 text-accent" /> Social Media API Connections
               </h3>
               <button 
                 onClick={() => setShowConfigModal(false)}
@@ -1404,64 +1497,153 @@ export default function SocialStudioPage() {
             </div>
 
             <p className="text-xs text-gray-500 leading-relaxed">
-              These credentials connect your website to your official Facebook Page and Instagram (@vastraaura21).
+              Configure credentials to publish directly to Instagram, Facebook, and Pinterest.
             </p>
 
             <form onSubmit={handleSaveConfig} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">
-                  Meta Access Token (Long-Lived Page/User Token)
-                </label>
-                <input
-                  type="password"
-                  placeholder="EAAB..."
-                  value={configForm.metaAccessToken}
-                  onChange={(e) => setConfigForm({ ...configForm, metaAccessToken: e.target.value })}
-                  className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
-                />
-                <span className="text-[11px] text-gray-400">Leave blank if you want to keep existing token.</span>
+              {/* Meta (Instagram & Facebook) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 flex items-center gap-1.5">
+                    <InstagramIcon className="w-3.5 h-3.5 text-pink-600" /> Meta (Instagram & Facebook)
+                  </h4>
+                  {config?.isConnected && (
+                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      ✓ Connected @{config.igUsername || 'vastraaura21'}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Meta Access Token (Long-Lived Page/User Token)
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="EAAB..."
+                    value={configForm.metaAccessToken}
+                    onChange={(e) => setConfigForm({ ...configForm, metaAccessToken: e.target.value })}
+                    className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
+                  />
+                  <span className="text-[11px] text-gray-400">Leave blank if you want to keep existing token.</span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Instagram Account ID (IG_ACCOUNT_ID)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="178414..."
+                    value={configForm.metaIgAccountId}
+                    onChange={(e) => setConfigForm({ ...configForm, metaIgAccountId: e.target.value })}
+                    className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Facebook Page ID (PAGE_ID)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="127514..."
+                    value={configForm.metaPageId}
+                    onChange={(e) => setConfigForm({ ...configForm, metaPageId: e.target.value })}
+                    className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Meta Ad Account ID (Optional for Ads)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="172158..."
+                    value={configForm.metaAdAccountId}
+                    onChange={(e) => setConfigForm({ ...configForm, metaAdAccountId: e.target.value })}
+                    className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">
-                  Instagram Account ID (IG_ACCOUNT_ID)
-                </label>
-                <input
-                  type="text"
-                  placeholder="178414..."
-                  value={configForm.metaIgAccountId}
-                  onChange={(e) => setConfigForm({ ...configForm, metaIgAccountId: e.target.value })}
-                  className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
-                />
+              {/* Pinterest Section */}
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 flex items-center gap-1.5">
+                    <PinterestIcon className="w-3.5 h-3.5 text-red-600" /> Pinterest API Settings (v5)
+                  </h4>
+                  {config?.isPinterestConnected && (
+                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      ✓ Connected @{config.pinterestUsername}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Pinterest Access Token (Trial or Bearer Token)
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="pina_..."
+                    value={configForm.pinterestAccessToken}
+                    onChange={(e) => setConfigForm({ ...configForm, pinterestAccessToken: e.target.value })}
+                    className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-red-600"
+                  />
+                  <span className="text-[11px] text-gray-400">From Pinterest Developers App Dashboard. Leave blank to keep existing.</span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Pinterest Default Board ID
+                  </label>
+                  {config?.pinterestBoards && config.pinterestBoards.length > 0 ? (
+                    <div className="space-y-1.5">
+                      <select
+                        value={configForm.pinterestBoardId}
+                        onChange={(e) => setConfigForm({ ...configForm, pinterestBoardId: e.target.value })}
+                        className="w-full p-2.5 border rounded-lg text-xs font-medium bg-gray-50 focus:outline-none focus:border-red-600"
+                      >
+                        <option value="">-- Select one of your Pinterest Boards --</option>
+                        {config.pinterestBoards.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name} ({b.id})
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-[10px] text-gray-400">Or enter Board ID manually below if not listed:</p>
+                      <input
+                        type="text"
+                        placeholder="e.g. 10987654321..."
+                        value={configForm.pinterestBoardId}
+                        onChange={(e) => setConfigForm({ ...configForm, pinterestBoardId: e.target.value })}
+                        className="w-full p-2 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-red-600"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Enter your Pinterest Board ID (e.g. 10987654321...)"
+                        value={configForm.pinterestBoardId}
+                        onChange={(e) => setConfigForm({ ...configForm, pinterestBoardId: e.target.value })}
+                        className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-red-600"
+                      />
+                      <span className="text-[11px] text-gray-400">Open your Pinterest board in browser to copy the ID, or enter token to fetch boards automatically.</span>
+                    </>
+                  )}
+                </div>
+
+                {config?.pinterestConnectionError && (
+                  <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg text-[11px] text-red-600">
+                    Pinterest Status: {config.pinterestConnectionError}
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">
-                  Facebook Page ID (PAGE_ID)
-                </label>
-                <input
-                  type="text"
-                  placeholder="127514..."
-                  value={configForm.metaPageId}
-                  onChange={(e) => setConfigForm({ ...configForm, metaPageId: e.target.value })}
-                  className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">
-                  Meta Ad Account ID (Optional for Ads)
-                </label>
-                <input
-                  type="text"
-                  placeholder="172158..."
-                  value={configForm.metaAdAccountId}
-                  onChange={(e) => setConfigForm({ ...configForm, metaAdAccountId: e.target.value })}
-                  className="w-full p-2.5 border rounded-lg text-xs font-mono bg-gray-50 focus:outline-none focus:border-black"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t">
                 <button
                   type="button"
                   onClick={() => setShowConfigModal(false)}

@@ -28,13 +28,18 @@ export async function POST(req: NextRequest) {
     const token = settings.metaAccessToken || process.env.META_ACCESS_TOKEN || '';
     const pageId = settings.metaPageId || process.env.META_PAGE_ID || '';
     const igAccountId = settings.metaIgAccountId || process.env.META_IG_ACCOUNT_ID || '';
+    const pinterestToken = settings.pinterestAccessToken || process.env.PINTEREST_ACCESS_TOKEN || '';
+    const defaultBoardId = settings.pinterestBoardId || process.env.PINTEREST_BOARD_ID || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com';
 
     const {
-      channels = [], // ['instagram_feed', 'instagram_story', 'facebook_page']
+      channels = [], // ['instagram_feed', 'instagram_story', 'facebook_page', 'pinterest_pin']
       caption = '',
       images = [], // array of image URLs
       storyImageCount = 1,
+      productTitle = '',
+      productLink = '',
+      boardId = '',
     } = await req.json();
 
     if (!channels.length) {
@@ -45,9 +50,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No image selected to post.' }, { status: 400 });
     }
 
-    if (!token) {
+    const hasMetaChannels = channels.some((c: string) => ['instagram_feed', 'instagram_story', 'facebook_page'].includes(c));
+    if (hasMetaChannels && !token) {
       return NextResponse.json({
         error: 'Meta Access Token is missing. Please enter your Meta credentials in Social Settings.',
+      }, { status: 400 });
+    }
+
+    if (channels.includes('pinterest_pin') && !pinterestToken) {
+      return NextResponse.json({
+        error: 'Pinterest Access Token is missing. Please enter your Pinterest credentials in Social Settings.',
       }, { status: 400 });
     }
 
@@ -55,6 +67,7 @@ export async function POST(req: NextRequest) {
       instagramFeed: null,
       instagramStory: null,
       facebookPage: null,
+      pinterestPin: null,
     };
 
     const formattedImages = images.map((img: string) => formatImageUrl(img, baseUrl));
@@ -168,6 +181,46 @@ export async function POST(req: NextRequest) {
       };
     }
 
+    // 4. Pinterest Pin
+    if (channels.includes('pinterest_pin')) {
+      const targetBoardId = (boardId || defaultBoardId || '').trim();
+      if (!targetBoardId) {
+        throw new Error('Pinterest Board ID is required to create a Pin. Please select or configure a Board ID in Social Settings.');
+      }
+
+      const pinTitle = (productTitle || caption.split('\n')[0] || 'Vastra Aura Collection').slice(0, 99);
+      const pinDesc = caption.slice(0, 790);
+      const pinLink = productLink ? formatImageUrl(productLink, baseUrl) : baseUrl;
+
+      const pinRes = await axios.post(
+        'https://api.pinterest.com/v5/pins',
+        {
+          board_id: targetBoardId,
+          title: pinTitle,
+          description: pinDesc,
+          link: pinLink,
+          alt_text: pinTitle,
+          media_source: {
+            source_type: 'image_url',
+            url: formattedImages[0],
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${pinterestToken}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
+
+      results.pinterestPin = {
+        success: true,
+        pinId: pinRes.data?.id,
+        url: pinRes.data?.id ? `https://www.pinterest.com/pin/${pinRes.data.id}/` : null,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Published successfully to selected channels!',
@@ -175,7 +228,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Social Publish Error:', error.response?.data || error);
-    const metaError = error.response?.data?.error?.message || error.message || 'Failed to publish to Meta platforms';
-    return NextResponse.json({ error: metaError }, { status: 500 });
+    const apiError = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to publish to selected platforms';
+    return NextResponse.json({ error: apiError }, { status: 500 });
   }
 }

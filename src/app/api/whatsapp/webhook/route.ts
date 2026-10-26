@@ -52,26 +52,91 @@ function extractFabric(text: string = ''): string {
   return 'Premium Fabric';
 }
 
-// Helper: Extract price and compute profit markup
+// Helper: Extract price and compute profit markup (User rule: ₹800-₹1000+ profit, e.g. ₹800 wholesale -> ₹1999 listing)
 function extractPrice(text: string = '') {
   const rateMatch = text.match(/(?:rate|price|rs\.?|inr|₹)\s*[:=-]?\s*(\d{3,5})/i) ||
                     text.match(/(\d{3,5})\s*(?:\/-|\+)/i) ||
                     text.match(/\b(\d{3,4})\b/);
 
-  let basePrice = 1199;
+  let basePrice = 800;
   if (rateMatch && rateMatch[1]) {
     basePrice = parseInt(rateMatch[1], 10);
   }
 
-  // Automatic Retail Margin: +₹450 on top of wholesale rate
-  const retailPrice = basePrice <= 600 ? basePrice + 350 : basePrice + 450;
-  const originalPrice = retailPrice + 900; // Anchor MRP
+  // Profit Margin Formula: ₹800 to ₹1200 profit, rounded to psychological .99 pricing
+  // Exactly as requested: ₹800 wholesale -> ₹1999 listing!
+  let retailPrice = 1999;
+  if (basePrice <= 500) {
+    retailPrice = 1499; // +₹1000 profit
+  } else if (basePrice <= 950) {
+    retailPrice = 1999; // +₹1050 to ₹1200 profit (e.g. 800 -> 1999!)
+  } else if (basePrice <= 1400) {
+    retailPrice = 2499; // +₹1100 to ₹1200 profit
+  } else if (basePrice <= 1900) {
+    retailPrice = 2999; // +₹1100 to ₹1200 profit
+  } else {
+    // High-ticket lehengas: Wholesale + ₹1200 profit rounded to 99
+    retailPrice = Math.ceil((basePrice + 1199) / 100) * 100 - 1;
+  }
+
+  const originalPrice = retailPrice + 1000; // Anchor MRP (e.g. 1999 -> MRP 2999)
 
   return {
     price: retailPrice.toString(),
     originalPrice: originalPrice.toString(),
     supplierRate: basePrice.toString(),
   };
+}
+
+// Helper: Extract available sizes from WhatsApp text & assign 5 stock each
+function extractSizes(text: string = '', category: string = '') {
+  if (category === 'Saree') {
+    return [{ name: 'Free Size (5.5m + Blouse)', stock: 5 }];
+  }
+
+  const lower = text.toLowerCase();
+  const detectedSizes: string[] = [];
+
+  // Check for common size range patterns like "M to XXL", "M-XXL", "M, L, XL, XXL"
+  if (/m\s*(?:to|-)\s*xxl/i.test(text) || /m\s*,\s*l\s*,\s*xl\s*,\s*xxl/i.test(text)) {
+    detectedSizes.push('M', 'L', 'XL', 'XXL');
+  } else if (/m\s*(?:to|-)\s*3xl/i.test(text)) {
+    detectedSizes.push('M', 'L', 'XL', 'XXL', '3XL');
+  } else if (/s\s*(?:to|-)\s*xxl/i.test(text)) {
+    detectedSizes.push('S', 'M', 'L', 'XL', 'XXL');
+  } else {
+    // Check individual sizes
+    const sizeCandidates = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
+    for (const sz of sizeCandidates) {
+      const regex = new RegExp(`(?:size|sizes|\\b)[^a-z0-9]*\\b${sz}\\b`, 'i');
+      if (regex.test(text) && !detectedSizes.includes(sz)) {
+        detectedSizes.push(sz);
+      }
+    }
+
+    // Check numeric chest sizing: 36, 38, 40, 42, 44, 46
+    if (/\b36\b/.test(text) && !detectedSizes.includes('S')) detectedSizes.push('S (36)');
+    if (/\b38\b/.test(text) && !detectedSizes.includes('M')) detectedSizes.push('M (38)');
+    if (/\b40\b/.test(text) && !detectedSizes.includes('L')) detectedSizes.push('L (40)');
+    if (/\b42\b/.test(text) && !detectedSizes.includes('XL')) detectedSizes.push('XL (42)');
+    if (/\b44\b/.test(text) && !detectedSizes.includes('XXL')) detectedSizes.push('XXL (44)');
+    if (/\b46\b/.test(text) && !detectedSizes.includes('3XL')) detectedSizes.push('3XL (46)');
+  }
+
+  if (lower.includes('free size') || lower.includes('freesize') || lower.includes('semi stitch') || lower.includes('unstitched')) {
+    if (detectedSizes.length === 0) {
+      return [{ name: 'Free Size / Semi-Stitched', stock: 5 }];
+    }
+  }
+
+  // If no specific sizes mentioned in text, default to standard M, L, XL, XXL
+  const finalSizes = detectedSizes.length > 0 ? detectedSizes : ['M', 'L', 'XL', 'XXL'];
+
+  // User rule: Every available size gets exactly 5 stock!
+  return finalSizes.map(sz => ({
+    name: sz,
+    stock: 5,
+  }));
 }
 
 // Helper: Generate Clean Title & SEO Description
@@ -123,6 +188,7 @@ async function saveCatalogProduct(images: string[], caption: string, messageId: 
   const fabric = extractFabric(caption);
   const { price, originalPrice } = extractPrice(caption);
   const { name, description } = generateMetadata(category, fabric, caption, price, originalPrice);
+  const sizes = extractSizes(caption, category);
 
   // Avoid duplicate listings of the same WhatsApp message
   const existing = await Product.findOne({
@@ -149,18 +215,12 @@ async function saveCatalogProduct(images: string[], caption: string, messageId: 
     fabric,
     description,
     originalSellerLink: messageId || `wp-wh-${Date.now()}`,
-    sizes: [
-      { name: 'S', stock: 5 },
-      { name: 'M', stock: 5 },
-      { name: 'L', stock: 5 },
-      { name: 'XL', stock: 5 },
-      { name: 'XXL', stock: 5 },
-    ],
+    sizes: sizes,
     isPlatformShipping: true,
   });
 
   await newProduct.save();
-  console.log(`🎉 [WHATSAPP WEBHOOK] Auto-created Product: ${name} (₹${price}) from "${chatName}"`);
+  console.log(`🎉 [WHATSAPP WEBHOOK] Auto-created Product: ${name} (₹${price}) from "${chatName}" with sizes: ${sizes.map(s => `${s.name}(${s.stock})`).join(', ')}`);
   return newProduct;
 }
 

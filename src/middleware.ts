@@ -11,35 +11,39 @@ export async function middleware(request: NextRequest) {
   const isInfluencerRoute = path.startsWith('/influencer') && path !== '/influencer/login' && path !== '/influencer/register';
   const isAccountRoute = path.startsWith('/account');
 
-  if (isAdminRoute || isSellerRoute || isInfluencerRoute || isAccountRoute) {
-    const sessionCookie = request.cookies.get('session')?.value;
-    
-    // Legacy fallback for MVP admin (temporary preservation)
+  // 1. Handle Admin Routes (/admin, /admin/social, etc.)
+  if (isAdminRoute) {
+    // If legacy admin cookie is present, allow access
     const legacyAdminCookie = request.cookies.get('admin_auth_token')?.value;
-    if (isAdminRoute && legacyAdminCookie === 'authenticated' && !sessionCookie) {
-       return NextResponse.next();
+    if (legacyAdminCookie === 'authenticated') {
+      return NextResponse.next();
     }
 
+    // Check JWT session
+    const sessionCookie = request.cookies.get('session')?.value;
+    if (sessionCookie) {
+      const session = await decrypt(sessionCookie);
+      if (session && session.role === 'ADMIN') {
+        return NextResponse.next();
+      }
+    }
+
+    // Not authenticated as ADMIN -> cleanly redirect to /admin/login
+    return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+
+  // 2. Handle Seller, Influencer, and Account Routes
+  if (isSellerRoute || isInfluencerRoute || isAccountRoute) {
+    const sessionCookie = request.cookies.get('session')?.value;
     if (!sessionCookie) {
-      if (isAdminRoute) return NextResponse.redirect(new URL('/admin/login', request.url));
-      if (isSellerRoute) return NextResponse.redirect(new URL('/login', request.url));
-      if (isInfluencerRoute) return NextResponse.redirect(new URL('/login', request.url));
-      if (isAccountRoute) return NextResponse.redirect(new URL('/login', request.url));
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const session = await decrypt(sessionCookie);
-
     if (!session) {
-      // Invalid or expired token
-      if (isAdminRoute) return NextResponse.redirect(new URL('/admin/login', request.url));
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Role-based access control
-    if (isAdminRoute && session.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
     if (isSellerRoute && session.role !== 'SELLER') {
       return NextResponse.redirect(new URL('/', request.url));
     }
@@ -48,17 +52,26 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated users away from login pages
-  if (path === '/admin/login' || path === '/login') {
-    const sessionCookie = request.cookies.get('session')?.value;
-    
-    if (path === '/admin/login') {
-       const legacyAdminCookie = request.cookies.get('admin_auth_token')?.value;
-       if (legacyAdminCookie === 'authenticated') {
-         return NextResponse.redirect(new URL('/admin', request.url));
-       }
+  // 3. Handle Admin Login Page (/admin/login)
+  if (path === '/admin/login') {
+    const legacyAdminCookie = request.cookies.get('admin_auth_token')?.value;
+    if (legacyAdminCookie === 'authenticated') {
+      return NextResponse.redirect(new URL('/admin', request.url));
     }
+    const sessionCookie = request.cookies.get('session')?.value;
+    if (sessionCookie) {
+      const session = await decrypt(sessionCookie);
+      if (session && session.role === 'ADMIN') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+    }
+    // Allow non-admins to view /admin/login
+    return NextResponse.next();
+  }
 
+  // 4. Handle Customer Login Page (/login)
+  if (path === '/login') {
+    const sessionCookie = request.cookies.get('session')?.value;
     if (sessionCookie) {
       const session = await decrypt(sessionCookie);
       if (session) {

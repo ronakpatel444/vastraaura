@@ -260,8 +260,12 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. GreenAPI Payload Format: "incomingMessageReceived"
-    if (body.typeWebhook === 'incomingMessageReceived') {
+    // 2. GreenAPI Payload Format: "incomingMessageReceived" or "outgoingMessageReceived"
+    if (
+      body.typeWebhook === 'incomingMessageReceived' ||
+      body.typeWebhook === 'outgoingMessageReceived' ||
+      body.typeWebhook === 'outgoingAPIMessageReceived'
+    ) {
       const messageData = body.messageData;
       const senderData = body.senderData || {};
       const chatId = senderData.chatId || 'default-chat';

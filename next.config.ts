@@ -41,6 +41,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'media.green-api.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.green-api.com',
+      },
     ],
   },
   // Allow access from local network for testing on phone & other devices

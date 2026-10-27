@@ -192,6 +192,7 @@ function parseCatalog(caption) {
     category: category,
     fabric: fabric,
     description: cleanWhatsAppDescription(caption) ? `${seoDesc}\n\n✨ Product Details & Specifications:\n${cleanWhatsAppDescription(caption)}` : seoDesc,
+    originalSellerLink: 'WhatsApp Group: Jaipur Vastra Hub',
     sizes: sizes,
     colors: colors,
     rawWholesalePrice,

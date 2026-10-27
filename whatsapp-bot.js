@@ -231,7 +231,7 @@ async function createProductFromCatalog(catalog) {
     images: images,
     fabric: fabric,
     description: cleanWhatsAppDescription(caption) ? `${seoDesc}\n\n✨ Product Details & Specifications:\n${cleanWhatsAppDescription(caption)}` : seoDesc,
-    originalSellerLink: messageId || `wp-${Date.now()}`,
+    originalSellerLink: chatName ? `WhatsApp Group: ${chatName}` : (messageId || `wp-${Date.now()}`),
     sizes: [
       { name: 'S', stock: 5 },
       { name: 'M', stock: 5 },

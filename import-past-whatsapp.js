@@ -190,6 +190,7 @@ function parseCatalog(caption, chatName) {
     category: category,
     fabric: fabric,
     description: cleanWhatsAppDescription(caption) ? `${seoDesc}\n\n✨ Product Details & Specifications:\n${cleanWhatsAppDescription(caption)}` : seoDesc,
+    originalSellerLink: chatName ? `WhatsApp Group: ${chatName}` : 'WhatsApp Group',
     sizes: sizes,
     colors: colors,
   };

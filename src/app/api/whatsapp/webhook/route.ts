@@ -68,19 +68,22 @@ export function cleanWhatsAppDescription(rawText: string = ''): string {
       continue;
     }
 
-    // Punctuation / placeholder only lines (e.g. '.', '...', '---', '•')
-    if (/^[.\-—_•*~–\s]+$/.test(trimmed)) {
+    // Punctuation / placeholder / divider only lines (e.g. '.', '---', '===', '•')
+    if (/^[.\-—_•*~–=+\s]+$/.test(trimmed)) {
       continue;
     }
 
-    // 1. Remove wholesale prices, rates, MRP, and design-code price lines (e.g. '251005 – 1950/-')
+    // Normalize Unicode fancy fonts (e.g., 𝐑𝐀𝐓𝐄 -> RATE, 𝐏𝐑𝐈𝐂𝐄 -> PRICE)
+    const normalized = trimmed.normalize('NFKD');
+
+    // 1. Remove wholesale prices, rates, MRP, and design-code price lines (e.g. '251005 – 1950/-', 'PRICE :- 999/-INR')
     const isPriceLine =
-      /(?:price|rate|mrp|cost|wholesale\s*rate|reseller|fixed\s*price|fixed\s*rate|no\s*less|no\s*bargain)\b/i.test(trimmed) ||
-      /^[💰💵🏷️⚠️🚨\s*~-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(trimmed) ||
-      /(?:₹|rs\.?|inr)\s*[\d,]+\s*(?:\/-|\+|-|\bonly\b|\+?\s*ship)/i.test(trimmed) ||
-      /^(?:price|rate)\s*[:=-]/i.test(trimmed) ||
-      /^\s*[*_~]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(trimmed) ||
-      /\b\d{3,5}\s*(?:\/-|\+ship)/i.test(trimmed);
+      /(?:price|rate|mrp|cost|wholesale\s*rate|reseller|fixed\s*price|fixed\s*rate|no\s*less|no\s*bargain)\b/i.test(normalized) ||
+      /^[💰💵🏷️⚠️🚨➕💲\s*~`'\"-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(normalized) ||
+      /(?:₹|rs\.?|inr)\s*[\d,]+\s*(?:\/-|\+|-|\bonly\b|\+?\s*ship)/i.test(normalized) ||
+      /[\d,]+\s*(?:\/-\s*inr|\/-|\+ship)/i.test(normalized) ||
+      /^(?:price|rate)\s*[:=-]/i.test(normalized) ||
+      /^\s*[*_~`]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(normalized);
 
     if (isPriceLine) {
       continue;
@@ -88,21 +91,21 @@ export function cleanWhatsAppDescription(rawText: string = ''): string {
 
     // 2. Remove supplier CTAs, DMs, photo references, shipping extra notes, phone numbers, and booking links
     const isCtaOrContactLine =
-      /(?:dm\s*(?:now|to|for|us)|book\s*(?:now|fast|your|here)|inbox\s*(?:us|now)|order\s*(?:now|fast|here|on)|ping\s*(?:us|now|for))\b/i.test(trimmed) ||
-      /(?:whatsapp|call|contact)\s*(?:us|me|on|at|no\.?|number|\:)?\s*[\d+]/i.test(trimmed) ||
-      /\b(?:https?:\/\/|wa\.me\/|bit\.ly\/)\S+/i.test(trimmed) ||
-      /\b[6-9]\d{9}\b/.test(trimmed) ||
-      /(?:single\s*pc\s*available|set\s*to\s*set|no\s*cod|ready\s*to\s*ship|dispatch\s*within)\b/i.test(trimmed) ||
-      /(?:shipping|ship)\s*:\s*(?:extra|charge)/i.test(trimmed) ||
-      /\bshipping\s*extra\b/i.test(trimmed) ||
-      /mentioned\s*on\s*photo/i.test(trimmed);
+      /(?:dm\s*(?:now|to|for|us)|book\s*(?:now|fast|your|here)|inbox\s*(?:us|now)|order\s*(?:now|fast|here|on)|ping\s*(?:us|now|for))\b/i.test(normalized) ||
+      /(?:whatsapp|call|contact)\s*(?:us|me|on|at|no\.?|number|\:)?\s*[\d+]/i.test(normalized) ||
+      /\b(?:https?:\/\/|wa\.me\/|bit\.ly\/)\S+/i.test(normalized) ||
+      /\b[6-9]\d{9}\b/.test(normalized) ||
+      /(?:single\s*pc\s*available|set\s*to\s*set|no\s*cod|ready\s*to\s*ship|dispatch\s*within)\b/i.test(normalized) ||
+      /(?:shipping|ship)\s*:\s*(?:extra|charge)/i.test(normalized) ||
+      /\bshipping\s*extra\b/i.test(normalized) ||
+      /mentioned\s*on\s*photo/i.test(normalized);
 
     if (isCtaOrContactLine) {
       continue;
     }
 
     // Remove standalone decorative emojis from lines that previously had price/warnings
-    const cleanedLine = trimmed.replace(/^[💰⚠️🚨🚚📸\s]+$/, '').trim();
+    const cleanedLine = trimmed.replace(/^[💰⚠️🚨🚚📸➕💲\s`*-]+$/, '').trim();
     if (cleanedLine) {
       cleanedLines.push(cleanedLine);
     }
@@ -281,7 +284,7 @@ async function saveCatalogProduct(images: string[], caption: string, messageId: 
     images: images.length > 0 ? images : [images[0]],
     fabric,
     description,
-    originalSellerLink: messageId || `wp-wh-${Date.now()}`,
+    originalSellerLink: chatName ? `WhatsApp Group: ${chatName}` : (messageId || `wp-wh-${Date.now()}`),
     sizes: sizes,
     isPlatformShipping: true,
   });

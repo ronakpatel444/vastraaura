@@ -119,14 +119,20 @@ export default function AdminOrdersPage() {
                             <p className="font-medium line-clamp-1">{item.name}</p>
                             <p className="text-xs text-gray-500 mb-1">Qty: {item.quantity} | Size: {item.size}</p>
                             {item.originalSellerLink && (
-                              <a 
-                                href={item.originalSellerLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium bg-blue-50 px-2 py-1 rounded inline-flex w-fit"
-                              >
-                                View Original Seller <ExternalLink className="w-3 h-3" />
-                              </a>
+                              item.originalSellerLink.startsWith('http') ? (
+                                <a 
+                                  href={item.originalSellerLink} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium bg-blue-50 px-2 py-1 rounded inline-flex w-fit"
+                                >
+                                  View Original Seller <ExternalLink className="w-3 h-3" />
+                                </a>
+                              ) : (
+                                <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1 w-fit mt-1">
+                                  💬 {item.originalSellerLink}
+                                </span>
+                              )
                             )}
                           </div>
                           <div className="font-medium text-right">

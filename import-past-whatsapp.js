@@ -73,6 +73,67 @@ function saveMedia(media, folderName, index = 1) {
   return `/images/products/whatsapp/${folderName}/${fileName}`;
 }
 
+// Clean raw WhatsApp text for public product description (remove wholesale rates, prices, fixed price notes, booking CTAs & phone numbers)
+function cleanWhatsAppDescription(rawText = '') {
+  if (!rawText) return '';
+
+  const lines = rawText.split(/\r?\n/);
+  const cleanedLines = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] !== '') {
+        cleanedLines.push('');
+      }
+      continue;
+    }
+
+    // Punctuation / placeholder only lines (e.g. '.', '...', '---', '•')
+    if (/^[.\-—_•*~–\s]+$/.test(trimmed)) {
+      continue;
+    }
+
+    // 1. Remove wholesale prices, rates, MRP, and design-code price lines (e.g. '251005 – 1950/-')
+    const isPriceLine =
+      /(?:price|rate|mrp|cost|wholesale\s*rate|reseller|fixed\s*price|fixed\s*rate|no\s*less|no\s*bargain)\b/i.test(trimmed) ||
+      /^[💰💵🏷️⚠️🚨\s*~-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(trimmed) ||
+      /(?:₹|rs\.?|inr)\s*[\d,]+\s*(?:\/-|\+|-|\bonly\b|\+?\s*ship)/i.test(trimmed) ||
+      /^(?:price|rate)\s*[:=-]/i.test(trimmed) ||
+      /^\s*[*_~]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(trimmed) ||
+      /\b\d{3,5}\s*(?:\/-|\+ship)/i.test(trimmed);
+
+    if (isPriceLine) {
+      continue;
+    }
+
+    // 2. Remove supplier CTAs, DMs, photo references, shipping extra notes, phone numbers, and booking links
+    const isCtaOrContactLine =
+      /(?:dm\s*(?:now|to|for|us)|book\s*(?:now|fast|your|here)|inbox\s*(?:us|now)|order\s*(?:now|fast|here|on)|ping\s*(?:us|now|for))\b/i.test(trimmed) ||
+      /(?:whatsapp|call|contact)\s*(?:us|me|on|at|no\.?|number|\:)?\s*[\d+]/i.test(trimmed) ||
+      /\b(?:https?:\/\/|wa\.me\/|bit\.ly\/)\S+/i.test(trimmed) ||
+      /\b[6-9]\d{9}\b/.test(trimmed) ||
+      /(?:single\s*pc\s*available|set\s*to\s*set|no\s*cod|ready\s*to\s*ship|dispatch\s*within)\b/i.test(trimmed) ||
+      /(?:shipping|ship)\s*:\s*(?:extra|charge)/i.test(trimmed) ||
+      /\bshipping\s*extra\b/i.test(trimmed) ||
+      /mentioned\s*on\s*photo/i.test(trimmed);
+
+    if (isCtaOrContactLine) {
+      continue;
+    }
+
+    const cleanedLine = trimmed.replace(/^[💰⚠️🚨🚚📸\s]+$/, '').trim();
+    if (cleanedLine) {
+      cleanedLines.push(cleanedLine);
+    }
+  }
+
+  while (cleanedLines.length > 0 && cleanedLines[0] === '') cleanedLines.shift();
+  while (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] === '') cleanedLines.pop();
+
+  return cleanedLines.join('\n');
+}
+
 // 5. Parse Catalog Text & Generate SEO
 function parseCatalog(caption, chatName) {
   // Extract Price
@@ -128,7 +189,7 @@ function parseCatalog(caption, chatName) {
     originalPrice: originalPrice,
     category: category,
     fabric: fabric,
-    description: `${seoDesc}\n\n📌 Catalog Details:\n${caption}`,
+    description: cleanWhatsAppDescription(caption) ? `${seoDesc}\n\n✨ Product Details & Specifications:\n${cleanWhatsAppDescription(caption)}` : seoDesc,
     sizes: sizes,
     colors: colors,
   };

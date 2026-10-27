@@ -26,17 +26,17 @@ function detectCategory(text: string = ''): string {
   if (lower.includes('short kurti') || lower.includes('short top') || lower.includes('short kurtis') || lower.includes('tunic')) {
     return 'Short Kurtis';
   }
-  if (lower.includes('kurta set') || lower.includes('kurti set') || lower.includes('kurta')) {
-    return 'Kurta Sets';
-  }
   if (lower.includes('chaniya') || lower.includes('choli') || lower.includes('navratri') || lower.includes('kediya')) {
     return 'Chaniya Choli';
   }
   if (lower.includes('lehenga') || lower.includes('ghagra')) {
     return 'Lehenga';
   }
-  if (lower.includes('saree') || lower.includes('sari') || lower.includes('patola') || lower.includes('silk')) {
+  if (lower.includes('saree') || lower.includes('sari') || lower.includes('patola')) {
     return 'Saree';
+  }
+  if (lower.includes('kurta set') || lower.includes('kurti set') || lower.includes('kurta') || lower.includes('frock') || lower.includes('gown') || lower.includes('dress') || lower.includes('anarkali') || lower.includes('coord') || lower.includes('co-ord')) {
+    return 'Kurta Sets';
   }
   return '3 Piece Suit';
 }
@@ -50,6 +50,68 @@ function extractFabric(text: string = ''): string {
     }
   }
   return 'Premium Fabric';
+}
+
+// Helper: Clean raw WhatsApp text for public product description (remove wholesale rates, prices, fixed price notes, booking CTAs, design codes with rates & phone numbers)
+export function cleanWhatsAppDescription(rawText: string = ''): string {
+  if (!rawText) return '';
+
+  const lines = rawText.split(/\r?\n/);
+  const cleanedLines: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] !== '') {
+        cleanedLines.push('');
+      }
+      continue;
+    }
+
+    // Punctuation / placeholder only lines (e.g. '.', '...', '---', '•')
+    if (/^[.\-—_•*~–\s]+$/.test(trimmed)) {
+      continue;
+    }
+
+    // 1. Remove wholesale prices, rates, MRP, and design-code price lines (e.g. '251005 – 1950/-')
+    const isPriceLine =
+      /(?:price|rate|mrp|cost|wholesale\s*rate|reseller|fixed\s*price|fixed\s*rate|no\s*less|no\s*bargain)\b/i.test(trimmed) ||
+      /^[💰💵🏷️⚠️🚨\s*~-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(trimmed) ||
+      /(?:₹|rs\.?|inr)\s*[\d,]+\s*(?:\/-|\+|-|\bonly\b|\+?\s*ship)/i.test(trimmed) ||
+      /^(?:price|rate)\s*[:=-]/i.test(trimmed) ||
+      /^\s*[*_~]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(trimmed) ||
+      /\b\d{3,5}\s*(?:\/-|\+ship)/i.test(trimmed);
+
+    if (isPriceLine) {
+      continue;
+    }
+
+    // 2. Remove supplier CTAs, DMs, photo references, shipping extra notes, phone numbers, and booking links
+    const isCtaOrContactLine =
+      /(?:dm\s*(?:now|to|for|us)|book\s*(?:now|fast|your|here)|inbox\s*(?:us|now)|order\s*(?:now|fast|here|on)|ping\s*(?:us|now|for))\b/i.test(trimmed) ||
+      /(?:whatsapp|call|contact)\s*(?:us|me|on|at|no\.?|number|\:)?\s*[\d+]/i.test(trimmed) ||
+      /\b(?:https?:\/\/|wa\.me\/|bit\.ly\/)\S+/i.test(trimmed) ||
+      /\b[6-9]\d{9}\b/.test(trimmed) ||
+      /(?:single\s*pc\s*available|set\s*to\s*set|no\s*cod|ready\s*to\s*ship|dispatch\s*within)\b/i.test(trimmed) ||
+      /(?:shipping|ship)\s*:\s*(?:extra|charge)/i.test(trimmed) ||
+      /\bshipping\s*extra\b/i.test(trimmed) ||
+      /mentioned\s*on\s*photo/i.test(trimmed);
+
+    if (isCtaOrContactLine) {
+      continue;
+    }
+
+    // Remove standalone decorative emojis from lines that previously had price/warnings
+    const cleanedLine = trimmed.replace(/^[💰⚠️🚨🚚📸\s]+$/, '').trim();
+    if (cleanedLine) {
+      cleanedLines.push(cleanedLine);
+    }
+  }
+
+  while (cleanedLines.length > 0 && cleanedLines[0] === '') cleanedLines.shift();
+  while (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] === '') cleanedLines.pop();
+
+  return cleanedLines.join('\n');
 }
 
 // Helper: Extract price and compute profit markup (User rule: ₹800-₹1000+ profit, e.g. ₹800 wholesale -> ₹1999 listing)
@@ -145,13 +207,18 @@ function generateMetadata(category: string, fabric: string, rawText: string, pri
   const cleanDesign = firstLine.length > 5 ? firstLine : 'Royal Festive Collection';
   const name = `Exclusive Handcrafted ${fabric} ${category} (${cleanDesign}) | Vastra Aura`;
 
-  const description =
+  const cleanedSpecs = cleanWhatsAppDescription(rawText);
+
+  let description =
     `Experience Surat artisan luxury with this beautiful ${fabric} ${category}. ` +
     `Designed with intricate detailing, comfortable tailoring, and vibrant colors. ` +
     `Perfect for weddings, festivals, and parties. ` +
     `\n\n✓ All India Free Cash on Delivery (COD)` +
-    `\n✓ Instant Dispatch & Worldwide Shipping` +
-    `\n\n📌 Original Supplier Specifications:\n${rawText}`;
+    `\n✓ Instant Dispatch & Worldwide Shipping`;
+
+  if (cleanedSpecs) {
+    description += `\n\n✨ Product Details & Specifications:\n${cleanedSpecs}`;
+  }
 
   return { name, description };
 }

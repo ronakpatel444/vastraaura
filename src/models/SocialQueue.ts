@@ -52,3 +52,4 @@ const SocialQueueSchema = new Schema<ISocialQueue>(
 // Prevent re-compilation in development
 export default (mongoose.models.SocialQueue as Model<ISocialQueue>) || 
   mongoose.model<ISocialQueue>('SocialQueue', SocialQueueSchema);
+

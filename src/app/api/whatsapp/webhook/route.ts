@@ -5,6 +5,7 @@ import Settings from '@/models/Settings';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
+import { addToSocialQueue } from '@/lib/socialQueue';
 
 // In-memory buffer to group multiple images sent with a caption in WhatsApp bursts
 interface CatalogBuffer {
@@ -339,7 +340,7 @@ function generateViralCaption(product: any, baseUrl: string): string {
   );
 }
 
-// AUTO SOCIAL MEDIA PUBLISHER (called after product is saved)
+// ENQUEUE TO 30-MINUTE SOCIAL MEDIA QUEUE (called after product is saved)
 // ============================================================
 async function autoPublishToSocial(
   product: any,
@@ -348,182 +349,33 @@ async function autoPublishToSocial(
   settings?: any
 ) {
   try {
-    const token = settings?.metaAccessToken || process.env.META_ACCESS_TOKEN || '';
-    const pageId = settings?.metaPageId || process.env.META_PAGE_ID || '';
-    const igAccountId = settings?.metaIgAccountId || process.env.META_IG_ACCOUNT_ID || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com';
-
-    if (!token) {
-      console.warn('[AutoSocial] No Meta token — skipping social auto-publish.');
-      return;
-    }
-
     const channels: string[] = settings?.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page'];
-    const GRAPH_API = 'https://graph.facebook.com/v19.0';
-
-    // Build full image URLs
-    const fullImages = images.map((img: string) => {
-      if (img.startsWith('http')) return img;
-      return `${baseUrl}${img.startsWith('/') ? img : '/' + img}`;
-    });
 
     // 🔥 VIRAL caption — hook formula based
     const socialCaption = generateViralCaption(product, baseUrl);
+    const mediaType: 'IMAGE' | 'CAROUSEL' | 'REEL' = videoLocalUrl
+      ? 'REEL'
+      : (images && images.length > 1)
+      ? 'CAROUSEL'
+      : 'IMAGE';
 
-    // ── VIDEO REEL (Instagram Reel + Facebook Reel) ──────────────────────────
-    if (videoLocalUrl) {
-      const fullVideoUrl = videoLocalUrl.startsWith('http') ? videoLocalUrl : `${baseUrl}${videoLocalUrl}`;
+    console.log(`[WhatsApp Webhook] 📥 Adding "${product.name}" to 30-Minute Social Queue (${mediaType})...`);
 
-      // Instagram Reel
-      if (igAccountId && (channels.includes('instagram_reel') || channels.includes('instagram_feed'))) {
-        try {
-          console.log('[AutoSocial] Uploading Instagram Reel...');
-          const igReelContainer = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
-            media_type: 'REELS',
-            video_url: fullVideoUrl,
-            caption: socialCaption,
-            share_to_feed: true,
-            access_token: token,
-          });
+    const queueItem = await addToSocialQueue({
+      productId: product._id,
+      title: product.name,
+      caption: socialCaption,
+      mediaType,
+      images,
+      videoUrl: videoLocalUrl,
+      channels,
+      gapMinutes: 30, // 30-minute spacing between posts!
+    });
 
-          // Poll until ready (video processing takes time)
-          let status = 'IN_PROGRESS';
-          let attempts = 0;
-          while (status === 'IN_PROGRESS' && attempts < 12) {
-            await new Promise(r => setTimeout(r, 10000)); // wait 10s
-            const statusRes = await axios.get(`${GRAPH_API}/${igReelContainer.data.id}?fields=status_code&access_token=${token}`);
-            status = statusRes.data.status_code || 'FINISHED';
-            attempts++;
-          }
-
-          if (status === 'FINISHED' || status === 'READY') {
-            await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
-              creation_id: igReelContainer.data.id,
-              access_token: token,
-            });
-            console.log('✅ [AutoSocial] Instagram Reel published!');
-          }
-        } catch (err: any) {
-          console.error('[AutoSocial] Instagram Reel failed:', err.response?.data || err.message);
-        }
-      }
-
-      // Facebook Reel
-      if (pageId && channels.includes('facebook_page')) {
-        try {
-          console.log('[AutoSocial] Uploading Facebook Reel...');
-          // Step 1: Initialize upload session
-          const initRes = await axios.post(`${GRAPH_API}/${pageId}/video_reels`, {
-            upload_phase: 'start',
-            access_token: token,
-          });
-          const videoId = initRes.data.video_id;
-
-          // Step 2: Upload video bytes
-          await axios.post(`https://rupload.facebook.com/video-upload/v19.0/${videoId}`, null, {
-            headers: {
-              Authorization: `OAuth ${token}`,
-              file_url: fullVideoUrl,
-            },
-          });
-
-          // Step 3: Publish
-          await axios.post(`${GRAPH_API}/${pageId}/video_reels`, {
-            upload_phase: 'finish',
-            video_id: videoId,
-            video_state: 'PUBLISHED',
-            description: socialCaption,
-            access_token: token,
-          });
-          console.log('✅ [AutoSocial] Facebook Reel published!');
-        } catch (err: any) {
-          console.error('[AutoSocial] Facebook Reel failed:', err.response?.data || err.message);
-        }
-      }
-
-      return; // Video handled, skip photo publishing
-    }
-
-    // ── PHOTO POST (Instagram + Facebook) ────────────────────────────────────
-
-    // Instagram Feed (Carousel if multiple images)
-    if (igAccountId && channels.includes('instagram_feed') && fullImages.length > 0) {
-      try {
-        if (fullImages.length === 1) {
-          const containerRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
-            image_url: fullImages[0],
-            caption: socialCaption,
-            access_token: token,
-          });
-          await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
-            creation_id: containerRes.data.id,
-            access_token: token,
-          });
-          console.log('✅ [AutoSocial] Instagram single post published!');
-        } else {
-          // Multi-image carousel (up to 10)
-          const carouselSlice = fullImages.slice(0, 10);
-          const childIds: string[] = [];
-          for (const imgUrl of carouselSlice) {
-            const itemRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
-              image_url: imgUrl,
-              is_carousel_item: true,
-              access_token: token,
-            });
-            childIds.push(itemRes.data.id);
-          }
-          const carouselRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
-            media_type: 'CAROUSEL',
-            children: childIds,
-            caption: socialCaption,
-            access_token: token,
-          });
-          await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
-            creation_id: carouselRes.data.id,
-            access_token: token,
-          });
-          console.log(`✅ [AutoSocial] Instagram carousel (${carouselSlice.length} photos) published!`);
-        }
-      } catch (err: any) {
-        console.error('[AutoSocial] Instagram Feed failed:', err.response?.data || err.message);
-      }
-    }
-
-    // Facebook Page Post (all images as multi-photo post)
-    if (pageId && channels.includes('facebook_page') && fullImages.length > 0) {
-      try {
-        if (fullImages.length === 1) {
-          await axios.post(`${GRAPH_API}/${pageId}/photos`, {
-            url: fullImages[0],
-            message: socialCaption,
-            access_token: token,
-          });
-          console.log('✅ [AutoSocial] Facebook single photo posted!');
-        } else {
-          // Multi-photo: upload each photo unpublished, then post together
-          const photoIds: { media_fbid: string }[] = [];
-          for (const imgUrl of fullImages.slice(0, 10)) {
-            const photoRes = await axios.post(`${GRAPH_API}/${pageId}/photos`, {
-              url: imgUrl,
-              published: false,
-              access_token: token,
-            });
-            photoIds.push({ media_fbid: photoRes.data.id });
-          }
-          await axios.post(`${GRAPH_API}/${pageId}/feed`, {
-            message: socialCaption,
-            attached_media: photoIds,
-            access_token: token,
-          });
-          console.log(`✅ [AutoSocial] Facebook multi-photo (${photoIds.length} photos) posted!`);
-        }
-      } catch (err: any) {
-        console.error('[AutoSocial] Facebook Page failed:', err.response?.data || err.message);
-      }
-    }
-
+    return queueItem;
   } catch (err: any) {
-    console.error('[AutoSocial] Auto-publish error:', err.message);
+    console.error('[WhatsApp Webhook] Error adding to social queue:', err.message);
   }
 }
 

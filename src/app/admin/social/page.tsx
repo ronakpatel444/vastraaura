@@ -81,13 +81,19 @@ interface MetaConfig {
 }
 
 export default function SocialStudioPage() {
-  const [activeTab, setActiveTab] = useState<'publisher' | 'agent'>('agent');
+  const [activeTab, setActiveTab] = useState<'publisher' | 'agent' | 'queue'>('agent');
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+
+  // 30-Min Queue States
+  const [queueData, setQueueData] = useState<any>({ stats: { pending: 0, published: 0, failed: 0 }, queue: { pending: [], published: [], failed: [] } });
+  const [loadingQueue, setLoadingQueue] = useState(false);
+  const [processingQueue, setProcessingQueue] = useState(false);
+  const [queueActionMsg, setQueueActionMsg] = useState('');
 
   // Channels to publish
   const [channels, setChannels] = useState<{
@@ -148,7 +154,70 @@ export default function SocialStudioPage() {
     fetchMetaConfig();
     fetchAgentDefaults();
     fetchWpConfig();
+    fetchQueue();
   }, []);
+
+  const fetchQueue = async () => {
+    try {
+      setLoadingQueue(true);
+      const res = await fetch('/api/admin/social/queue');
+      const data = await res.json();
+      if (data.success) {
+        setQueueData(data);
+      }
+    } catch (e) {
+      console.error('Failed to load queue', e);
+    } finally {
+      setLoadingQueue(false);
+    }
+  };
+
+  const handleProcessQueueNow = async () => {
+    try {
+      setProcessingQueue(true);
+      setQueueActionMsg('');
+      const res = await fetch('/api/admin/social/queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'process_now' }),
+      });
+      const data = await res.json();
+      setQueueActionMsg(data.message || 'Processed');
+      fetchQueue();
+    } catch (e: any) {
+      setQueueActionMsg('Error: ' + e.message);
+    } finally {
+      setProcessingQueue(false);
+      setTimeout(() => setQueueActionMsg(''), 4000);
+    }
+  };
+
+  const handleDeleteQueueItem = async (id: string) => {
+    if (!confirm('Remove this item from the queue?')) return;
+    try {
+      await fetch('/api/admin/social/queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id }),
+      });
+      fetchQueue();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRetryQueueItem = async (id: string) => {
+    try {
+      await fetch('/api/admin/social/queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry', id }),
+      });
+      fetchQueue();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -537,23 +606,23 @@ export default function SocialStudioPage() {
       </div>
 
       {/* Main Tab Switcher (Segmented Control on Mobile, Tabs on Desktop) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 bg-gray-100/90 rounded-2xl sm:bg-transparent sm:p-0 sm:border-b sm:border-gray-200 sm:rounded-none">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 bg-gray-100/90 rounded-2xl sm:bg-transparent sm:p-0 sm:border-b sm:border-gray-200 sm:rounded-none">
         <button
           onClick={() => setActiveTab('agent')}
-          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
+          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
             activeTab === 'agent'
               ? 'bg-white text-black shadow-sm sm:bg-transparent sm:shadow-none sm:border-black'
               : 'text-gray-500 hover:text-black sm:border-transparent'
           }`}
         >
           <Sparkles className="w-4 h-4 text-accent" />
-          <span>🤖 AI Viral Growth Agent</span>
+          <span>🤖 AI Growth Agent</span>
           <span className="px-1.5 py-0.5 text-[9px] bg-amber-100 text-amber-800 rounded-full font-semibold">Copilot</span>
         </button>
 
         <button
           onClick={() => setActiveTab('publisher')}
-          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
+          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
             activeTab === 'publisher'
               ? 'bg-white text-black shadow-sm sm:bg-transparent sm:shadow-none sm:border-black'
               : 'text-gray-500 hover:text-black sm:border-transparent'
@@ -561,7 +630,26 @@ export default function SocialStudioPage() {
         >
           <Send className="w-4 h-4 text-pink-600" />
           <span>📸 1-Click Publisher</span>
-          <span className="text-[10px] text-gray-500 hidden sm:inline">(Feed, Story, Pin)</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('queue');
+            fetchQueue();
+          }}
+          className={`flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-none sm:border-b-2 transition-all ${
+            activeTab === 'queue'
+              ? 'bg-white text-black shadow-sm sm:bg-transparent sm:shadow-none sm:border-black'
+              : 'text-gray-500 hover:text-black sm:border-transparent'
+          }`}
+        >
+          <Zap className="w-4 h-4 text-indigo-600" />
+          <span>⏱️ 30-Min Queue</span>
+          {(queueData?.stats?.pending || 0) > 0 && (
+            <span className="px-1.5 py-0.5 text-[10px] bg-indigo-100 text-indigo-800 rounded-full font-bold">
+              {queueData.stats.pending}
+            </span>
+          )}
         </button>
       </div>
 
@@ -1534,6 +1622,253 @@ export default function SocialStudioPage() {
             </div>
 
           </div>
+
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* TAB 3: 30-MINUTE SOCIAL MEDIA QUEUE (Auto-Paced Scheduler)      */}
+      {/* ============================================================== */}
+      {activeTab === 'queue' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          
+          {/* Queue Header Hero Card */}
+          <div className="p-6 bg-gradient-to-r from-neutral-900 via-neutral-800 to-indigo-950 text-white rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-neutral-700">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping" />
+                <span className="text-xs uppercase tracking-widest text-indigo-400 font-bold">
+                  30-Minute Auto-Paced Social Engine
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-serif">
+                Instagram & Facebook Publishing Queue
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                Posts and Reels from WhatsApp are automatically queued with a <strong>strict 30-minute gap</strong> between each. This protects your account from spam flags and ensures maximum algorithm visibility.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                onClick={handleProcessQueueNow}
+                disabled={processingQueue || (queueData?.stats?.pending || 0) === 0}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md transition-all cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-amber-300" />
+                {processingQueue ? 'Publishing Next...' : '⚡ Publish Next Item Now'}
+              </button>
+
+              <button
+                onClick={fetchQueue}
+                disabled={loadingQueue}
+                className="px-3.5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold rounded-xl border border-neutral-600 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+
+          {/* Action notification message */}
+          {queueActionMsg && (
+            <div className="p-3.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-900 border border-indigo-200 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+              <span>{queueActionMsg}</span>
+            </div>
+          )}
+
+          {/* Stat Counter Pills */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Scheduled (Waiting)</p>
+                <p className="text-2xl font-bold text-indigo-600 mt-1">{queueData?.stats?.pending || 0}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Spaced by 30 minutes each</p>
+              </div>
+              <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                <Zap className="w-6 h-6" />
+              </div>
+            </div>
+
+            <div className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Successfully Published</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{queueData?.stats?.published || 0}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Live on Instagram & Facebook</p>
+              </div>
+              <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+            </div>
+
+            <div className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Failed / Attention Needed</p>
+                <p className="text-2xl font-bold text-rose-600 mt-1">{queueData?.stats?.failed || 0}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Expired tokens or media errors</p>
+              </div>
+              <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 1: UPCOMING SCHEDULED QUEUE */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-base text-gray-900 flex items-center gap-2">
+                <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg text-xs">⏳</span>
+                Upcoming Scheduled Posts ({queueData?.queue?.pending?.length || 0})
+              </h3>
+              <span className="text-xs text-gray-500">
+                Interval: <strong>30 minutes</strong>
+              </span>
+            </div>
+
+            {loadingQueue ? (
+              <div className="p-8 text-center text-gray-500 text-sm">Loading queue...</div>
+            ) : (!queueData?.queue?.pending || queueData.queue.pending.length === 0) ? (
+              <div className="p-10 text-center text-gray-400 space-y-2">
+                <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-400" />
+                <p className="font-bold text-gray-700 text-sm">Queue is empty!</p>
+                <p className="text-xs text-gray-500">
+                  When new products arrive in WhatsApp catalog groups, they will automatically appear here scheduled 30 minutes apart.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {queueData.queue.pending.map((item: any, idx: number) => {
+                  const schedTime = new Date(item.scheduledAt);
+                  const isPast = schedTime.getTime() <= Date.now();
+                  const diffMinutes = Math.round((schedTime.getTime() - Date.now()) / 60000);
+
+                  return (
+                    <div key={item._id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/50 rounded-xl px-2 transition-colors">
+                      <div className="flex items-start gap-3.5">
+                        <span className="w-7 h-7 rounded-full bg-neutral-900 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+
+                        {item.images && item.images[0] ? (
+                          <img
+                            src={item.images[0]}
+                            alt={item.title}
+                            className="w-14 h-14 rounded-xl object-cover border border-gray-200 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0 font-bold text-xs">
+                            🎬 Reel
+                          </div>
+                        )}
+
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-sm font-bold text-gray-900 truncate max-w-md">
+                            {item.title}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <span className="px-2 py-0.5 bg-neutral-100 text-neutral-800 rounded font-bold">
+                              {item.mediaType === 'REEL' ? '🎬 Reel' : item.mediaType === 'CAROUSEL' ? `📸 Carousel (${item.images?.length || 0})` : '📸 Single Image'}
+                            </span>
+                            <span className="px-2 py-0.5 bg-pink-50 text-pink-700 rounded font-semibold">
+                              Instagram
+                            </span>
+                            <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold">
+                              Facebook
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 justify-between sm:justify-end">
+                        <div className="text-right">
+                          <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${
+                            isPast 
+                              ? 'bg-amber-100 text-amber-800' 
+                              : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                          }`}>
+                            {isPast ? '⚡ Due Now' : `in ${diffMinutes} mins`}
+                          </span>
+                          <p className="text-[11px] text-gray-400 mt-0.5 font-mono">
+                            {schedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => handleDeleteQueueItem(item._id)}
+                          className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Remove from queue"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 2: RECENTLY PUBLISHED POSTS */}
+          {queueData?.queue?.published && queueData.queue.published.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="font-bold text-base text-gray-900 flex items-center gap-2 border-b pb-3">
+                <span className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs">✓</span>
+                Recently Published History ({queueData.queue.published.length})
+              </h3>
+              <div className="divide-y divide-gray-100">
+                {queueData.queue.published.map((item: any) => (
+                  <div key={item._id} className="py-3 flex items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center gap-3 truncate">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span className="font-bold text-gray-900 truncate">{item.title}</span>
+                      <span className="text-gray-400 font-mono text-[11px]">
+                        {new Date(item.publishedAt || item.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold rounded">
+                      Live
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 3: FAILED POSTS (If any) */}
+          {queueData?.queue?.failed && queueData.queue.failed.length > 0 && (
+            <div className="bg-rose-50/50 border border-rose-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-rose-200 pb-3">
+                <h3 className="font-bold text-base text-rose-900 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-rose-600" />
+                  Failed Posts ({queueData.queue.failed.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {queueData.queue.failed.map((item: any) => (
+                  <div key={item._id} className="p-3 bg-white border border-rose-200 rounded-xl flex items-center justify-between gap-4 text-xs">
+                    <div className="space-y-1 min-w-0">
+                      <p className="font-bold text-gray-900 truncate">{item.title}</p>
+                      <p className="text-rose-600 text-[11px] font-mono truncate">{item.error || 'Failed to publish'}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleRetryQueueItem(item._id)}
+                        className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded text-[11px] cursor-pointer"
+                      >
+                        Retry
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQueueItem(item._id)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       )}

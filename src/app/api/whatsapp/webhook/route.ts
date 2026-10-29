@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
+import Settings from '@/models/Settings';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import axios from 'axios';
 interface CatalogBuffer {
   [chatId: string]: {
     images: string[];
+    videoUrl?: string;
     folderKey: string;
     caption: string;
     timer: NodeJS.Timeout | null;
@@ -79,11 +81,11 @@ export function cleanWhatsAppDescription(rawText: string = ''): string {
     // 1. Remove wholesale prices, rates, MRP, and design-code price lines (e.g. '251005 – 1950/-', 'PRICE :- 999/-INR')
     const isPriceLine =
       /(?:price|rate|mrp|cost|wholesale\s*rate|reseller|fixed\s*price|fixed\s*rate|no\s*less|no\s*bargain)\b/i.test(normalized) ||
-      /^[💰💵🏷️⚠️🚨➕💲\s*~`'\"-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(normalized) ||
+      /^[💰💵🏷️⚠️🚨➕💲\s*~`'"-]*\s*(?:price|rate|mrp|inr|rs\.?|₹)\s*[:=-]?\s*[\d,]+/i.test(normalized) ||
       /(?:₹|rs\.?|inr)\s*[\d,]+\s*(?:\/-|\+|-|\bonly\b|\+?\s*ship)/i.test(normalized) ||
       /[\d,]+\s*(?:\/-\s*inr|\/-|\+ship)/i.test(normalized) ||
       /^(?:price|rate)\s*[:=-]/i.test(normalized) ||
-      /^\s*[*_~`]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(normalized);
+      /^\s*[*_~`]?\s*(?:[a-zA-Z0-9_\s#.-]+[-–—:])?​\s*₹?\s*\d{3,5}\s*(?:\/-|\+|-|\bonly\b)/i.test(normalized);
 
     if (isPriceLine) {
       continue;
@@ -250,8 +252,330 @@ async function downloadAndSaveImage(downloadUrl: string, folderKey: string, inde
   }
 }
 
-// Helper: Create product in Database
-async function saveCatalogProduct(images: string[], caption: string, messageId: string, chatName: string) {
+// Helper: Download video to local public disk
+async function downloadAndSaveVideo(downloadUrl: string, folderKey: string): Promise<string> {
+  try {
+    const uploadDir = path.join(process.cwd(), 'public', 'incoming-catalogs', folderKey);
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const fileName = `reel.mp4`;
+    const filePath = path.join(uploadDir, fileName);
+
+    const response = await axios.get(downloadUrl, {
+      responseType: 'arraybuffer',
+      timeout: 60000,
+    });
+
+    fs.writeFileSync(filePath, Buffer.from(response.data));
+    return `/incoming-catalogs/${folderKey}/${fileName}`;
+  } catch (err: any) {
+    console.warn(`[Video Download Warn] Using remote URL directly: ${err.message}`);
+    return downloadUrl;
+  }
+}
+
+// ============================================================
+// ============================================================
+// VIRAL CAPTION GENERATOR — Hook formulas for Instagram/Facebook
+// ============================================================
+function generateViralCaption(product: any, baseUrl: string): string {
+  const name = (product.name || '').split('|')[0].trim();
+  const category = product.category || 'Ethnic Wear';
+  const fabric = product.fabric || 'Premium Fabric';
+  const price = product.price ? `₹${product.price}` : '';
+  const productUrl = `${baseUrl}/products/${product._id}`;
+  const handle = '@vastraaura21';
+
+  // Rotate viral hooks based on product id (so each product gets different hook)
+  const idNum = parseInt((product._id || '0').toString().slice(-2), 16) || 0;
+
+  const hooks = [
+    // 1. Metro Boutique Expose
+    `POV: You found the direct Surat studio where Mumbai & Delhi boutiques buy their ${category} for ${price}... 🤯\n\nThey sell it to you for ₹12,000+. We sell direct! 👇`,
+    // 2. Price Shock
+    `Boutique in Mumbai: ₹15,999 ❌\nVastra Aura Direct from Surat: ${price} ✅\n\nSame quality. Zero middleman. 🤫`,
+    // 3. Flare/Reveal Hook
+    `Wait till the full flare opens... 😱 Handcrafted with real ${fabric} — delivered FREE across India! 🇮🇳`,
+    // 4. Relatable
+    `My brain: "You already have enough outfits!"\nMe seeing this ${category} at ${price}: "Add to cart!" 😭✨`,
+    // 5. NRI Hook
+    `How NRI brides in USA & UK are getting designer ${category} delivered in 5 days under $60! ✈️`,
+    // 6. Urgency Drop
+    `Only 5 pieces left in this batch! Once sold, restock takes 3 weeks ⏳\n\n${name}`,
+    // 7. Navratri/Festival
+    `Wear this to your next Garba or Sangeet and everyone will ask: "WHERE DID YOU GET THIS?!" 💃✨`,
+    // 8. Artisan BTS
+    `48 hours of pure hand-craftsmanship in Surat → this breathtaking ${category} 🪡✨\n\nDirect to your door. Free COD!`,
+  ];
+
+  const hook = hooks[idNum % hooks.length];
+
+  // Dynamic hashtags
+  const catTag = `#${category.replace(/\s+/g, '')}`;
+  const fabricTag = fabric !== 'Premium Fabric' ? `#${fabric.replace(/\s+/g, '')}` : '#PremiumFabric';
+  const hashtags = [
+    '#VastraAura', '#vastraaura21', catTag, fabricTag,
+    '#EthnicWear', '#IndianFashion', '#SuratFashion',
+    '#DirectFromSurat', '#FreeCOD', '#CashOnDelivery',
+    '#FestiveWear', '#WeddingOutfit', '#ReelItFeelIt',
+    '#FYPIndia', '#ExplorePage', '#TrendingReels',
+    '#MumbaiFashion', '#DelhiBoutiques', '#NRIWedding',
+    '#DesignerWear', '#HandcraftedIndia', '#AllIndiaDelivery',
+  ].join(' ');
+
+  return (
+    `${hook}\n\n` +
+    `✨ ${name}\n` +
+    `🧵 Fabric: ${fabric} • Direct Surat Artisan\n` +
+    `🏷️ ${price} (No boutique markup!)\n` +
+    `📦 Free Cash on Delivery — All India\n` +
+    `✈️ Express Shipping: USA, UK, Canada, Dubai\n\n` +
+    `🛒 Order Now 👇\n${productUrl}\n\n` +
+    `💬 Comment "PRICE" for direct link in DM!\n` +
+    `Follow ${handle} for daily drops ✨\n\n` +
+    `${hashtags}`
+  );
+}
+
+// AUTO SOCIAL MEDIA PUBLISHER (called after product is saved)
+// ============================================================
+async function autoPublishToSocial(
+  product: any,
+  images: string[],
+  videoLocalUrl?: string,
+  settings?: any
+) {
+  try {
+    const token = settings?.metaAccessToken || process.env.META_ACCESS_TOKEN || '';
+    const pageId = settings?.metaPageId || process.env.META_PAGE_ID || '';
+    const igAccountId = settings?.metaIgAccountId || process.env.META_IG_ACCOUNT_ID || '';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com';
+
+    if (!token) {
+      console.warn('[AutoSocial] No Meta token — skipping social auto-publish.');
+      return;
+    }
+
+    const channels: string[] = settings?.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page'];
+    const GRAPH_API = 'https://graph.facebook.com/v19.0';
+
+    // Build full image URLs
+    const fullImages = images.map((img: string) => {
+      if (img.startsWith('http')) return img;
+      return `${baseUrl}${img.startsWith('/') ? img : '/' + img}`;
+    });
+
+    // 🔥 VIRAL caption — hook formula based
+    const socialCaption = generateViralCaption(product, baseUrl);
+
+    // ── VIDEO REEL (Instagram Reel + Facebook Reel) ──────────────────────────
+    if (videoLocalUrl) {
+      const fullVideoUrl = videoLocalUrl.startsWith('http') ? videoLocalUrl : `${baseUrl}${videoLocalUrl}`;
+
+      // Instagram Reel
+      if (igAccountId && (channels.includes('instagram_reel') || channels.includes('instagram_feed'))) {
+        try {
+          console.log('[AutoSocial] Uploading Instagram Reel...');
+          const igReelContainer = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
+            media_type: 'REELS',
+            video_url: fullVideoUrl,
+            caption: socialCaption,
+            share_to_feed: true,
+            access_token: token,
+          });
+
+          // Poll until ready (video processing takes time)
+          let status = 'IN_PROGRESS';
+          let attempts = 0;
+          while (status === 'IN_PROGRESS' && attempts < 12) {
+            await new Promise(r => setTimeout(r, 10000)); // wait 10s
+            const statusRes = await axios.get(`${GRAPH_API}/${igReelContainer.data.id}?fields=status_code&access_token=${token}`);
+            status = statusRes.data.status_code || 'FINISHED';
+            attempts++;
+          }
+
+          if (status === 'FINISHED' || status === 'READY') {
+            await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
+              creation_id: igReelContainer.data.id,
+              access_token: token,
+            });
+            console.log('✅ [AutoSocial] Instagram Reel published!');
+          }
+        } catch (err: any) {
+          console.error('[AutoSocial] Instagram Reel failed:', err.response?.data || err.message);
+        }
+      }
+
+      // Facebook Reel
+      if (pageId && channels.includes('facebook_page')) {
+        try {
+          console.log('[AutoSocial] Uploading Facebook Reel...');
+          // Step 1: Initialize upload session
+          const initRes = await axios.post(`${GRAPH_API}/${pageId}/video_reels`, {
+            upload_phase: 'start',
+            access_token: token,
+          });
+          const videoId = initRes.data.video_id;
+
+          // Step 2: Upload video bytes
+          await axios.post(`https://rupload.facebook.com/video-upload/v19.0/${videoId}`, null, {
+            headers: {
+              Authorization: `OAuth ${token}`,
+              file_url: fullVideoUrl,
+            },
+          });
+
+          // Step 3: Publish
+          await axios.post(`${GRAPH_API}/${pageId}/video_reels`, {
+            upload_phase: 'finish',
+            video_id: videoId,
+            video_state: 'PUBLISHED',
+            description: socialCaption,
+            access_token: token,
+          });
+          console.log('✅ [AutoSocial] Facebook Reel published!');
+        } catch (err: any) {
+          console.error('[AutoSocial] Facebook Reel failed:', err.response?.data || err.message);
+        }
+      }
+
+      return; // Video handled, skip photo publishing
+    }
+
+    // ── PHOTO POST (Instagram + Facebook) ────────────────────────────────────
+
+    // Instagram Feed (Carousel if multiple images)
+    if (igAccountId && channels.includes('instagram_feed') && fullImages.length > 0) {
+      try {
+        if (fullImages.length === 1) {
+          const containerRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
+            image_url: fullImages[0],
+            caption: socialCaption,
+            access_token: token,
+          });
+          await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
+            creation_id: containerRes.data.id,
+            access_token: token,
+          });
+          console.log('✅ [AutoSocial] Instagram single post published!');
+        } else {
+          // Multi-image carousel (up to 10)
+          const carouselSlice = fullImages.slice(0, 10);
+          const childIds: string[] = [];
+          for (const imgUrl of carouselSlice) {
+            const itemRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
+              image_url: imgUrl,
+              is_carousel_item: true,
+              access_token: token,
+            });
+            childIds.push(itemRes.data.id);
+          }
+          const carouselRes = await axios.post(`${GRAPH_API}/${igAccountId}/media`, {
+            media_type: 'CAROUSEL',
+            children: childIds,
+            caption: socialCaption,
+            access_token: token,
+          });
+          await axios.post(`${GRAPH_API}/${igAccountId}/media_publish`, {
+            creation_id: carouselRes.data.id,
+            access_token: token,
+          });
+          console.log(`✅ [AutoSocial] Instagram carousel (${carouselSlice.length} photos) published!`);
+        }
+      } catch (err: any) {
+        console.error('[AutoSocial] Instagram Feed failed:', err.response?.data || err.message);
+      }
+    }
+
+    // Facebook Page Post (all images as multi-photo post)
+    if (pageId && channels.includes('facebook_page') && fullImages.length > 0) {
+      try {
+        if (fullImages.length === 1) {
+          await axios.post(`${GRAPH_API}/${pageId}/photos`, {
+            url: fullImages[0],
+            message: socialCaption,
+            access_token: token,
+          });
+          console.log('✅ [AutoSocial] Facebook single photo posted!');
+        } else {
+          // Multi-photo: upload each photo unpublished, then post together
+          const photoIds: { media_fbid: string }[] = [];
+          for (const imgUrl of fullImages.slice(0, 10)) {
+            const photoRes = await axios.post(`${GRAPH_API}/${pageId}/photos`, {
+              url: imgUrl,
+              published: false,
+              access_token: token,
+            });
+            photoIds.push({ media_fbid: photoRes.data.id });
+          }
+          await axios.post(`${GRAPH_API}/${pageId}/feed`, {
+            message: socialCaption,
+            attached_media: photoIds,
+            access_token: token,
+          });
+          console.log(`✅ [AutoSocial] Facebook multi-photo (${photoIds.length} photos) posted!`);
+        }
+      } catch (err: any) {
+        console.error('[AutoSocial] Facebook Page failed:', err.response?.data || err.message);
+      }
+    }
+
+  } catch (err: any) {
+    console.error('[AutoSocial] Auto-publish error:', err.message);
+  }
+}
+
+// ============================================================
+// HARDCODED ALLOWED GROUPS — Fakt aa groups mathi j product leva
+// (partial match — group name ma aa words hoy to process karase)
+// ============================================================
+const HARDCODED_ALLOWED_GROUPS = [
+  'mudra ethnic',           // Mudra Ethnic - Premium Saree's
+  'fashion hub',            // Fashion Hub™ Brand Update & FASHION HUB ™ DRESSES AND KURTI
+  'kurti, gown, lahenga',   // Kurti, Gown, Lahenga - Mudra Ethnic - Reseller's Update
+  'reseller',               // Any reseller update group
+  'saree',                  // Mudra Ethnic - Under 1000 Saree's Update
+  'under 1000',             // Under 1000 Saree's Update
+  'dresses and kurti',      // FASHION HUB ™ DRESSES AND KURTI
+];
+
+// ============================================================
+// CHECK: Is this chatId/chatName from an ALLOWED group?
+// ============================================================
+function isAllowedGroup(chatId: string, chatName: string, dbGroups: string[]): boolean {
+  const chatNameLower = (chatName || '').toLowerCase().trim();
+  const chatIdLower = (chatId || '').toLowerCase().trim();
+
+  // 1. Check HARDCODED groups (always active)
+  const hardcodedMatch = HARDCODED_ALLOWED_GROUPS.some((g) =>
+    chatNameLower.includes(g.toLowerCase()) || chatIdLower.includes(g.toLowerCase())
+  );
+  if (hardcodedMatch) return true;
+
+  // 2. Check Admin panel configured groups (if any added)
+  if (dbGroups && dbGroups.length > 0) {
+    const dbMatch = dbGroups.some((g) => {
+      const gl = g.toLowerCase().trim();
+      return chatNameLower.includes(gl) || chatIdLower.includes(gl);
+    });
+    if (dbMatch) return true;
+  }
+
+  // 3. If no hardcoded match and no DB groups configured → BLOCK
+  return false;
+}
+
+// Helper: Create product in Database + auto-post to social
+async function saveCatalogProduct(
+  images: string[],
+  caption: string,
+  messageId: string,
+  chatName: string,
+  videoLocalUrl?: string,
+  settings?: any
+) {
   await connectToDatabase();
 
   const category = detectCategory(caption);
@@ -291,6 +615,16 @@ async function saveCatalogProduct(images: string[], caption: string, messageId: 
 
   await newProduct.save();
   console.log(`🎉 [WHATSAPP WEBHOOK] Auto-created Product: ${name} (₹${price}) from "${chatName}" with sizes: ${sizes.map(s => `${s.name}(${s.stock})`).join(', ')}`);
+
+  // 🚀 AUTO SOCIAL MEDIA PUBLISH (non-blocking)
+  const autoSocial = settings?.whatsappAutoSocial ?? false;
+  if (autoSocial) {
+    console.log('[AutoSocial] Triggering auto social publish...');
+    autoPublishToSocial(newProduct, images, videoLocalUrl, settings).catch((err) => {
+      console.error('[AutoSocial] Background publish error:', err.message);
+    });
+  }
+
   return newProduct;
 }
 
@@ -314,6 +648,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    // Load settings for group filter + auto-social config
+    await connectToDatabase();
+    const settings = await Settings.findOne() || {};
+    const allowedGroups: string[] = settings?.whatsappAllowedGroups || [];
+
     // 1. Direct Manual / Custom JSON payload test
     if (body.caption && (body.imageUrl || (body.images && body.images.length > 0))) {
       const images = body.images || [body.imageUrl];
@@ -321,7 +660,9 @@ export async function POST(req: Request) {
         images,
         body.caption,
         body.messageId || `manual-${Date.now()}`,
-        body.chatName || 'Manual Test'
+        body.chatName || 'Manual Test',
+        body.videoUrl,
+        settings
       );
       return NextResponse.json({
         success: true,
@@ -342,69 +683,160 @@ export async function POST(req: Request) {
       const chatName = senderData.chatName || senderData.senderName || 'WhatsApp Group';
       const messageId = body.idMessage || `msg-${Date.now()}`;
 
+      // 🚫 PERSONAL MESSAGE BLOCK — fakt @g.us (group) j allow, @c.us (personal DM) reject
+      const isGroupChat = chatId.endsWith('@g.us') || chatId.includes('@g.us');
+      if (!isGroupChat) {
+        console.log(`[WhatsApp Webhook] 🚫 Personal DM ignored: "${chatName}" (${chatId})`);
+        return NextResponse.json({ success: true, ignored: true, reason: 'Personal DM — only group messages allowed' });
+      }
+
+      // 🔒 GROUP FILTER: Only process messages from allowed groups
+      if (!isAllowedGroup(chatId, chatName, allowedGroups)) {
+        console.log(`[WhatsApp Webhook] ⛔ BLOCKED: "${chatName}" (${chatId}) — not in allowed list`);
+        return NextResponse.json({ success: true, ignored: true, reason: 'Group not in whitelist' });
+      }
+      console.log(`[WhatsApp Webhook] ✅ ALLOWED: "${chatName}" — processing message...`);
+
+      // ── VIDEO MESSAGE → Reel ──────────────────────────────────────────────
+      if (messageData?.typeMessage === 'videoMessage' && messageData?.fileMessageData) {
+        const fileData = messageData.fileMessageData;
+        const downloadUrl = fileData.downloadUrl;
+        const caption = (fileData.caption || '').trim();
+        const folderKey = `cat-${Date.now().toString().slice(-6)}`;
+
+        const videoLocalUrl = downloadUrl ? await downloadAndSaveVideo(downloadUrl, folderKey) : '';
+
+        if (caption.length > 3) {
+          // Video + caption → create product + publish as reel
+          const product = await saveCatalogProduct(
+            [], // no static images for video products
+            caption,
+            messageId,
+            chatName,
+            videoLocalUrl || downloadUrl,
+            settings
+          );
+          return NextResponse.json({
+            success: true,
+            created: true,
+            type: 'video_reel',
+            productId: product._id,
+            name: product.name,
+          });
+        }
+
+        // Buffer the video, wait for caption text
+        if (!catalogBuffer[chatId]) {
+          catalogBuffer[chatId] = { images: [], folderKey, caption: '', timer: null };
+        }
+        catalogBuffer[chatId].videoUrl = videoLocalUrl || downloadUrl;
+
+        return NextResponse.json({ success: true, buffered: true, type: 'video_buffered' });
+      }
+
       // Case A: Image Message with Caption or Album
       if (messageData?.typeMessage === 'imageMessage' && messageData?.fileMessageData) {
         const fileData = messageData.fileMessageData;
         const downloadUrl = fileData.downloadUrl;
         const caption = (fileData.caption || '').trim();
 
-        const folderKey = `cat-${Date.now().toString().slice(-6)}`;
-        const localImgUrl = downloadUrl ? await downloadAndSaveImage(downloadUrl, folderKey, 1) : '';
-
-        // If caption is present with image, save immediately
-        if (caption.length > 10) {
-          const product = await saveCatalogProduct(
-            [localImgUrl || downloadUrl],
-            caption,
-            messageId,
-            chatName
-          );
-          return NextResponse.json({
-            success: true,
-            created: true,
-            productId: product._id,
-            name: product.name,
-          });
-        }
-
-        // Otherwise buffer image and wait for text description
+        // Initialize buffer for this chat if not exists
         if (!catalogBuffer[chatId]) {
-          catalogBuffer[chatId] = {
-            images: [],
-            folderKey,
-            caption: '',
-            timer: null,
-          };
+          const fk = `cat-${Date.now().toString().slice(-6)}`;
+          catalogBuffer[chatId] = { images: [], folderKey: fk, caption: '', timer: null };
         }
-        catalogBuffer[chatId].images.push(localImgUrl || downloadUrl);
+
+        const buf = catalogBuffer[chatId];
+
+        // Download & save image
+        const localImgUrl = downloadUrl ? await downloadAndSaveImage(downloadUrl, buf.folderKey, buf.images.length + 1) : '';
+        if (localImgUrl) buf.images.push(localImgUrl);
+
+        // If caption came with this image, save it
+        if (caption.length > 5) {
+          buf.caption = caption;
+        }
+
+        // Clear existing timer (restart 4-second burst window)
+        if (buf.timer) clearTimeout(buf.timer);
+
+        // Set timer: 4 seconds silence = burst done → create product
+        buf.timer = setTimeout(async () => {
+          const finalBuf = catalogBuffer[chatId];
+          if (!finalBuf) return;
+
+          const finalCaption = finalBuf.caption || `${chatName} Product`;
+          if (finalBuf.images.length > 0 && finalCaption.length > 3) {
+            try {
+              await saveCatalogProduct(
+                finalBuf.images,
+                finalCaption,
+                messageId,
+                chatName,
+                undefined,
+                settings
+              );
+              console.log(`✅ [Burst Done] Created product with ${finalBuf.images.length} images from "${chatName}"`);
+            } catch (err: any) {
+              console.error('[Burst Timer] Save error:', err.message);
+            }
+          }
+          delete catalogBuffer[chatId];
+        }, 4000);
 
         return NextResponse.json({
           success: true,
           buffered: true,
-          imagesCount: catalogBuffer[chatId].images.length,
+          imagesCount: buf.images.length,
+          hasCaption: buf.caption.length > 0,
         });
       }
 
-      // Case B: Text Message (often arrives as separate description for the photo)
+      // Case B: Text Message (often arrives as separate description for the photo/video)
       if (messageData?.typeMessage === 'textMessage' && messageData?.textMessageData?.textMessage) {
         const text = messageData.textMessageData.textMessage.trim();
 
-        if (catalogBuffer[chatId] && catalogBuffer[chatId].images.length > 0) {
+        if (catalogBuffer[chatId]) {
           const buf = catalogBuffer[chatId];
-          const product = await saveCatalogProduct(
-            buf.images,
-            text,
-            messageId,
-            chatName
-          );
-          delete catalogBuffer[chatId];
 
-          return NextResponse.json({
-            success: true,
-            created: true,
-            productId: product._id,
-            name: product.name,
-          });
+          // Has buffered video → publish as reel
+          if (buf.videoUrl) {
+            const product = await saveCatalogProduct(
+              buf.images,
+              text,
+              messageId,
+              chatName,
+              buf.videoUrl,
+              settings
+            );
+            delete catalogBuffer[chatId];
+            return NextResponse.json({
+              success: true,
+              created: true,
+              type: 'video_reel',
+              productId: product._id,
+              name: product.name,
+            });
+          }
+
+          // Has buffered images → publish as photo post
+          if (buf.images.length > 0) {
+            const product = await saveCatalogProduct(
+              buf.images,
+              text,
+              messageId,
+              chatName,
+              undefined,
+              settings
+            );
+            delete catalogBuffer[chatId];
+            return NextResponse.json({
+              success: true,
+              created: true,
+              productId: product._id,
+              name: product.name,
+            });
+          }
         }
       }
     }

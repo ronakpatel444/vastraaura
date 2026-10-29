@@ -25,6 +25,10 @@ export interface ISettings extends Document {
   metaAdAccountId?: string;
   pinterestAccessToken?: string;
   pinterestBoardId?: string;
+  // WhatsApp Automation
+  whatsappAllowedGroups?: string[];   // Array of group chat IDs or names to whitelist
+  whatsappAutoSocial?: boolean;       // Auto-post to social on product create
+  whatsappAutoSocialChannels?: string[]; // Which channels to auto-post to
 }
 
 const SettingsSchema = new Schema(
@@ -60,6 +64,10 @@ const SettingsSchema = new Schema(
     metaAdAccountId: { type: String, default: '' },
     pinterestAccessToken: { type: String, default: '' },
     pinterestBoardId: { type: String, default: '' },
+    // WhatsApp Automation
+    whatsappAllowedGroups: { type: [String], default: [] },
+    whatsappAutoSocial: { type: Boolean, default: false },
+    whatsappAutoSocialChannels: { type: [String], default: ['instagram_feed', 'facebook_page'] },
   },
   { timestamps: true }
 );

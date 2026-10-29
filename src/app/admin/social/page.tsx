@@ -123,6 +123,13 @@ export default function SocialStudioPage() {
   });
   const [savingConfig, setSavingConfig] = useState(false);
 
+  // WhatsApp Automation Config
+  const [wpAutoSocial, setWpAutoSocial] = useState(false);
+  const [wpAllowedGroups, setWpAllowedGroups] = useState('');
+  const [wpChannels, setWpChannels] = useState({ instagram_feed: true, facebook_page: true, instagram_reel: false });
+  const [savingWpConfig, setSavingWpConfig] = useState(false);
+  const [wpConfigMsg, setWpConfigMsg] = useState('');
+
   // AI Growth Agent states (Targeting Out-of-Surat & Global)
   const [agentStyle, setAgentStyle] = useState<'metro_expose' | 'nri_global' | 'viral_twirl' | 'packing_asmr'>('metro_expose');
   const [reelScript, setReelScript] = useState<any>(null);
@@ -140,6 +147,7 @@ export default function SocialStudioPage() {
     fetchProducts();
     fetchMetaConfig();
     fetchAgentDefaults();
+    fetchWpConfig();
   }, []);
 
   const fetchProducts = async () => {
@@ -212,6 +220,56 @@ export default function SocialStudioPage() {
   };
 
   const [frameworkIndex, setFrameworkIndex] = useState<number>(0);
+
+  const fetchWpConfig = async () => {
+    try {
+      const res = await fetch('/api/admin/whatsapp-config');
+      const data = await res.json();
+      setWpAutoSocial(data.whatsappAutoSocial || false);
+      setWpAllowedGroups((data.whatsappAllowedGroups || []).join('\n'));
+      const ch = data.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page'];
+      setWpChannels({
+        instagram_feed: ch.includes('instagram_feed'),
+        facebook_page: ch.includes('facebook_page'),
+        instagram_reel: ch.includes('instagram_reel'),
+      });
+    } catch (e) {
+      console.error('Failed to load WhatsApp config', e);
+    }
+  };
+
+  const handleSaveWpConfig = async () => {
+    setSavingWpConfig(true);
+    setWpConfigMsg('');
+    try {
+      const channels: string[] = [];
+      if (wpChannels.instagram_feed) channels.push('instagram_feed');
+      if (wpChannels.facebook_page) channels.push('facebook_page');
+      if (wpChannels.instagram_reel) channels.push('instagram_reel');
+
+      const groups = wpAllowedGroups
+        .split(/[\n,]/)
+        .map((g) => g.trim())
+        .filter(Boolean);
+
+      const res = await fetch('/api/admin/whatsapp-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          whatsappAutoSocial: wpAutoSocial,
+          whatsappAllowedGroups: groups,
+          whatsappAutoSocialChannels: channels,
+        }),
+      });
+      const data = await res.json();
+      setWpConfigMsg(data.success ? '✅ WhatsApp automation config saved!' : (data.error || 'Failed'));
+    } catch (err: any) {
+      setWpConfigMsg('Error: ' + err.message);
+    } finally {
+      setSavingWpConfig(false);
+      setTimeout(() => setWpConfigMsg(''), 4000);
+    }
+  };
 
   const handleGenerateScript = async (overrideIndex?: number, overrideProduct?: Product) => {
     try {
@@ -1639,6 +1697,96 @@ export default function SocialStudioPage() {
                 {config?.pinterestConnectionError && (
                   <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg text-[11px] text-red-600">
                     Pinterest Status: {config.pinterestConnectionError}
+                  </div>
+                )}
+              </div>
+
+              {/* ── WhatsApp Automation Section ── */}
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 flex items-center gap-1.5">
+                  <span>📲</span> WhatsApp Group → Auto Social Publish
+                </h4>
+                <p className="text-[11px] text-gray-500 leading-relaxed">
+                  WhatsApp group mathi product aave tyare automatically Instagram + Facebook per post/reel muki devanu.
+                </p>
+
+                {/* Master Toggle */}
+                <label className="flex items-center gap-3 cursor-pointer group p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-black transition-colors">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={wpAutoSocial}
+                      onChange={(e) => setWpAutoSocial(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div className={`w-10 h-5 rounded-full transition-colors ${wpAutoSocial ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <div className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow transition-transform ${wpAutoSocial ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-semibold text-gray-900">Auto-Publish to Social Media</span>
+                    <span className="block text-[11px] text-gray-500">WhatsApp mathi product aave → Instantly social media per live</span>
+                  </div>
+                </label>
+
+                {wpAutoSocial && (
+                  <div className="space-y-3 pl-1">
+                    {/* Channel Selection */}
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-700 mb-1.5">Kya platforms per auto-post karvu?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { key: 'instagram_feed', label: '📸 Instagram Feed (Photo/Carousel)', color: 'pink' },
+                          { key: 'facebook_page', label: '📘 Facebook Page (Photo/Reel)', color: 'blue' },
+                          { key: 'instagram_reel', label: '🎬 Force Reel Format (Video Only)', color: 'purple' },
+                        ].map(({ key, label, color }) => (
+                          <label key={key} className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition-all ${
+                            wpChannels[key as keyof typeof wpChannels]
+                              ? `bg-${color}-50 border-${color}-300 text-${color}-800`
+                              : 'bg-gray-50 border-gray-200 text-gray-500'
+                          }`}>
+                            <input
+                              type="checkbox"
+                              checked={wpChannels[key as keyof typeof wpChannels]}
+                              onChange={(e) => setWpChannels({ ...wpChannels, [key]: e.target.checked })}
+                              className="w-3 h-3 accent-black"
+                            />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Allowed Groups Whitelist */}
+                    <div>
+                      <label className="text-[11px] font-semibold text-gray-700 block mb-1">
+                        Allowed WhatsApp Groups (1 per line — Group name or Chat ID)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={wpAllowedGroups}
+                        onChange={(e) => setWpAllowedGroups(e.target.value)}
+                        placeholder={"Vastra Catalog Group\n120363XXXXXXXXXX@g.us\nSurat Fashion Suppliers"}
+                        className="w-full p-2 border rounded-lg text-[11px] font-mono bg-gray-50 focus:outline-none focus:border-black resize-none"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        Blank = ALL groups allowed. Group name partial match bhi kaam karse (case-insensitive).
+                      </p>
+                    </div>
+
+                    {wpConfigMsg && (
+                      <div className={`p-2.5 rounded-lg text-[11px] font-medium ${wpConfigMsg.startsWith('✅') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                        {wpConfigMsg}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleSaveWpConfig}
+                      disabled={savingWpConfig}
+                      className="w-full py-2 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-60"
+                    >
+                      {savingWpConfig ? 'Saving...' : '💾 Save WhatsApp Automation Settings'}
+                    </button>
                   </div>
                 )}
               </div>

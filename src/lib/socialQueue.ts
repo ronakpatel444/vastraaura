@@ -54,7 +54,7 @@ export async function addToSocialQueue({
   mediaType,
   images = [],
   videoUrl = '',
-  channels = ['instagram_feed', 'facebook_page'],
+  channels = ['instagram_feed', 'facebook_page', 'pinterest_pin'],
   gapMinutes = DEFAULT_GAP_MINUTES,
 }: {
   productId?: any;
@@ -261,6 +261,56 @@ async function publishQueueItem(item: ISocialQueue, settings: any) {
       });
       results.facebook = { success: true, id: feedRes.data.id, count: photoIds.length };
       console.log(`✅ [SocialQueue] Facebook multi-photo published!`);
+    }
+  }
+
+  // ── CASE 3: PINTEREST PIN ─────────────────────────────────────────────────
+  const pinterestToken = settings?.pinterestAccessToken || process.env.PINTEREST_ACCESS_TOKEN || '';
+  const defaultBoardId = settings?.pinterestBoardId || process.env.PINTEREST_BOARD_ID || '';
+
+  if (item.channels.includes('pinterest_pin') && pinterestToken && defaultBoardId && fullImages.length > 0) {
+    try {
+      console.log(`[SocialQueue] 📌 Publishing Pinterest Pin for: "${item.title}"`);
+      const pinTitle = (item.title || 'Vastra Aura Collection').slice(0, 99);
+      const pinDesc = (item.caption || '').slice(0, 790);
+      const pinLink = item.productId 
+        ? `${baseUrl}/products/${item.productId}` 
+        : baseUrl;
+
+      const pinRes = await axios.post(
+        'https://api.pinterest.com/v5/pins',
+        {
+          board_id: defaultBoardId,
+          title: pinTitle,
+          description: pinDesc,
+          link: pinLink,
+          alt_text: pinTitle,
+          media_source: {
+            source_type: 'image_url',
+            url: fullImages[0],
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${pinterestToken}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
+
+      results.pinterestPin = {
+        success: true,
+        pinId: pinRes.data?.id,
+        url: pinRes.data?.id ? `https://www.pinterest.com/pin/${pinRes.data.id}/` : null,
+      };
+      console.log(`✅ [SocialQueue] Pinterest Pin published! ID: ${pinRes.data?.id}`);
+    } catch (pinErr: any) {
+      console.error('[SocialQueue] Pinterest Pin failed:', pinErr.response?.data || pinErr.message);
+      results.pinterestPin = {
+        success: false,
+        error: pinErr.response?.data?.message || pinErr.message,
+      };
     }
   }
 

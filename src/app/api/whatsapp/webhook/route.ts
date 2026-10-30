@@ -350,7 +350,7 @@ async function autoPublishToSocial(
 ) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vastraaura.com';
-    const channels: string[] = settings?.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page'];
+    const channels: string[] = settings?.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page', 'pinterest_pin'];
 
     // 🔥 VIRAL caption — hook formula based
     const socialCaption = generateViralCaption(product, baseUrl);

@@ -132,7 +132,7 @@ export default function SocialStudioPage() {
   // WhatsApp Automation Config
   const [wpAutoSocial, setWpAutoSocial] = useState(false);
   const [wpAllowedGroups, setWpAllowedGroups] = useState('');
-  const [wpChannels, setWpChannels] = useState({ instagram_feed: true, facebook_page: true, instagram_reel: false });
+  const [wpChannels, setWpChannels] = useState({ instagram_feed: true, facebook_page: true, instagram_reel: false, pinterest_pin: true });
   const [savingWpConfig, setSavingWpConfig] = useState(false);
   const [wpConfigMsg, setWpConfigMsg] = useState('');
 
@@ -296,11 +296,12 @@ export default function SocialStudioPage() {
       const data = await res.json();
       setWpAutoSocial(data.whatsappAutoSocial || false);
       setWpAllowedGroups((data.whatsappAllowedGroups || []).join('\n'));
-      const ch = data.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page'];
+      const ch = data.whatsappAutoSocialChannels || ['instagram_feed', 'facebook_page', 'pinterest_pin'];
       setWpChannels({
         instagram_feed: ch.includes('instagram_feed'),
         facebook_page: ch.includes('facebook_page'),
         instagram_reel: ch.includes('instagram_reel'),
+        pinterest_pin: ch.includes('pinterest_pin'),
       });
     } catch (e) {
       console.error('Failed to load WhatsApp config', e);
@@ -315,6 +316,7 @@ export default function SocialStudioPage() {
       if (wpChannels.instagram_feed) channels.push('instagram_feed');
       if (wpChannels.facebook_page) channels.push('facebook_page');
       if (wpChannels.instagram_reel) channels.push('instagram_reel');
+      if (wpChannels.pinterest_pin) channels.push('pinterest_pin');
 
       const groups = wpAllowedGroups
         .split(/[\n,]/)
@@ -2072,6 +2074,7 @@ export default function SocialStudioPage() {
                         {[
                           { key: 'instagram_feed', label: '📸 Instagram Feed (Photo/Carousel)', color: 'pink' },
                           { key: 'facebook_page', label: '📘 Facebook Page (Photo/Reel)', color: 'blue' },
+                          { key: 'pinterest_pin', label: '📌 Pinterest Pin (Weddings Board)', color: 'red' },
                           { key: 'instagram_reel', label: '🎬 Force Reel Format (Video Only)', color: 'purple' },
                         ].map(({ key, label, color }) => (
                           <label key={key} className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition-all ${

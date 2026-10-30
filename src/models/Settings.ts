@@ -67,7 +67,7 @@ const SettingsSchema = new Schema(
     // WhatsApp Automation
     whatsappAllowedGroups: { type: [String], default: [] },
     whatsappAutoSocial: { type: Boolean, default: false },
-    whatsappAutoSocialChannels: { type: [String], default: ['instagram_feed', 'facebook_page'] },
+    whatsappAutoSocialChannels: { type: [String], default: ['instagram_feed', 'facebook_page', 'pinterest_pin'] },
   },
   { timestamps: true }
 );
